@@ -1,0 +1,33 @@
+syntax = "v1"
+
+type (
+	LoginRequest {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+	LoginResponse {
+		StatusCode int64  `json:"status_code"`
+		StatusMsg  string `json:"status_msg"`
+		UserId     string `json:"user_id"`
+		Token      string `json:"token"`
+	}
+
+	RegisterRequest {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+	RegisterResponse {
+		StatusCode int64  `json:"status_code"`
+		StatusMsg  string `json:"status_msg"`
+		UserId     string `json:"user_id"`
+		Token      string `json:"token"`
+	}
+)
+
+service User {
+	@handler Login
+	post /douyin/user/login(LoginRequest) returns (LoginResponse)
+	
+	@handler Register
+	post /douyin/user/register(RegisterRequest) returns (RegisterResponse)
+}
