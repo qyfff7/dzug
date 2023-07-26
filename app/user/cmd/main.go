@@ -1,9 +1,9 @@
 package main
 
 import (
-	"dzug/user/discovery"
-	pb "dzug/user/idl"
-	"dzug/user/service"
+	"dzug/app/user/service"
+	"dzug/discovery"
+	pb "dzug/idl"
 	"google.golang.org/grpc"
 	"log"
 	"net"

@@ -1,7 +1,7 @@
 package http
 
 import (
-	pb "dzug/user/idl"
+	pb "dzug/idl"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
