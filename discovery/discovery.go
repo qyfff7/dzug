@@ -97,17 +97,3 @@ func (s *ServiceDiscovery) GetServices() []string {
 func (s *ServiceDiscovery) Close() error {
 	return s.cli.Close()
 }
-
-func main() {
-	var endpoints = []string{"localhost:2379"}
-	ser := NewServiceDiscovery(endpoints)
-	defer ser.Close()
-	ser.WatchService("user")
-	//ser.WatchService("/gRPC/")
-	for {
-		select {
-		case <-time.Tick(10 * time.Second):
-			log.Println(ser.GetServices())
-		}
-	}
-}
