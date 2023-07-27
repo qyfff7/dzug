@@ -10,7 +10,7 @@ import (
 )
 
 func UserLogin(ctx context.Context, req *user.DouyinUserLoginRequest) (resp *user.DouyinUserLoginResponse, err error) {
-	// 启用etcd服务发现
+	//// 启用etcd服务发现
 	var endpoints = []string{"localhost:2379"}
 	ser := discovery.NewServiceDiscovery(endpoints)
 	defer ser.Close()
