@@ -2,7 +2,7 @@ package http
 
 import (
 	"dzug/app/gateway/rpc"
-	pb "dzug/idl"
+	pb "dzug/idl/user"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

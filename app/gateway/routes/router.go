@@ -7,10 +7,14 @@ import (
 
 func NewRouter() *gin.Engine {
 	ginRouter := gin.Default()
-	v1 := ginRouter.Group("/douyin/user")
+	user := ginRouter.Group("/douyin/user")
 	{
-		v1.POST("/login", http.UserLogin)
-		v1.POST("/register", http.UserRegister)
+		user.POST("/login", http.UserLogin)
+		user.POST("/register", http.UserRegister)
+	}
+	relation := ginRouter.Group("/douyin/relation")
+	{
+		relation.POST("/action", http.RelationAction)
 	}
 
 	return ginRouter

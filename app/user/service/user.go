@@ -2,15 +2,15 @@ package service
 
 import (
 	"context"
-	pb "dzug/idl"
+	"dzug/idl/user"
 )
 
 type UserSrv struct {
-	pb.UnimplementedDouyinUserServiceServer
+	user.UnimplementedDouyinUserServiceServer
 }
 
-func (u *UserSrv) Login(context.Context, *pb.DouyinUserLoginRequest) (*pb.DouyinUserLoginResponse, error) {
-	return &pb.DouyinUserLoginResponse{
+func (u *UserSrv) Login(context.Context, *user.DouyinUserLoginRequest) (*user.DouyinUserLoginResponse, error) {
+	return &user.DouyinUserLoginResponse{
 		StatusCode: 200,
 		StatusMsg:  "登录成功",
 		UserId:     1,
@@ -18,8 +18,8 @@ func (u *UserSrv) Login(context.Context, *pb.DouyinUserLoginRequest) (*pb.Douyin
 	}, nil
 }
 
-func (u *UserSrv) Register(context.Context, *pb.DouyinUserRegisterRequest) (*pb.DouyinUserRegisterResponse, error) {
-	return &pb.DouyinUserRegisterResponse{
+func (u *UserSrv) Register(context.Context, *user.DouyinUserRegisterRequest) (*user.DouyinUserRegisterResponse, error) {
+	return &user.DouyinUserRegisterResponse{
 		StatusCode: 200,
 		StatusMsg:  "注册成功",
 		UserId:     1,

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"dzug/app/user/service"
+	"dzug/app/relation/service"
 	"dzug/discovery"
-	pb "dzug/idl/user"
+	pb "dzug/idl/relation"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -12,7 +12,7 @@ import (
 func main() {
 	endpoints := []string{"localhost:2379"}
 	// lease 应该是租约时间，这里是5秒
-	etcdRegister, err := discovery.NewServiceRegister(endpoints, "user", "localhost:9000", 5)
+	etcdRegister, err := discovery.NewServiceRegister(endpoints, "relation", "localhost:9001", 5)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -22,9 +22,9 @@ func main() {
 	// 创建grpc服务器并监听9000端口
 	server := grpc.NewServer()
 	defer server.Stop()
-	pb.RegisterDouyinUserServiceServer(server, &service.UserSrv{})
+	pb.RegisterDouyinRelationActionServiceServer(server, &service.RelationSrv{})
 
-	lis, err := net.Listen("tcp", ":9000")
+	lis, err := net.Listen("tcp", ":9001")
 	if err != nil {
 		log.Fatal(err)
 	}

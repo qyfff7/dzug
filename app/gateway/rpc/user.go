@@ -3,25 +3,29 @@ package rpc
 import (
 	"context"
 	"dzug/discovery"
-	pb "dzug/idl"
+	"dzug/idl/user"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
 )
 
-func UserLogin(ctx context.Context, req *pb.DouyinUserLoginRequest) (resp *pb.DouyinUserLoginResponse, err error) {
+func UserLogin(ctx context.Context, req *user.DouyinUserLoginRequest) (resp *user.DouyinUserLoginResponse, err error) {
+	// 启用etcd服务发现
 	var endpoints = []string{"localhost:2379"}
 	ser := discovery.NewServiceDiscovery(endpoints)
 	defer ser.Close()
 	ser.WatchService("user")
+
+	// grpc监听与UserClient初始化
 	target := ser.GetServices()[0]
 	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials())) // grpc.WithInsecure() // 不使用TLS认证
 	if err != nil {
 		log.Fatalf("net.Connect err : %v", err)
 	}
 	defer conn.Close()
+	UserClient := user.NewDouyinUserServiceClient(conn)
 
-	UserClient := pb.NewDouyinUserServiceClient(conn)
+	// rpc调用
 	r, err := UserClient.Login(ctx, req)
 	if err != nil {
 		return
@@ -29,7 +33,7 @@ func UserLogin(ctx context.Context, req *pb.DouyinUserLoginRequest) (resp *pb.Do
 	return r, nil
 }
 
-func UserRegister(ctx context.Context, req *pb.DouyinUserRegisterRequest) (resp *pb.DouyinUserRegisterResponse, err error) {
+func UserRegister(ctx context.Context, req *user.DouyinUserRegisterRequest) (resp *user.DouyinUserRegisterResponse, err error) {
 	var endpoints = []string{"localhost:2379"}
 	ser := discovery.NewServiceDiscovery(endpoints)
 	defer ser.Close()
@@ -41,7 +45,7 @@ func UserRegister(ctx context.Context, req *pb.DouyinUserRegisterRequest) (resp 
 	}
 	defer conn.Close()
 
-	UserClient := pb.NewDouyinUserServiceClient(conn)
+	UserClient := user.NewDouyinUserServiceClient(conn)
 	r, err := UserClient.Register(ctx, req)
 	if err != nil {
 		return

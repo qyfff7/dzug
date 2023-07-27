@@ -4,7 +4,7 @@
 // 	protoc        v3.15.5
 // source: action.proto
 
-package __
+package relation
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
