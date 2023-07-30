@@ -9,85 +9,90 @@ import (
 	"time"
 )
 
-// ServiceDiscovery 服务发现
+// ServiceDiscovery 用于服务发现
 type ServiceDiscovery struct {
-	cli        *clientv3.Client  //etcd client
-	serverList map[string]string //服务列表！！！！！！！！！！！！！！！！这个东西到底好不好用 和自带的那个有什么区别
+	EtcdAddrs []string
+
+	cli        *clientv3.Client
+	serverList map[string]string // 存储解析后的地址
 	lock       sync.Mutex
 }
 
-// NewServiceDiscovery  新建发现服务
-func NewServiceDiscovery(endpoints []string) *ServiceDiscovery {
-	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   endpoints,
+// NewServiceDiscovery 新建发现结构体
+func (s *ServiceDiscovery) NewServiceDiscovery() (err error) {
+	s.cli, err = clientv3.New(clientv3.Config{
+		Endpoints:   s.EtcdAddrs,
 		DialTimeout: 5 * time.Second,
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	return &ServiceDiscovery{
-		cli:        cli,
-		serverList: make(map[string]string),
-	}
+	s.serverList = make(map[string]string)
+	return
 }
 
-// WatchService 初始化服务列表和监视
-func (s *ServiceDiscovery) WatchService(prefix string) error {
-	//根据前缀获取现有的key
-	resp, err := s.cli.Get(context.Background(), prefix, clientv3.WithPrefix())
+func (s *ServiceDiscovery) WatchService(target string) error {
+	// 获取target的所有键值对
+	resp, err := s.cli.Get(context.Background(), target, clientv3.WithPrefix())
 	if err != nil {
+		log.Fatal(err)
 		return err
 	}
 
+	// 将键值对放入新增服务地址中
 	for _, ev := range resp.Kvs {
-		s.SetServiceList(string(ev.Key), string(ev.Value))
+		s.setServiceList(string(ev.Key), string(ev.Value))
 	}
 
-	//监视前缀，修改变更的server
-	go s.watcher(prefix)
+	// 启动协程持续性监听
+	go s.watcher(target)
 	return nil
 }
 
-// watcher 监听前缀
-func (s *ServiceDiscovery) watcher(prefix string) {
-	rch := s.cli.Watch(context.Background(), prefix, clientv3.WithPrefix())
-	log.Printf("watching prefix:%s now...", prefix)
-	for wresp := range rch {
-		for _, ev := range wresp.Events {
+// setServiceList 设置服务列表
+func (s *ServiceDiscovery) setServiceList(key, value string) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	s.serverList[key] = value
+	log.Println("put key :", key, " val:", value)
+}
+
+// delServiceList 从列表中删除服务
+func (s *ServiceDiscovery) delServiceList(key string) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	delete(s.serverList, key)
+	log.Println("delete key: ", key)
+}
+
+// watcher 监视服务列表
+func (s *ServiceDiscovery) watcher(target string) {
+	watchChan := s.cli.Watch(context.Background(), target, clientv3.WithPrefix())
+	log.Println("Watching target: ", target, "...")
+	for w := range watchChan {
+		for _, ev := range w.Events {
 			switch ev.Type {
 			case mvccpb.PUT: //修改或者新增
-				s.SetServiceList(string(ev.Kv.Key), string(ev.Kv.Value))
+				s.setServiceList(string(ev.Kv.Key), string(ev.Kv.Value))
 			case mvccpb.DELETE: //删除
-				s.DelServiceList(string(ev.Kv.Key))
+				s.delServiceList(string(ev.Kv.Key))
 			}
 		}
 	}
 }
 
-// SetServiceList 新增服务地址
-func (s *ServiceDiscovery) SetServiceList(key, val string) {
-	s.lock.Lock()
-	defer s.lock.Unlock()
-	s.serverList[key] = string(val)
-	log.Println("put key :", key, "val:", val)
-}
-
-// DelServiceList 删除服务地址
-func (s *ServiceDiscovery) DelServiceList(key string) {
-	s.lock.Lock()
-	defer s.lock.Unlock()
-	delete(s.serverList, key)
-	log.Println("del key:", key)
-}
-
+// GetServices 获取服务中所有的服务
 func (s *ServiceDiscovery) GetServices() map[string]string {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	return s.serverList
 }
 
-// Close 关闭服务
+// GetServiceByKey 通过key 获取服务链接
+func (s *ServiceDiscovery) GetServiceByKey(target string) (value string) {
+	return s.serverList[target]
+}
+
 func (s *ServiceDiscovery) Close() error {
 	return s.cli.Close()
 }

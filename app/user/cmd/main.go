@@ -15,7 +15,7 @@ func main() {
 		EtcdAddrs: endpoints,
 		Lease:     5,
 		Key:       "user",
-		Value:     "127.0.0.1:9000",
+		Value:     "127.0.0.1:9001",
 	}
 	err := serviceRegister.NewServiceRegister()
 	if err != nil {
@@ -28,7 +28,7 @@ func main() {
 	defer server.Stop()
 	pb.RegisterDouyinUserServiceServer(server, &service.UserSrv{})
 
-	lis, err := net.Listen("tcp", ":9000")
+	lis, err := net.Listen("tcp", ":9001")
 	if err != nil {
 		log.Fatal(err)
 	}
