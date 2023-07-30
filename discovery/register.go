@@ -63,10 +63,10 @@ func NewServiceRegister(endpoints []string, key, val string, lease int64) (*Serv
 
 // ListenLeaseRespChan 监听续租相应chan
 func (s *ServiceRegister) ListenLeaseRespChan() {
-	for leaseKeepResp := range s.keepAliveChan {
-		log.Printf("续租成功: %v\n", leaseKeepResp)
-	}
-	log.Println("关闭续租")
+	//for leaseKeepResp := range s.keepAliveChan {
+	//	log.Printf("续租成功: %v\n", leaseKeepResp)
+	//}
+	//log.Println("关闭续租")
 }
 
 // Close 关闭租约

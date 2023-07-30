@@ -12,7 +12,7 @@ import (
 // ServiceDiscovery 服务发现
 type ServiceDiscovery struct {
 	cli        *clientv3.Client  //etcd client
-	serverList map[string]string //服务列表
+	serverList map[string]string //服务列表！！！！！！！！！！！！！！！！这个东西到底好不好用 和自带的那个有什么区别
 	lock       sync.Mutex
 }
 
@@ -82,15 +82,26 @@ func (s *ServiceDiscovery) DelServiceList(key string) {
 }
 
 // GetServices 获取服务地址
-func (s *ServiceDiscovery) GetServices() []string {
+//func (s *ServiceDiscovery) GetServices() []string {
+//	s.lock.Lock()
+//	defer s.lock.Unlock()
+//	addrs := make([]string, 0)
+//
+//	for _, v := range s.serverList {
+//		addrs = append(addrs, v)
+//	}
+//	return addrs
+//}
+
+func (s *ServiceDiscovery) GetServices() map[string]string {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	addrs := make([]string, 0)
-
-	for _, v := range s.serverList {
-		addrs = append(addrs, v)
-	}
-	return addrs
+	//addrs := make([]string, 0)
+	//
+	//for _, v := range s.serverList {
+	//	addrs = append(addrs, v)
+	//}
+	return s.serverList
 }
 
 // Close 关闭服务

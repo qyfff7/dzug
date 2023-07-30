@@ -17,7 +17,7 @@ func RelationAction(ctx context.Context, req *relation.DouyinRelationActionReque
 	ser.WatchService("relation")
 
 	// grpc监听与UserClient初始化
-	target := ser.GetServices()[0]
+	target := ser.GetServices()["relation"]
 	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials())) // grpc.WithInsecure() // 不使用TLS认证
 	if err != nil {
 		log.Fatalf("net.Connect err : %v", err)

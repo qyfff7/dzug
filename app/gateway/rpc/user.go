@@ -17,7 +17,7 @@ func UserLogin(ctx context.Context, req *user.DouyinUserLoginRequest) (resp *use
 	ser.WatchService("user")
 
 	// grpc监听与UserClient初始化
-	target := ser.GetServices()[0]
+	target := ser.GetServices()["user"]
 	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials())) // grpc.WithInsecure() // 不使用TLS认证
 	if err != nil {
 		log.Fatalf("net.Connect err : %v", err)
@@ -38,7 +38,7 @@ func UserRegister(ctx context.Context, req *user.DouyinUserRegisterRequest) (res
 	ser := discovery.NewServiceDiscovery(endpoints)
 	defer ser.Close()
 	ser.WatchService("user")
-	target := ser.GetServices()[0]
+	target := ser.GetServices()["user"]
 	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials())) // grpc.WithInsecure() // 不使用TLS认证
 	if err != nil {
 		log.Fatalf("net.Connect err : %v", err)
