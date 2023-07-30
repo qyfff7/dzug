@@ -4,12 +4,14 @@ import (
 	"context"
 	"dzug/discovery"
 	"dzug/idl/relation"
+	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
 )
 
 func RelationAction(ctx context.Context, req *relation.DouyinRelationActionRequest) (resp *relation.DouyinRelationActionResponse, err error) {
+	fmt.Println("working relationAction rpc")
 	// 启用etcd服务发现
 	var endpoints = []string{"localhost:2379"}
 	ser := discovery.NewServiceDiscovery(endpoints)

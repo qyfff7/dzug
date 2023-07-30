@@ -81,26 +81,9 @@ func (s *ServiceDiscovery) DelServiceList(key string) {
 	log.Println("del key:", key)
 }
 
-// GetServices 获取服务地址
-//func (s *ServiceDiscovery) GetServices() []string {
-//	s.lock.Lock()
-//	defer s.lock.Unlock()
-//	addrs := make([]string, 0)
-//
-//	for _, v := range s.serverList {
-//		addrs = append(addrs, v)
-//	}
-//	return addrs
-//}
-
 func (s *ServiceDiscovery) GetServices() map[string]string {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	//addrs := make([]string, 0)
-	//
-	//for _, v := range s.serverList {
-	//	addrs = append(addrs, v)
-	//}
 	return s.serverList
 }
 

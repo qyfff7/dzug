@@ -1,72 +1,93 @@
 package discovery
 
 import (
+	"fmt"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"log"
 	"time"
 )
 
-// ServiceRegister 创建租约注册服务
+// ServiceRegister 注册服务到etcd上
 type ServiceRegister struct {
+	EtcdAddrs []string // etcd集群列表
+	Lease     int64    // 服务的租约时间TTL
+	Key       string   // 服务名称
+	Value     string   // 服务地址
+
 	cli     *clientv3.Client // etcd client，用于与etcd通信
 	leaseID clientv3.LeaseID // 租约ID
 	// 租约keepalive相应chan
 	keepAliveChan <-chan *clientv3.LeaseKeepAliveResponse // 通道，只接受那一种类型，用于接收续租响应
-	key           string                                  // 服务注册路径
-	val           string                                  // 服务注册值
+	// todo 暂时没有日志记录
 }
 
-// putKeyWithLease 注册服务并绑定租约
-func (s *ServiceRegister) putKeyWithLease(lease int64) error {
-	// 设置租约时间
-	resp, err := s.cli.Grant(s.cli.Ctx(), lease) // 创建一个具有指定租约时间的租约，获得租约的响应
-	if err != nil {
-		return err
-	}
-	// 注册服务并绑定租约
-	_, err = s.cli.Put(s.cli.Ctx(), s.key, s.val, clientv3.WithLease(resp.ID)) // 使用cli.Put将服务注册到etcd，并用withLease绑定到注册的键上
-	if err != nil {
-		return err
-	}
-	// 设置续租，定期发送需求请求
-	leaseRespChan, err := s.cli.KeepAlive(s.cli.Ctx(), resp.ID) // 设置续租，定期发送请求
-	if err != nil {
-		return err
-	}
-	log.Println(s.leaseID)
-	s.keepAliveChan = leaseRespChan // 将续租响应通道赋值给keepAliveChan
-	log.Printf("put key:%s val:%s success\n", s.key, s.val)
-	return nil
-}
-
-func NewServiceRegister(endpoints []string, key, val string, lease int64) (*ServiceRegister, error) {
-	cli, err := clientv3.New(clientv3.Config{ // 与ecd通信的 clientv3.Client对象
-		Endpoints:   endpoints,
-		DialTimeout: 5 * time.Second,
+// NewServiceRegister 通过传入的ServiceRegister 启动一个服务注册项目，并返回错误
+func (s *ServiceRegister) NewServiceRegister() error {
+	// 配置clientv3 服务器
+	cli, err := clientv3.New(clientv3.Config{
+		Endpoints:   s.EtcdAddrs,
+		DialTimeout: 5 * time.Second, // 5s 连接超时
 	})
 	if err != nil {
 		log.Fatal(err)
+		return err
 	}
 
-	ser := &ServiceRegister{ // 创建ServiceRegister对象
-		cli: cli,
-		key: key,
-		val: val,
-	}
+	s.cli = cli
 
-	// 服务注册，并申请租约设置时间keepalive
-	if err := ser.putKeyWithLease(lease); err != nil {
-		return nil, err
+	// 启动服务
+	if err := s.putKeyWithLease(); err != nil {
+		log.Fatal(err)
+		return err
 	}
-	return ser, nil
+	go s.keepAlive() // 保持连接
+	return nil
 }
 
-// ListenLeaseRespChan 监听续租相应chan
-func (s *ServiceRegister) ListenLeaseRespChan() {
-	//for leaseKeepResp := range s.keepAliveChan {
-	//	log.Printf("续租成功: %v\n", leaseKeepResp)
-	//}
-	//log.Println("关闭续租")
+// putKeyWithLease 通过租约来启动一个etcd连接
+func (s *ServiceRegister) putKeyWithLease() error {
+	// 设置租约时间
+	resp, err := s.cli.Grant(s.cli.Ctx(), s.Lease) // 得到租约ID
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	// 注册服务并绑定租约
+	_, err = s.cli.Put(s.cli.Ctx(), s.Key, s.Value, clientv3.WithLease(resp.ID))
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	s.keepAliveChan, err = s.cli.KeepAlive(s.cli.Ctx(), resp.ID) // 保持租约活跃
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	log.Println("租约ID为：", s.leaseID)
+	log.Printf("put key:%s val:%s success\n", s.Key, s.Value)
+	return nil
+}
+
+// keepAlive 保持etcd连接
+func (s *ServiceRegister) keepAlive() {
+	for {
+		select {
+		case keepAliveResp := <-s.keepAliveChan:
+			// 收到续租响应
+			if keepAliveResp == nil {
+				fmt.Println("续租失败")
+				return
+			}
+			// 处理续租响应
+			fmt.Println(s.Key, "：收到续租响应，续租成功")
+		case <-time.After(5 * time.Second):
+			// 定时执行续租操作
+			if err := s.putKeyWithLease(); err != nil {
+				fmt.Println("续租失败: ", err)
+				return
+			}
+		}
+	}
 }
 
 // Close 关闭租约

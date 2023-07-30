@@ -11,13 +11,17 @@ import (
 
 func main() {
 	endpoints := []string{"localhost:2379"}
-	// lease 应该是租约时间，这里是5秒
-	etcdRegister, err := discovery.NewServiceRegister(endpoints, "user", "localhost:9000", 5)
+	serviceRegister := &discovery.ServiceRegister{
+		EtcdAddrs: endpoints,
+		Lease:     5,
+		Key:       "user",
+		Value:     "127.0.0.1:9000",
+	}
+	err := serviceRegister.NewServiceRegister()
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer etcdRegister.Close()
-	go etcdRegister.ListenLeaseRespChan() // 启用协程，监听续租响应通道
+	defer serviceRegister.Close()
 
 	// 创建grpc服务器并监听9000端口
 	server := grpc.NewServer()
