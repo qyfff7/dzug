@@ -32,7 +32,6 @@ func (s *ServiceRegister) NewServiceRegister() error {
 		log.Fatal(err)
 		return err
 	}
-
 	s.cli = cli
 
 	// 启动服务
@@ -58,7 +57,8 @@ func (s *ServiceRegister) putKeyWithLease() error {
 		log.Fatal(err)
 		return err
 	}
-	s.keepAliveChan, err = s.cli.KeepAlive(s.cli.Ctx(), resp.ID) // 保持租约活跃
+	// 保持租约活跃
+	s.keepAliveChan, err = s.cli.KeepAlive(s.cli.Ctx(), resp.ID)
 	if err != nil {
 		log.Fatal(err)
 		return err
@@ -79,7 +79,7 @@ func (s *ServiceRegister) keepAlive() {
 				return
 			}
 			// 处理续租响应
-			fmt.Println(s.Key, "：收到续租响应，续租成功")
+			fmt.Printf("%v：收到续租响应，续租成功 %v\n", s.Key, time.Now().Format("2006-01-02 15:04:05"))
 		case <-time.After(5 * time.Second):
 			// 定时执行续租操作
 			if err := s.putKeyWithLease(); err != nil {

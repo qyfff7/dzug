@@ -25,7 +25,7 @@ func (s *ServiceDiscovery) NewServiceDiscovery() (err error) {
 		DialTimeout: 5 * time.Second,
 	})
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	s.serverList = make(map[string]string)
 	return
@@ -35,7 +35,7 @@ func (s *ServiceDiscovery) WatchService(target string) error {
 	// 获取target的所有键值对
 	resp, err := s.cli.Get(context.Background(), target, clientv3.WithPrefix())
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return err
 	}
 

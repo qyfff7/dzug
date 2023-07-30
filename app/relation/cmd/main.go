@@ -10,15 +10,6 @@ import (
 )
 
 func main() {
-	//endpoints := []string{"localhost:2379"}
-	//// lease 应该是租约时间，这里是5秒
-	//etcdRegister, err := discovery.NewServiceRegister(endpoints, "relation", "localhost:9001", 5)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//defer etcdRegister.Close()
-	//go etcdRegister.ListenLeaseRespChan() // 启用协程，监听续租响应通道
-
 	endpoints := []string{"localhost:2379"}
 	serviceRegister := &discovery.ServiceRegister{
 		EtcdAddrs: endpoints,
@@ -28,7 +19,7 @@ func main() {
 	}
 	err := serviceRegister.NewServiceRegister()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer serviceRegister.Close()
 
@@ -39,7 +30,7 @@ func main() {
 
 	lis, err := net.Listen("tcp", ":9001")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	log.Println("listening ")
 	if err := server.Serve(lis); err != nil {

@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"dzug/app/gateway/http"
+	"dzug/app/gateway/handlers"
 	"github.com/gin-gonic/gin"
 )
 
@@ -9,12 +9,12 @@ func NewRouter() *gin.Engine {
 	ginRouter := gin.Default()
 	user := ginRouter.Group("/douyin/user")
 	{
-		user.POST("/login", http.UserLogin)
-		user.POST("/register", http.UserRegister)
+		user.POST("/login", handlers.UserLogin)
+		user.POST("/register", handlers.UserRegister)
 	}
 	relation := ginRouter.Group("/douyin/relation")
 	{
-		relation.POST("/action", http.RelationAction)
+		relation.POST("/action", handlers.RelationAction)
 	}
 
 	return ginRouter

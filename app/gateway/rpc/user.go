@@ -2,12 +2,13 @@ package rpc
 
 import (
 	"context"
+	"dzug/discovery"
 	"dzug/idl/user"
 )
 
 func UserLogin(ctx context.Context, req *user.DouyinUserLoginRequest) (resp *user.DouyinUserLoginResponse, err error) {
-	loadClient("user", &UserClient)
-	r, err := UserClient.Login(ctx, req)
+	discovery.LoadClient("user", &discovery.UserClient) // 加载etcd客户端程序
+	r, err := discovery.UserClient.Login(ctx, req)      // 调用登录方法
 	if err != nil {
 		return
 	}
@@ -15,8 +16,8 @@ func UserLogin(ctx context.Context, req *user.DouyinUserLoginRequest) (resp *use
 }
 
 func UserRegister(ctx context.Context, req *user.DouyinUserRegisterRequest) (resp *user.DouyinUserRegisterResponse, err error) {
-	loadClient("user", &UserClient)
-	r, err := UserClient.Register(ctx, req)
+	discovery.LoadClient("user", &discovery.UserClient)
+	r, err := discovery.UserClient.Register(ctx, req) // 调用注册方法
 	if err != nil {
 		return
 	}
