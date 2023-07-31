@@ -105,6 +105,8 @@ gateway用来处理网关相关操作
    ![image-20230730202104030](doc/image-20230730202104030.png)
    ![image-20230730202133306](doc/image-20230730202133306.png)如，这里的的service包下的UserSrv结构体就继承了对应的包
 6. main函数写法，参照任意一个即可，etcd端口号与你的etcd端口相同，一般本地的不改动，都是localhost:2379，ServiceRegister这里的Value用一个新的端口，不然无法注册服务，net.Listen里的端口号与value保持一致，其他几乎不用改动，当然，除了把service.UserSrv{}注册的那个位置，要用正确的
+7. 「2023年07月31日 16:39:10」补充
+   main函数已精简，选择user或者relation参考均可，只有第10、11、16行需要改成你的代码，其他保持一致即可
 
 ---
 

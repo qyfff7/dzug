@@ -12,7 +12,7 @@ type ServiceRegister struct {
 	EtcdAddrs []string // etcd集群列表
 	Lease     int64    // 服务的租约时间TTL
 	Key       string   // 服务名称
-	Value     string   // 服务地址
+	Value     string   // 服务地址，这个东西更改后，应该服务地址列表和代表的权值
 
 	cli     *clientv3.Client // etcd client，用于与etcd通信
 	leaseID clientv3.LeaseID // 租约ID
@@ -93,6 +93,7 @@ func (s *ServiceRegister) keepAlive() {
 // Close 关闭租约
 func (s *ServiceRegister) Close() error {
 	// 撤销租约
+	// todo 优雅关闭？
 	if _, err := s.cli.Revoke(s.cli.Ctx(), s.leaseID); err != nil { // Revoke撤销租约
 		return err
 	}

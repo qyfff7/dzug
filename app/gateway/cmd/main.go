@@ -6,8 +6,8 @@ import (
 )
 
 func main() {
-	route := routes.NewRouter() // 启动路由
-	discovery.Init()            // 启动服务发现程序
-	defer discovery.Ser.Close() // 延时关闭
+	route := routes.NewRouter()          // 启动路由
+	discovery.InitDiscovery()            // 启动服务发现程序
+	defer discovery.SerDiscovery.Close() // 延时关闭
 	_ = route.Run(":8001")
 }
