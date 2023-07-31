@@ -2,10 +2,9 @@ package discovery
 
 import (
 	"context"
-	"fmt"
 	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientv3 "go.etcd.io/etcd/client/v3"
-	"log"
+	"go.uber.org/zap"
 	"math/rand"
 	"sync"
 	"time"
@@ -27,17 +26,17 @@ func (s *ServiceDiscovery) NewServiceDiscovery() (err error) {
 		DialTimeout: 5 * time.Second,
 	})
 	if err != nil {
-		log.Println(err)
+		zap.L().Error("建立服务发现失败: ", zap.Error(err))
 	}
 	s.serverList = make(map[string][]string)
 	return
 }
 
 func (s *ServiceDiscovery) watchService(target string) error {
-	// 获取target的所有键值对
+	// 获取target的所有键值对，即所有服务地址
 	resp, err := s.cli.Get(context.Background(), target, clientv3.WithPrefix())
 	if err != nil {
-		log.Println(err)
+		zap.L().Error("获取服务列表失败：", zap.Error(err))
 		return err
 	}
 
@@ -57,7 +56,7 @@ func (s *ServiceDiscovery) setServiceList(key, value string) {
 	defer s.lock.Unlock()
 	if !existValue(s.serverList[value], key) { // 如果没有了这个地址 ！！！反着放的
 		s.serverList[value] = append(s.serverList[value], key)
-		log.Println("put key :", key, " val:", value)
+		zap.L().Debug("put key :" + key + " val:" + value)
 	}
 }
 
@@ -75,13 +74,13 @@ func (s *ServiceDiscovery) delServiceList(key string) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	delete(s.serverList, key)
-	log.Println("delete key: ", key)
+	zap.L().Debug("delete key: " + key)
 }
 
 // watcher 监视服务列表
 func (s *ServiceDiscovery) watcher(target string) {
 	watchChan := s.cli.Watch(context.Background(), target, clientv3.WithPrefix())
-	log.Println("Watching target: ", target, "...")
+	zap.L().Debug("Watching target: " + target + "...")
 	for w := range watchChan {
 		for _, ev := range w.Events {
 			switch ev.Type {
@@ -106,7 +105,7 @@ func (s *ServiceDiscovery) GetServiceByKey(target string) (value string) {
 	rand.Seed(time.Now().UnixNano())
 	// 生成随机整数
 	randomNum := rand.Intn(len(s.serverList[target])) // target 下随机选一个链接进行调用，负载均衡 /:fade
-	fmt.Println(target, " 调用的链接为：", s.serverList[target][randomNum])
+	zap.L().Debug(target + " 调用的链接为：" + s.serverList[target][randomNum])
 	return s.serverList[target][randomNum]
 }
 

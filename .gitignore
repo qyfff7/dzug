@@ -22,3 +22,5 @@ app/task/logs
 .idea
 bin
 logs
+*.log
+*.yml

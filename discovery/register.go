@@ -1,9 +1,8 @@
 package discovery
 
 import (
-	"fmt"
 	clientv3 "go.etcd.io/etcd/client/v3"
-	"log"
+	"go.uber.org/zap"
 	"time"
 )
 
@@ -29,14 +28,14 @@ func (s *ServiceRegister) NewServiceRegister() error {
 		DialTimeout: 5 * time.Second, // 5s 连接超时
 	})
 	if err != nil {
-		log.Fatal(err)
+		zap.L().Error("新建clientv3失败" + err.Error())
 		return err
 	}
 	s.cli = cli
 
 	// 启动服务
-	if err := s.putKeyWithLease(); err != nil {
-		log.Fatal(err)
+	if err = s.putKeyWithLease(); err != nil {
+		zap.L().Info("启动服务失败")
 		return err
 	}
 	go s.keepAlive() // 保持连接
@@ -48,23 +47,22 @@ func (s *ServiceRegister) putKeyWithLease() error {
 	// 设置租约时间
 	resp, err := s.cli.Grant(s.cli.Ctx(), s.Lease) // 得到租约ID
 	if err != nil {
-		log.Fatal(err)
+		zap.L().Error("设置租约失败" + err.Error())
 		return err
 	}
 	// 注册服务并绑定租约
 	_, err = s.cli.Put(s.cli.Ctx(), s.Value, s.Key, clientv3.WithLease(resp.ID)) // !!!key，value，故意填反的
 	if err != nil {
-		log.Fatal(err)
+		zap.L().Error("注册服务绑定租约失败" + err.Error())
 		return err
 	}
 	// 保持租约活跃
 	s.keepAliveChan, err = s.cli.KeepAlive(s.cli.Ctx(), resp.ID)
 	if err != nil {
-		log.Fatal(err)
+		zap.L().Error("租约保活失败" + err.Error())
 		return err
 	}
-	log.Println("租约ID为：", s.leaseID)
-	log.Printf("put key:%s val:%s success\n", s.Key, s.Value)
+	zap.L().Debug("put key: " + s.Key + " val: " + s.Value + " success")
 	return nil
 }
 
@@ -75,15 +73,15 @@ func (s *ServiceRegister) keepAlive() {
 		case keepAliveResp := <-s.keepAliveChan:
 			// 收到续租响应
 			if keepAliveResp == nil {
-				fmt.Println("续租失败")
+				zap.L().Debug("续租失败")
 				return
 			}
 			// 处理续租响应
-			fmt.Printf("%v：收到续租响应，续租成功 %v\n", s.Key, time.Now().Format("2006-01-02 15:04:05"))
+			zap.L().Debug(s.Key + "收到续租响应，续租成功 " + time.Now().Format("2006-01-02 15:04:05"))
 		case <-time.After(5 * time.Second):
 			// 定时执行续租操作
 			if err := s.putKeyWithLease(); err != nil {
-				fmt.Println("续租失败: ", err)
+				zap.L().Error("定时续租失败" + err.Error())
 				return
 			}
 		}
@@ -95,8 +93,9 @@ func (s *ServiceRegister) Close() error {
 	// 撤销租约
 	// todo 优雅关闭？
 	if _, err := s.cli.Revoke(s.cli.Ctx(), s.leaseID); err != nil { // Revoke撤销租约
+		zap.L().Error("撤销租约失败：" + err.Error())
 		return err
 	}
-	log.Println("撤销租约")
+	zap.L().Debug(s.Key + "撤销租约")
 	return s.cli.Close()
 }

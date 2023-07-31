@@ -1,12 +1,12 @@
 package discovery
 
 import (
+	"dzug/conf"
 	"dzug/idl/relation"
 	"dzug/idl/user"
-	"fmt"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"log"
 )
 
 var (
@@ -18,11 +18,11 @@ var (
 
 // InitDiscovery 初始化一个服务发现程序
 func InitDiscovery() {
-	endpoints := []string{"localhost:2379"}               // etcd地址
+	endpoints := conf.Config.EtcdConfig.Addr              // etcd地址
 	SerDiscovery = ServiceDiscovery{EtcdAddrs: endpoints} // 放入etcd地址
 	err := SerDiscovery.NewServiceDiscovery()             // 实例化
 	if err != nil {
-		log.Println("启动服务发现失败: ", err)
+		zap.L().Error("启动服务发现失败: " + err.Error())
 		return
 	}
 }
@@ -32,7 +32,7 @@ func InitDiscovery() {
 func LoadClient(serviceName string, client any) {
 	conn, err := connectService(serviceName) // 找到grpc连接链接
 	if err != nil {
-		log.Println("grpc连接服务: ", serviceName, "失败, error: ", err)
+		zap.L().Error("grpc连接服务: " + serviceName + "失败, error: " + err.Error())
 		return
 	}
 
@@ -42,7 +42,7 @@ func LoadClient(serviceName string, client any) {
 	case *relation.DouyinRelationActionServiceClient:
 		*c = relation.NewDouyinRelationActionServiceClient(conn)
 	default:
-		fmt.Println("没有这种类型的服务")
+		zap.L().Info("没有这种类型的服务")
 	}
 }
 
@@ -51,6 +51,7 @@ func LoadClient(serviceName string, client any) {
 func connectService(serviceName string) (conn *grpc.ClientConn, err error) {
 	err = SerDiscovery.watchService("") // ！！！监视所有的服务
 	if err != nil {
+		zap.L().Error("未找到服务地址：" + err.Error())
 		return nil, err
 	}
 	conn, err = grpc.Dial(SerDiscovery.GetServiceByKey(serviceName), grpc.WithTransportCredentials(insecure.NewCredentials()))
