@@ -31,7 +31,7 @@ func (s *ServiceDiscovery) NewServiceDiscovery() (err error) {
 	return
 }
 
-func (s *ServiceDiscovery) WatchService(target string) error {
+func (s *ServiceDiscovery) watchService(target string) error {
 	// 获取target的所有键值对
 	resp, err := s.cli.Get(context.Background(), target, clientv3.WithPrefix())
 	if err != nil {
