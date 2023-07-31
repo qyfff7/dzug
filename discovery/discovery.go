@@ -2,9 +2,11 @@ package discovery
 
 import (
 	"context"
+	"fmt"
 	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"log"
+	"math/rand"
 	"sync"
 	"time"
 )
@@ -14,7 +16,7 @@ type ServiceDiscovery struct {
 	EtcdAddrs []string
 
 	cli        *clientv3.Client
-	serverList map[string]string // 存储解析后的地址
+	serverList map[string][]string // 存储解析后的地址
 	lock       sync.Mutex
 }
 
@@ -27,7 +29,7 @@ func (s *ServiceDiscovery) NewServiceDiscovery() (err error) {
 	if err != nil {
 		log.Println(err)
 	}
-	s.serverList = make(map[string]string)
+	s.serverList = make(map[string][]string)
 	return
 }
 
@@ -49,12 +51,23 @@ func (s *ServiceDiscovery) watchService(target string) error {
 	return nil
 }
 
-// setServiceList 设置服务列表
+// setServiceList 设置地址列表
 func (s *ServiceDiscovery) setServiceList(key, value string) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	s.serverList[key] = value
-	log.Println("put key :", key, " val:", value)
+	if !existValue(s.serverList[value], key) { // 如果没有了这个地址 ！！！反着放的
+		s.serverList[value] = append(s.serverList[value], key)
+		log.Println("put key :", key, " val:", value)
+	}
+}
+
+func existValue(strs []string, str string) bool {
+	for _, s := range strs {
+		if s == str {
+			return true
+		}
+	}
+	return false
 }
 
 // delServiceList 从列表中删除服务
@@ -82,7 +95,7 @@ func (s *ServiceDiscovery) watcher(target string) {
 }
 
 // GetServices 获取服务中所有的服务
-func (s *ServiceDiscovery) GetServices() map[string]string {
+func (s *ServiceDiscovery) GetServices() map[string][]string {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	return s.serverList
@@ -90,7 +103,11 @@ func (s *ServiceDiscovery) GetServices() map[string]string {
 
 // GetServiceByKey 通过key 获取服务链接
 func (s *ServiceDiscovery) GetServiceByKey(target string) (value string) {
-	return s.serverList[target]
+	rand.Seed(time.Now().UnixNano())
+	// 生成随机整数
+	randomNum := rand.Intn(len(s.serverList[target])) // target 下随机选一个链接进行调用，负载均衡 /:fade
+	fmt.Println(target, " 调用的链接为：", s.serverList[target][randomNum])
+	return s.serverList[target][randomNum]
 }
 
 func (s *ServiceDiscovery) Close() error {

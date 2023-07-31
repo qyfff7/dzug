@@ -49,7 +49,7 @@ func LoadClient(serviceName string, client any) {
 // connectService 通过服务名字找到对应的链接
 // 比如，传入user，会找到etcd上存储的user的链接
 func connectService(serviceName string) (conn *grpc.ClientConn, err error) {
-	err = SerDiscovery.watchService(serviceName)
+	err = SerDiscovery.watchService("") // ！！！监视所有的服务
 	if err != nil {
 		return nil, err
 	}

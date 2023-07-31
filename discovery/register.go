@@ -52,7 +52,7 @@ func (s *ServiceRegister) putKeyWithLease() error {
 		return err
 	}
 	// 注册服务并绑定租约
-	_, err = s.cli.Put(s.cli.Ctx(), s.Key, s.Value, clientv3.WithLease(resp.ID))
+	_, err = s.cli.Put(s.cli.Ctx(), s.Value, s.Key, clientv3.WithLease(resp.ID)) // !!!key，value，故意填反的
 	if err != nil {
 		log.Fatal(err)
 		return err

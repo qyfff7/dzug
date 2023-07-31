@@ -18,7 +18,7 @@ func RelationAction(ctx *gin.Context) {
 		})
 		return
 	}
-	fmt.Println(relationReq.Token)
+	fmt.Println("我是token：", relationReq.Token)
 	relationResp, err := rpc.RelationAction(ctx, &relationReq)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, pb.DouyinRelationActionResponse{
