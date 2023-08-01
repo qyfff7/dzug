@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"dzug/user_service/Log_Conf/logger"
+	"dzug/logger"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

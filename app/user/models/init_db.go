@@ -1,7 +1,7 @@
 package models
 
 import (
-	"dzug/user_service/Log_Conf/conf"
+	"dzug/conf"
 	"fmt"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
