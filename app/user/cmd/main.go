@@ -2,38 +2,37 @@ package main
 
 import (
 	"dzug/app/user/service"
-	"dzug/discovery"
-	pb "dzug/idl/user"
+	"dzug/conf"
+	"dzug/etcd/registry"
+	"dzug/logger"
+	pb "dzug/protos/user"
+	"fmt"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"log"
-	"net"
 )
 
 func main() {
-	endpoints := []string{"localhost:2379"}
-	serviceRegister := &discovery.ServiceRegister{
-		EtcdAddrs: endpoints,
-		Lease:     5,
-		Key:       "user",
-		Value:     "127.0.0.1:9000",
+	//1. 初始化配置文件
+	if err := conf.Init(); err != nil {
+		fmt.Printf("Config file initialization error,%#v", err)
+		return
 	}
-	err := serviceRegister.NewServiceRegister()
-	if err != nil {
-		log.Println(err)
-	}
-	defer serviceRegister.Close()
 
-	// 创建grpc服务器并监听9000端口
+	//2. 初始化日志
+	if err := logger.Init(conf.Config.LogConfig, conf.Config.Mode); err != nil {
+		fmt.Printf("log file initialization error,%#v", err)
+		return
+	}
+	defer zap.L().Sync() //把缓冲区的日志，追加到文件中
+	zap.L().Info("日志服务启动，开始记录日志")
+
+	key := "user"             // 注册的名字
+	value := "127.0.0.1:9000" // 注册的服务地址
+	// 传入注册的服务名和注册的服务地址进行注册
+	s, _ := registry.NewServer()
+	_ = s.StartRegisterAndListen(key, value)
 	server := grpc.NewServer()
 	defer server.Stop()
 	pb.RegisterDouyinUserServiceServer(server, &service.UserSrv{})
-
-	lis, err := net.Listen("tcp", ":9000")
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println("listening ")
-	if err := server.Serve(lis); err != nil {
-		panic(err)
-	}
+	s.StartGRPCListen(server, value)
 }

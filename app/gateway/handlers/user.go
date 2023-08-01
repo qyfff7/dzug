@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"dzug/app/gateway/rpc"
-	pb "dzug/idl/user"
+	pb "dzug/protos/user"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

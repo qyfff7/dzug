@@ -4,7 +4,8 @@ import (
 	"context"
 	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientv3 "go.etcd.io/etcd/client/v3"
-	"log"
+	"go.uber.org/zap"
+	"math/rand"
 	"sync"
 	"time"
 )
@@ -14,7 +15,7 @@ type ServiceDiscovery struct {
 	EtcdAddrs []string
 
 	cli        *clientv3.Client
-	serverList map[string]string // 存储解析后的地址
+	serverList map[string][]string // 存储解析后的地址
 	lock       sync.Mutex
 }
 
@@ -25,17 +26,17 @@ func (s *ServiceDiscovery) NewServiceDiscovery() (err error) {
 		DialTimeout: 5 * time.Second,
 	})
 	if err != nil {
-		log.Println(err)
+		zap.L().Error("建立服务发现失败: ", zap.Error(err))
 	}
-	s.serverList = make(map[string]string)
+	s.serverList = make(map[string][]string)
 	return
 }
 
-func (s *ServiceDiscovery) WatchService(target string) error {
-	// 获取target的所有键值对
+func (s *ServiceDiscovery) watchService(target string) error {
+	// 获取target的所有键值对，即所有服务地址
 	resp, err := s.cli.Get(context.Background(), target, clientv3.WithPrefix())
 	if err != nil {
-		log.Println(err)
+		zap.L().Error("获取服务列表失败：", zap.Error(err))
 		return err
 	}
 
@@ -49,12 +50,23 @@ func (s *ServiceDiscovery) WatchService(target string) error {
 	return nil
 }
 
-// setServiceList 设置服务列表
+// setServiceList 设置地址列表
 func (s *ServiceDiscovery) setServiceList(key, value string) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	s.serverList[key] = value
-	log.Println("put key :", key, " val:", value)
+	if !existValue(s.serverList[value], key) { // 如果没有了这个地址 ！！！反着放的
+		s.serverList[value] = append(s.serverList[value], key)
+		zap.L().Debug("put key :" + key + " val:" + value)
+	}
+}
+
+func existValue(strs []string, str string) bool {
+	for _, s := range strs {
+		if s == str {
+			return true
+		}
+	}
+	return false
 }
 
 // delServiceList 从列表中删除服务
@@ -62,13 +74,13 @@ func (s *ServiceDiscovery) delServiceList(key string) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	delete(s.serverList, key)
-	log.Println("delete key: ", key)
+	zap.L().Debug("delete key: " + key)
 }
 
 // watcher 监视服务列表
 func (s *ServiceDiscovery) watcher(target string) {
 	watchChan := s.cli.Watch(context.Background(), target, clientv3.WithPrefix())
-	log.Println("Watching target: ", target, "...")
+	zap.L().Debug("Watching target: " + target + "...")
 	for w := range watchChan {
 		for _, ev := range w.Events {
 			switch ev.Type {
@@ -82,7 +94,7 @@ func (s *ServiceDiscovery) watcher(target string) {
 }
 
 // GetServices 获取服务中所有的服务
-func (s *ServiceDiscovery) GetServices() map[string]string {
+func (s *ServiceDiscovery) GetServices() map[string][]string {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	return s.serverList
@@ -90,7 +102,11 @@ func (s *ServiceDiscovery) GetServices() map[string]string {
 
 // GetServiceByKey 通过key 获取服务链接
 func (s *ServiceDiscovery) GetServiceByKey(target string) (value string) {
-	return s.serverList[target]
+	rand.Seed(time.Now().UnixNano())
+	// 生成随机整数
+	randomNum := rand.Intn(len(s.serverList[target])) // target 下随机选一个链接进行调用，负载均衡 /:fade
+	zap.L().Debug(target + " 调用的链接为：" + s.serverList[target][randomNum])
+	return s.serverList[target][randomNum]
 }
 
 func (s *ServiceDiscovery) Close() error {

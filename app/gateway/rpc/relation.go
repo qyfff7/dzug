@@ -3,7 +3,7 @@ package rpc
 import (
 	"context"
 	"dzug/discovery"
-	"dzug/idl/relation"
+	"dzug/protos/relation"
 )
 
 func RelationAction(ctx context.Context, req *relation.DouyinRelationActionRequest) (resp *relation.DouyinRelationActionResponse, err error) {

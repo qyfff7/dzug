@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"dzug/idl/user"
+	"dzug/protos/user"
 )
 
 type UserSrv struct {

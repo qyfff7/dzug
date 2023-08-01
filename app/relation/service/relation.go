@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"dzug/idl/relation"
+	"dzug/protos/relation"
 )
 
 type RelationSrv struct {

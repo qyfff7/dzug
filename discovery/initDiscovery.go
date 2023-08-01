@@ -1,28 +1,28 @@
 package discovery
 
 import (
-	"dzug/idl/relation"
-	"dzug/idl/user"
-	"fmt"
+	"dzug/conf"
+	"dzug/protos/relation"
+	"dzug/protos/user"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"log"
 )
 
 var (
-	Ser ServiceDiscovery
+	SerDiscovery ServiceDiscovery
 
 	UserClient     user.DouyinUserServiceClient
 	RelationClient relation.DouyinRelationActionServiceClient
 )
 
-// Init 初始化一个服务发现程序
-func Init() {
-	endpoints := []string{"localhost:2379"}      // etcd地址
-	Ser = ServiceDiscovery{EtcdAddrs: endpoints} // 放入etcd地址
-	err := Ser.NewServiceDiscovery()             // 实例化
+// InitDiscovery 初始化一个服务发现程序
+func InitDiscovery() {
+	endpoints := conf.Config.EtcdConfig.Addr              // etcd地址
+	SerDiscovery = ServiceDiscovery{EtcdAddrs: endpoints} // 放入etcd地址
+	err := SerDiscovery.NewServiceDiscovery()             // 实例化
 	if err != nil {
-		log.Fatal("启动服务发现失败")
+		zap.L().Error("启动服务发现失败: " + err.Error())
 		return
 	}
 }
@@ -32,7 +32,7 @@ func Init() {
 func LoadClient(serviceName string, client any) {
 	conn, err := connectService(serviceName) // 找到grpc连接链接
 	if err != nil {
-		log.Println("grpc连接服务: ", serviceName, "失败, error: ", err)
+		zap.L().Error("grpc连接服务: " + serviceName + "失败, error: " + err.Error())
 		return
 	}
 
@@ -42,17 +42,18 @@ func LoadClient(serviceName string, client any) {
 	case *relation.DouyinRelationActionServiceClient:
 		*c = relation.NewDouyinRelationActionServiceClient(conn)
 	default:
-		fmt.Println("没有这种类型的服务")
+		zap.L().Info("没有这种类型的服务")
 	}
 }
 
 // connectService 通过服务名字找到对应的链接
 // 比如，传入user，会找到etcd上存储的user的链接
 func connectService(serviceName string) (conn *grpc.ClientConn, err error) {
-	err = Ser.WatchService(serviceName)
+	err = SerDiscovery.watchService("") // ！！！监视所有的服务
 	if err != nil {
+		zap.L().Error("未找到服务地址：" + err.Error())
 		return nil, err
 	}
-	conn, err = grpc.Dial(Ser.GetServiceByKey(serviceName), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err = grpc.Dial(SerDiscovery.GetServiceByKey(serviceName), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	return
 }

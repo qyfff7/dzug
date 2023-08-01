@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"dzug/app/gateway/rpc"
-	pb "dzug/idl/relation"
+	pb "dzug/protos/relation"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -18,7 +18,7 @@ func RelationAction(ctx *gin.Context) {
 		})
 		return
 	}
-	fmt.Println(relationReq.Token)
+	fmt.Println("我是token：", relationReq.Token)
 	relationResp, err := rpc.RelationAction(ctx, &relationReq)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, pb.DouyinRelationActionResponse{
