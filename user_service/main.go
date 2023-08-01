@@ -4,6 +4,7 @@ import (
 	"dzug/user_service/Log_Conf/conf"
 	"dzug/user_service/Log_Conf/logger"
 	models "dzug/user_service/models"
+	"dzug/user_service/pkg/snowflake"
 	"fmt"
 	"go.uber.org/zap"
 )
@@ -32,6 +33,12 @@ func main() {
 	//...
 
 	models.InsertData()
+
+	//4. snowflake初始化
+	if err := snowflake.Init(conf.Config.StartTime, conf.Config.MachineID); err != nil {
+		zap.L().Error("snowflake initialization error", zap.Error(err))
+		return
+	}
 
 	////4.注册路由
 	//r := routes.SetupRouter(conf.Config.Mode)

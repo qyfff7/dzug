@@ -16,6 +16,7 @@ type ProjectConfig struct {
 	Version   string `mapstructure:"version"`
 	StartTime string `mapstructure:"start_time"`
 	Mode      string `mapstructure:"mode"`
+	MachineID int64  `mapstructure:"machine_id"`
 
 	*LogConfig   `mapstructure:"log"`
 	*MySQLConfig `mapstructure:"mysql"`
