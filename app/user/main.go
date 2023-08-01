@@ -1,10 +1,10 @@
 package main
 
 import (
+	"dzug/app/user/models"
+	"dzug/app/user/pkg/snowflake"
 	"dzug/user_service/Log_Conf/conf"
 	"dzug/user_service/Log_Conf/logger"
-	models "dzug/user_service/models"
-	"dzug/user_service/pkg/snowflake"
 	"fmt"
 	"go.uber.org/zap"
 )

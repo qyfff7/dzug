@@ -2,8 +2,8 @@ package rpc
 
 import (
 	"context"
-	"dzug/user_service/discovery"
-	"dzug/user_service/idl/user"
+	"dzug/discovery"
+	"dzug/protos/user"
 )
 
 func UserLogin(ctx context.Context, req *user.DouyinUserLoginRequest) (resp *user.DouyinUserLoginResponse, err error) {

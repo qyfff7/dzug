@@ -13,12 +13,17 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+<<<<<<< HEAD
 user_service/app/user/config/config.yml
 user_service/app/task/config/config.yml
 config/config.yml
 user_service/app/gateway/logs
 user_service/app/user/logs
 user_service/app/task/logs
+=======
+>>>>>>> b4b30d8f11f9b8c9c312460c2ed998749e7d6b5e
 .idea
 bin
-logs
+*.log
+*.yml
+*.yaml

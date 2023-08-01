@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"dzug/user_service/Log_Conf/conf"
+	"dzug/conf"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

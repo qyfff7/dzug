@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"dzug/user_service/app/gateway/rpc"
-	pb "dzug/user_service/idl/user"
+	"dzug/app/gateway/rpc"
+	pb "dzug/protos/user"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
