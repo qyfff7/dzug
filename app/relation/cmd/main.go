@@ -4,8 +4,8 @@ import (
 	"dzug/app/relation/service"
 	"dzug/conf"
 	"dzug/discovery"
-	pb "dzug/idl/relation"
 	"dzug/logger"
+	pb "dzug/protos/relation"
 	"fmt"
 	"go.uber.org/zap"
 )

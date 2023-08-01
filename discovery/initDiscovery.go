@@ -2,8 +2,8 @@ package discovery
 
 import (
 	"dzug/conf"
-	"dzug/idl/relation"
-	"dzug/idl/user"
+	"dzug/protos/relation"
+	"dzug/protos/user"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
