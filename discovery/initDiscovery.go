@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	SerDiscovery ServiceDiscovery
+	SerDiscovery serviceDiscovery
 
 	UserClient     user.DouyinUserServiceClient
 	RelationClient relation.DouyinRelationActionServiceClient
@@ -19,8 +19,8 @@ var (
 // InitDiscovery 初始化一个服务发现程序
 func InitDiscovery() {
 	endpoints := conf.Config.EtcdConfig.Addr              // etcd地址
-	SerDiscovery = ServiceDiscovery{EtcdAddrs: endpoints} // 放入etcd地址
-	err := SerDiscovery.NewServiceDiscovery()             // 实例化
+	SerDiscovery = serviceDiscovery{EtcdAddrs: endpoints} // 放入etcd地址
+	err := SerDiscovery.newServiceDiscovery()             // 实例化
 	if err != nil {
 		zap.L().Error("启动服务发现失败: " + err.Error())
 		return
@@ -54,6 +54,11 @@ func connectService(serviceName string) (conn *grpc.ClientConn, err error) {
 		zap.L().Error("未找到服务地址：" + err.Error())
 		return nil, err
 	}
-	conn, err = grpc.Dial(SerDiscovery.GetServiceByKey(serviceName), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	addr, err := SerDiscovery.getServiceByKey(serviceName)
+	if err != nil {
+		zap.L().Error("未找到服务地址：" + err.Error())
+		return nil, err
+	}
+	conn, err = grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	return
 }

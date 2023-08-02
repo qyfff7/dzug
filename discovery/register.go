@@ -1,6 +1,7 @@
 package discovery
 
 import (
+	"context"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.uber.org/zap"
 	"time"
@@ -17,25 +18,24 @@ type ServiceRegister struct {
 	leaseID clientv3.LeaseID // 租约ID
 	// 租约keepalive相应chan
 	keepAliveChan <-chan *clientv3.LeaseKeepAliveResponse // 通道，只接受那一种类型，用于接收续租响应
-	// todo 暂时没有日志记录
 }
 
-// NewServiceRegister 通过传入的ServiceRegister 启动一个服务注册项目，并返回错误
-func (s *ServiceRegister) NewServiceRegister() error {
+// newServiceRegister 通过传入的ServiceRegister 启动一个服务注册项目，并返回错误
+func (s *ServiceRegister) newServiceRegister() error {
 	// 配置clientv3 服务器
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   s.EtcdAddrs,
 		DialTimeout: 5 * time.Second, // 5s 连接超时
 	})
 	if err != nil {
-		zap.L().Error("新建clientv3失败" + err.Error())
+		zap.L().Error("新建clientv3实例失败" + err.Error())
 		return err
 	}
 	s.cli = cli
 
 	// 启动服务
 	if err = s.putKeyWithLease(); err != nil {
-		zap.L().Info("启动服务失败")
+		zap.L().Error("启动注册服务失败" + err.Error())
 		return err
 	}
 	go s.keepAlive() // 保持连接
@@ -44,10 +44,13 @@ func (s *ServiceRegister) NewServiceRegister() error {
 
 // putKeyWithLease 通过租约来启动一个etcd连接
 func (s *ServiceRegister) putKeyWithLease() error {
+	// 建立连接超时，3秒未连接上，超时
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(3)*time.Second)
+	defer cancel()
 	// 设置租约时间
-	resp, err := s.cli.Grant(s.cli.Ctx(), s.Lease) // 得到租约ID
+	resp, err := s.cli.Grant(ctx, s.Lease) // 得到租约ID
 	if err != nil {
-		zap.L().Error("设置租约失败" + err.Error())
+		zap.L().Error("设置租约失败" + err.Error() + "(请检查etcd是否已启动）")
 		return err
 	}
 	// 注册服务并绑定租约
@@ -73,17 +76,21 @@ func (s *ServiceRegister) keepAlive() {
 		case keepAliveResp := <-s.keepAliveChan:
 			// 收到续租响应
 			if keepAliveResp == nil {
-				zap.L().Debug("续租失败")
-				return
+				//if err := s.putKeyWithLease(); err != nil { // 尝试重新注册
+				//	zap.L().Error("定时续租失败：" + err.Error() + "（请检查etcd服务是否仍然存活）")
+				//}
+				zap.L().Error("续租失败（请检查etcd服务是否仍然存活）")
+				panic("续租失败（请检查etcd服务是否仍然存活）")
+				return // 未尝试重新注册
 			}
 			// 处理续租响应
-			zap.L().Debug(s.Key + "收到续租响应，续租成功 " + time.Now().Format("2006-01-02 15:04:05"))
+			zap.L().Info(s.Key + "收到续租响应，续租成功 " + time.Now().Format("2006-01-02 15:04:05"))
 		case <-time.After(5 * time.Second):
 			// 定时执行续租操作
 			if err := s.putKeyWithLease(); err != nil {
-				zap.L().Error("定时续租失败" + err.Error())
-				return
+				zap.L().Error("定时续租失败：" + err.Error() + "（请检查etcd服务是否仍然存活）")
 			}
+			zap.L().Debug("已进行重新续租操作")
 		}
 	}
 }
@@ -91,7 +98,6 @@ func (s *ServiceRegister) keepAlive() {
 // Close 关闭租约
 func (s *ServiceRegister) Close() error {
 	// 撤销租约
-	// todo 优雅关闭？
 	if _, err := s.cli.Revoke(s.cli.Ctx(), s.leaseID); err != nil { // Revoke撤销租约
 		zap.L().Error("撤销租约失败：" + err.Error())
 		return err
