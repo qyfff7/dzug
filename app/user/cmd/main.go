@@ -6,6 +6,7 @@ import (
 	"dzug/discovery"
 	"dzug/logger"
 	pb "dzug/protos/user"
+	"dzug/repo"
 	"fmt"
 	"go.uber.org/zap"
 )
@@ -24,6 +25,8 @@ func main() {
 	}
 	defer zap.L().Sync() //把缓冲区的日志，追加到文件中
 	zap.L().Info("服务启动，开始记录日志")
+
+	repo.Init()
 
 	key := "user"             // 注册的名字
 	value := "127.0.0.1:9000" // 注册的服务地址
