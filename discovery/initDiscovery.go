@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"dzug/conf"
+	"dzug/protos/favorite"
 	"dzug/protos/relation"
 	"dzug/protos/user"
 	"go.uber.org/zap"
@@ -14,6 +15,7 @@ var (
 
 	UserClient     user.DouyinUserServiceClient
 	RelationClient relation.DouyinRelationActionServiceClient
+	FavoriteClient favorite.DouyinFavoriteActionServiceClient
 )
 
 // InitDiscovery 初始化一个服务发现程序
@@ -41,6 +43,8 @@ func LoadClient(serviceName string, client any) {
 		*c = user.NewDouyinUserServiceClient(conn)
 	case *relation.DouyinRelationActionServiceClient:
 		*c = relation.NewDouyinRelationActionServiceClient(conn)
+	case *favorite.DouyinFavoriteActionServiceClient:
+		*c = favorite.NewDouyinFavoriteActionServiceClient(conn)
 	default:
 		zap.L().Info("没有这种类型的服务")
 	}

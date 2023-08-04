@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+// 数据库模型
+
 // Comment 评论表
 type Comment struct {
 	gorm.Model

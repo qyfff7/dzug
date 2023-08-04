@@ -24,6 +24,11 @@ func NewRouter(mode string) *gin.Engine {
 	{
 		relation.POST("/action", handlers.RelationAction)
 	}
+	favorite := ginRouter.Group("/douyin/favorite")
+	{
+		favorite.POST("/action", handlers.FavoriteAction)
+		favorite.GET("/list", handlers.FavoriteList)
+	}
 
 	return ginRouter
 }
