@@ -52,10 +52,6 @@ func (m *Message) TableName() string {
 	return "message"
 }
 
-func (m *Relation) TableName() string {
-	return "relation"
-}
-
 type Relation struct {
 	ID        uint   `gorm:"primarykey"`
 	UserId    uint64 `gorm:"column:user_id;type:bigint(20) unsigned;default:0;comment:用户id;NOT NULL;uniqueIndex:r" json:"user_id"`
@@ -65,23 +61,31 @@ type Relation struct {
 	DeletedAt gorm.DeletedAt `gorm:"uniqueIndex:r"`
 }
 
+func (m *Relation) TableName() string {
+	return "relation"
+}
+
 // User 用户表
 type User struct {
 	gorm.Model
-	UserId        uint64 `gorm:"column:userid;type:bigint(20);comment:用户id;NOT NULL;unique" json:"user_id"` // UserId 是Relation表中，UserId和ToUserId的外键
-	Comment       []Comment
-	Favorite      []Favorite
-	Video         []Video
-	Relation      []Relation `gorm:"foreignKey:ToUserId"`
-	Relation1     []Relation `gorm:"foreignKey:UserId"`
-	Message       []Message  `gorm:"foreignKey:ToUserId"`
-	Message1      []Message  `gorm:"foreignKey:FromUserId"`
-	Name          string     `gorm:"column:name;type:varchar(32);comment:用户名称;NOT NULL;unique" json:"name"`
-	Password      string     `gorm:"column:password;type:varchar(255);comment:密码，已加密;NOT NULL" json:"password"`
-	FollowCount   uint64     `gorm:"column:follow_count;type:bigint(20) unsigned;default:0;comment:关注人数;NOT NULL" json:"follow_count"`
-	FollowerCount uint64     `gorm:"column:follower_count;type:bigint(20) unsigned;default:0;comment:粉丝人数;NOT NULL" json:"follower_count"`
-	WorkCount     uint64     `gorm:"column:work_count;type:bigint(20) unsigned;default:0;comment:作品数;NOT NULL" json:"work_count"`
-	FavoriteCount uint64     `gorm:"column:favorite_count;type:bigint(20) unsigned;default:0;comment:点赞视频数;NOT NULL" json:"favorite_count"`
+	UserId           uint64 `gorm:"column:user_id;type:bigint(20);comment:用户真正的id;NOT NULL;unique" json:"user_id"` // UserId 是Relation表中，UserId和ToUserId的外键
+	Comment          []Comment
+	Favorite         []Favorite
+	Video            []Video    `gorm:"foreignKey:UserId;references:UserId"`
+	Relation         []Relation `gorm:"foreignKey:ToUserId"`
+	Relation1        []Relation `gorm:"foreignKey:UserId"`
+	Message          []Message  `gorm:"foreignKey:ToUserId"`
+	Message1         []Message  `gorm:"foreignKey:FromUserId"`
+	Name             string     `gorm:"column:name;type:varchar(32);comment:用户名称;NOT NULL;unique" json:"name"`
+	BackgroundImages string     `gorm:"column:background_images;type:varchar(255);comment:主页背景图;default:" json:"background_images"`
+	Avatar           string     `gorm:"column:avatar;type:varchar(255);comment:用户头像;default:" json:"avatar"`
+	Signature        string     `gorm:"column:signature;type:varchar(255);comment:个人简介;default:" json:"signature"`
+	Password         string     `gorm:"column:password;type:varchar(255);comment:密码，已加密;NOT NULL" json:"password"`
+	FollowCount      uint64     `gorm:"column:follow_count;type:bigint(20) unsigned;default:0;comment:关注人数;NOT NULL" json:"follow_count"`
+	FollowerCount    uint64     `gorm:"column:follower_count;type:bigint(20) unsigned;default:0;comment:粉丝人数;NOT NULL" json:"follower_count"`
+	WorkCount        uint64     `gorm:"column:work_count;type:bigint(20) unsigned;default:0;comment:作品数;NOT NULL" json:"work_count"`
+	FavoriteCount    uint64     `gorm:"column:favorite_count;type:bigint(20) unsigned;default:0;comment:点赞视频数;NOT NULL" json:"favorite_count"`
+	TotalFavorited   uint64     `gorm:"column:total_favorited;type:bigint(20);default:0;comment:获赞数"`
 }
 
 func (m *User) TableName() string {
@@ -91,7 +95,7 @@ func (m *User) TableName() string {
 // Video 视频表
 type Video struct {
 	gorm.Model
-	UserId        uint64 `gorm:"column:user_id;type:bigint(20) unsigned;default:0;comment:user表主键;NOT NULL" json:"user_id"`
+	UserId        uint64 `gorm:"column:user_id;type:bigint(20) unsigned;default:0;comment:user表主键;NOT NULL;" json:"user_id"`
 	Title         string `gorm:"column:title;type:varchar(128);comment:视频标题;NOT NULL" json:"title"`
 	PlayUrl       string `gorm:"column:play_url;type:varchar(128);comment:视频地址;NOT NULL" json:"play_url"`
 	CoverUrl      string `gorm:"column:cover_url;type:varchar(128);comment:封面地址;NOT NULL" json:"cover_url"`
