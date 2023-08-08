@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
+	"dzug/app/favorite/dal/dao"
 	"dzug/protos/favorite"
-	"dzug/repo"
 	"fmt"
 )
 
@@ -12,23 +12,21 @@ type FavoriteSrv struct {
 }
 
 // Favorite 点赞操作（测试用）
+// 先从redis里获取点赞记录，如果点赞记录key存在在redis中，直接添加value
+// 如果没有这个key，就从数据库里读取，确保有这个key，添加到redis中后，再进行更改
+// redis key：userId value：videoId
 func (f *FavoriteSrv) Favorite(ctx context.Context, in *favorite.FavoriteRequest) (*favorite.FavoriteResponse, error) {
-	if repo.DB == nil {
-		panic("fuck")
-	}
-	fa := &repo.Favorite{
-		UserId:  uint64(in.UserId),
-		VideoId: uint64(in.VideoId),
-	}
-	fmt.Println(fa)
-	fmt.Println(in.UserId)
-	res := repo.DB.Create(fa)
-	if res.Error != nil {
-		fmt.Println("错误为：", res.Error.Error())
+	userId := uint64(in.UserId)
+	videoId := uint64(in.VideoId)
+	//keys := redis.Rdb.Keys(context.Background(), strconv.FormatUint(userId, 10))
+
+	err := dao.Favorite(videoId, userId)
+	if err != nil {
+		fmt.Println("错误为：", err.Error())
 		return &favorite.FavoriteResponse{
 			StatusCode: 400,
 			StatusMsg:  "点赞失败",
-		}, res.Error
+		}, err
 	}
 	return &favorite.FavoriteResponse{
 		StatusCode: 200,
