@@ -68,7 +68,7 @@ func (m *Relation) TableName() string {
 // User 用户表
 type User struct {
 	gorm.Model
-	UserId           uint64 `gorm:"column:user_id;type:bigint(20);comment:用户真正的id;NOT NULL;unique" json:"user_id"` // UserId 是Relation表中，UserId和ToUserId的外键
+	UserId           uint64 `gorm:"column:user_id;type:bigint(20);comment:用户真正的id;NOT NULL;unique" json:"user_id" ` // UserId 是Relation表中，UserId和ToUserId的外键
 	Comment          []Comment
 	Favorite         []Favorite
 	Video            []Video    `gorm:"foreignKey:UserId;references:UserId"`
@@ -76,11 +76,11 @@ type User struct {
 	Relation1        []Relation `gorm:"foreignKey:UserId"`
 	Message          []Message  `gorm:"foreignKey:ToUserId"`
 	Message1         []Message  `gorm:"foreignKey:FromUserId"`
-	Name             string     `gorm:"column:name;type:varchar(32);comment:用户名称;NOT NULL;unique" json:"name"`
+	Name             string     `gorm:"column:name;type:varchar(32);comment:用户名称;NOT NULL;unique" json:"name" `
 	BackgroundImages string     `gorm:"column:background_images;type:varchar(255);comment:主页背景图;default:" json:"background_images"`
 	Avatar           string     `gorm:"column:avatar;type:varchar(255);comment:用户头像;default:" json:"avatar"`
 	Signature        string     `gorm:"column:signature;type:varchar(255);comment:个人简介;default:" json:"signature"`
-	Password         string     `gorm:"column:password;type:varchar(255);comment:密码，已加密;NOT NULL" json:"password"`
+	Password         string     `gorm:"column:password;type:varchar(255);comment:密码，已加密;NOT NULL" json:"password" `
 	FollowCount      uint64     `gorm:"column:follow_count;type:bigint(20) unsigned;default:0;comment:关注人数;NOT NULL" json:"follow_count"`
 	FollowerCount    uint64     `gorm:"column:follower_count;type:bigint(20) unsigned;default:0;comment:粉丝人数;NOT NULL" json:"follower_count"`
 	WorkCount        uint64     `gorm:"column:work_count;type:bigint(20) unsigned;default:0;comment:作品数;NOT NULL" json:"work_count"`

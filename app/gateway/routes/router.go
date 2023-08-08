@@ -26,8 +26,8 @@ func NewRouter(mode string) *gin.Engine {
 
 	user := ginRouter.Group("/douyin/user")
 	{
-		user.GET("/", handlers.UserInfo) //用户信息路由
-		//user.POST("/login", handlers.UserLogin)       //用户登录路由
+		user.GET("/", handlers.UserInfo)              //用户信息路由
+		user.POST("/login", handlers.UserLogin)       //用户登录路由
 		user.POST("/register", handlers.UserRegister) //用户注册路由
 	}
 

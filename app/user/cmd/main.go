@@ -28,7 +28,11 @@ func main() {
 	zap.L().Info("服务启动，开始记录日志")
 
 	//3. 初始化mysql数据库
-	repo.Init()
+	if err := repo.Init(); err != nil {
+		fmt.Printf("mysql  init error,%#v", err)
+		zap.L().Error("初始化mysql数据库失败！！！")
+		return
+	}
 
 	//4. snowflake初始化
 	if err := snowflake.Init(conf.Config.StartTime, conf.Config.MachineID); err != nil {

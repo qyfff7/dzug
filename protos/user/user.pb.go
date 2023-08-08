@@ -26,8 +26,8 @@ type LoginAndRegisterRequest struct {
 	unknownFields protoimpl.UnknownFields
 
 	// 用户注册 & 登录 的接口请求 model
-	Username string `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"` // 用户名【注册的话，最长32个字符】
-	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"` // 密码
+	Username string `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty" binding:"required,max=32"` // 用户名【注册的话，最长32个字符】
+	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty" binding:"required,max=32"` // 密码
 }
 
 func (x *LoginAndRegisterRequest) Reset() {

@@ -21,6 +21,17 @@ func (s *Userservice) Register(c context.Context, req *user.LoginAndRegisterRequ
 	}
 	return resp, nil
 }
+func (s *Userservice) Login(ctx context.Context, req *user.LoginAndRegisterRequest) (*user.LoginAndRegisterResponse, error) {
+
+	//1.dao层进行数据库查询操作
+	resp, err := dao.Login(ctx, req)
+	if err != nil {
+		zap.L().Error("用户登录失败", zap.Error(err))
+		return nil, err
+	}
+	return resp, nil
+
+}
 
 // Register 用户注册
 /*func (s *user_service) Register(ctx context.Context, req *user.LoginAndRegisterRequest) (*user.TokenResponse, error) {
@@ -62,36 +73,7 @@ func (s *Userservice) Register(c context.Context, req *user.LoginAndRegisterRequ
 }
 */
 
-/*func (s *user_service) Login(ctx context.Context, req *user.LoginAndRegisterRequest) (*user.TokenResponse, error) {
-
-	// 1、请求参数校验
-	if err := req.Validate(); err != nil {
-		return nil, status.Error(codes.InvalidArgument,
-			constant.Code2Msg(constant.ERROR_ARGS_VALIDATE))
-	}
-
-	// 2、根据用户名查询用户信息
-	userReq := newGetUserReq()
-	userReq.Username = req.Username
-	po, err := s.getUser(ctx, userReq)
-	if err != nil {
-		return nil, status.Error(codes.Unavailable,
-			constant.Code2Msg(constant.ERROR_ACQUIRE))
-	}
-
-	// 若用户名或密码有误，不返回具体的用户名或者密码错误
-	if po == nil || !po.CheckHash(req.Password) {
-		return nil, status.Error(codes.PermissionDenied,
-			constant.Code2Msg(constant.BAD_NAME_PASSWORD))
-	}
-
-	// 3、颁发Token 并返回
-	response := user.NewTokenResponse(po.Id, s.token(ctx, po))
-
-	return response, nil
-}
-
-
+/*
 func (s *user_service) UserInfo(ctx context.Context, req *user.UserInfoRequest) (*user.UserInfoResponse, error) {
 
 	// 请求参数校验
