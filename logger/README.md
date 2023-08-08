@@ -37,6 +37,13 @@
 
 项目配置文件地址可在`config,go`文件中调整，日志文件可在`config.yaml`文件中调整。
 
+补充：
+
+在使用`zap.L().Error()` 记录日志的过程中，如果想要记录日志的内容，可以在后面加上`zap.Error(err)`(这是记录错误类型的)，`zap.String("lalala)` 这是记录String类型的，等等有多种类型，
+如果不知道想记录的类型，写`zap.Any()`
+示例：`zap.L().Error("UserRegister with invalid param, ", zap.Error(err))`、`zap.L().Info("这是一个日志记录示例", zap.String("参数错误", "用户注册时，输入参数出错"))`
+
+
 
 
 

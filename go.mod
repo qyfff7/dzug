@@ -13,7 +13,6 @@ require (
 	google.golang.org/grpc v1.56.2
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
-
 	gorm.io/driver/mysql v1.5.1
 	gorm.io/gorm v1.25.2
 

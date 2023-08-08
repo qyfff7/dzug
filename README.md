@@ -113,8 +113,8 @@ gateway用来处理网关相关操作
 3. 在app包建comment文件夹
 4. cmd包放置 main.go（仅作参考）
 5. service放置rpc函数，需要继承comment_grpc.pb.go文件夹下的DouyinCommentServiceServer 接口（这个名字写法，只是参照我的写法，可能叫别的名字）
-   ![image-20230730202104030](user_service/doc/image-20230730202104030.png)
-   ![image-20230730202133306](user_service/doc/image-20230730202133306.png)如，这里的的service包下的UserSrv结构体就继承了对应的包
+   ![image-20230730202104030](doc/image-20230730202104030.png)
+   ![image-20230730202133306](doc/image-20230730202133306.png)如，这里的的service包下的UserSrv结构体就继承了对应的包
 6. main函数写法，参照任意一个即可，etcd端口号与你的etcd端口相同，一般本地的不改动，都是localhost:2379，ServiceRegister这里的Value用一个新的端口，不然无法注册服务，net.Listen里的端口号与value保持一致，其他几乎不用改动，当然，除了把service.UserSrv{}注册的那个位置，要用正确的
 5. service文件夹放置rpc函数（模仿写即可），需要继承comment_grpc.pb.go文件夹下的DouyinCommentServiceServer 接口（这个名字写法，只是参照我的写法，可能叫别的名字）
    ![image-20230730202104030](doc/image-20230730202104030.png)

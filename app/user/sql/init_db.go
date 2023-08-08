@@ -1,4 +1,4 @@
-package models
+package sql
 
 import (
 	"dzug/conf"
@@ -27,7 +27,7 @@ func InitDB() (err error) {
 		zap.L().Error("Database connection failure，", zap.Error(err))
 		return
 	}
-	if err = DB.AutoMigrate(&User{}); err != nil {
+	if err = DB.AutoMigrate(&models.User{}, &models.Favorite{}, models.Video{}, models.Comment{}); err != nil {
 		zap.L().Error("Failed to create database,", zap.Error(err))
 		return
 	}
@@ -35,7 +35,7 @@ func InitDB() (err error) {
 }
 func InsertData() (err error) {
 	// 先创建数据 --- 创建对象
-	var u User
+	var u models.User
 	u.Name = "zhangsan3"
 	u.Password = "aaa"
 	u.FollowCount = 1
