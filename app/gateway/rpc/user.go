@@ -61,6 +61,7 @@ func Login(ctx context.Context, in *pb.LoginAndRegisterRequest) (*pb.LoginAndReg
 	return &pb.LoginAndRegisterResponse{UserId: 916, Token: "这里是clinet/rpc/user,正在调用User服务的Login方法，调用成功！" + "输入的用户名是：" + in.Username + "密码是：" + in.Password}, nil
 
 }
+
 func Register(ctx context.Context, in *pb.LoginAndRegisterRequest) (*pb.LoginAndRegisterResponse, error) {
 
 	conn, err := grpc.Dial("127.0.0.1:9000", grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -68,18 +69,18 @@ func Register(ctx context.Context, in *pb.LoginAndRegisterRequest) (*pb.LoginAnd
 		zap.L().Error("与用户服务建立连接失败" + err.Error())
 		return nil, err
 	}
-	defer conn.Close()
 
 	//2. 建立链接
 	client := pb.NewServiceClient(conn)
 	defer conn.Close()
+
 	//3.执行RPC的调用 （这个方法在服务端来实现并返回结果）
-	//in.Username =
+
 	resp, err := client.Register(context.Background(), &pb.LoginAndRegisterRequest{})
 	if err != nil {
 
 		panic(err)
 	}
-	fmt.Println("客户端调用服务端的登录服务，成功，得到的Userid是", resp.GetUserId(), "tocken 是", resp.GetToken())
-	return &pb.LoginAndRegisterResponse{UserId: 916, Token: "这里是clinet/rpc/user,正在调用User服务的Login方法，调用成功！" + "输入的用户名是：" + in.Username + "密码是：" + in.Password}, nil
+	fmt.Println("客户端远程调用服务端的注册服务，成功，得到的Userid是", resp.GetUserId(), "tocken 是", resp.GetToken())
+	return resp, nil
 }

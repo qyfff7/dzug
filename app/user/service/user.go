@@ -2,17 +2,24 @@ package service
 
 import (
 	"context"
+	"dzug/app/user/dao"
 	"dzug/protos/user"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
-type user_service struct {
+type Userservice struct {
 	db *gorm.DB
 	user.UnimplementedServiceServer
 }
 
-func (s *user_service) Register(c context.Context, req *user.LoginAndRegisterRequest) (*user.LoginAndRegisterResponse, error) {
-
+func (s *Userservice) Register(c context.Context, req *user.LoginAndRegisterRequest) (*user.LoginAndRegisterResponse, error) {
+	resp, err := dao.InsertUser(c, req)
+	if err != nil {
+		zap.L().Error("用户注册失败", zap.Error(err))
+		return nil, err
+	}
+	return resp, nil
 }
 
 // Register 用户注册

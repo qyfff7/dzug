@@ -37,7 +37,7 @@ func UserRegister(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, pb.LoginAndRegisterResponse{
 			UserId: 0,
-			Token:  "客户端调用Login服务出错",
+			Token:  "客户端远程调用Register服务出错",
 		})
 		return
 	}
