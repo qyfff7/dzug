@@ -23,7 +23,7 @@ func (s *Userservice) Register(c context.Context, req *user.LoginAndRegisterRequ
 }
 func (s *Userservice) Login(ctx context.Context, req *user.LoginAndRegisterRequest) (*user.LoginAndRegisterResponse, error) {
 
-	//1.dao层进行数据库查询操作
+	//dao层进行数据库查询操作
 	resp, err := dao.Login(ctx, req)
 	if err != nil {
 		zap.L().Error("用户登录失败", zap.Error(err))
@@ -33,75 +33,18 @@ func (s *Userservice) Login(ctx context.Context, req *user.LoginAndRegisterReque
 
 }
 
-// Register 用户注册
-/*func (s *user_service) Register(ctx context.Context, req *user.LoginAndRegisterRequest) (*user.TokenResponse, error) {
+func (s *Userservice) UserInfo(ctx context.Context, req *user.UserInfoRequest) (*user.UserInfoResponse, error) {
 
-	// 1、请求参数校验
-	if err := req.Validate(); err != nil {
-		return nil, status.Error(codes.InvalidArgument,
-			constant.Code2Msg(constant.ERROR_ARGS_VALIDATE))
-	}
-
-	// 2、根据 Username 查询此用户是否已经注册
-	userReq := newGetUserReq()
-	userReq.Username = req.Username
-	po, err := s.getUser(ctx, userReq)
+	resp, err := dao.GetuserInfo(ctx, req)
 	if err != nil {
-		return nil, status.Error(codes.Unavailable,
-			constant.Code2Msg(constant.ERROR_ACQUIRE))
+		zap.L().Error("获取用户信息失败", zap.Error(err))
+		return nil, err
 	}
+	return resp, nil
 
-	if po.Id > 0 {
-		// 用户已存在
-		return nil, status.Error(codes.AlreadyExists,
-			constant.Code2Msg(constant.WRONG_EXIST_USERS))
-	}
-
-	// 3、未注册-创建用户，注册-返回提示
-	po = user.NewUserPo(req.Hash())
-	insertRes, err := s.insert(ctx, po)
-
-	if err != nil {
-		return nil, status.Error(codes.Unknown,
-			constant.Code2Msg(constant.ERROR_SAVE))
-	}
-
-	// 4、颁发Token并返回
-	response := user.NewTokenResponse(insertRes.Id, s.token(ctx, insertRes))
-
-	return response, nil
 }
-*/
 
 /*
-func (s *user_service) UserInfo(ctx context.Context, req *user.UserInfoRequest) (*user.UserInfoResponse, error) {
-
-	// 请求参数校验
-	if err := req.Validate(); err != nil {
-		s.l.Errorf("user UserInfo：参数校验失败，%s", err.Error())
-		return nil, status.Error(codes.InvalidArgument,
-			constant.Code2Msg(constant.ERROR_ARGS_VALIDATE))
-	}
-
-	response := user.NewUserInfoResponse()
-	response.User = user.NewDefaultUser()
-	// get user info, user += userInfo
-
-	userReq := newGetUserReq()
-	userReq.UserId = req.UserId
-	po, err := s.getUser(ctx, userReq)
-	if err != nil {
-		return nil, status.Error(codes.Unavailable,
-			constant.Code2Msg(constant.ERROR_ACQUIRE))
-	}
-	response.User = po.Po2vo()
-
-	// 将Token放入Ctx
-	tkCtx := context.WithValue(ctx, constant.REQUEST_TOKEN, req.Token)
-
-	return response, s.composeInfo(tkCtx, response.User)
-}
-
 func (s *user_service) UserMap(ctx context.Context, req *user.UserMapRequest) (*user.UserMapResponse, error) {
 
 	// 1、获取用户列表 []User

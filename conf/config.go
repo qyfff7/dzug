@@ -22,6 +22,7 @@ type ProjectConfig struct {
 	*MySQLConfig `mapstructure:"mysql"`
 	*RedisConfig `mapstructure:"redis"`
 	*EtcdConfig  `mapstructure:"etcd"`
+	*JwtConfig   `mapstructure:"jwt"`
 }
 
 // LogConfig 日志文件的配置
@@ -54,6 +55,11 @@ type RedisConfig struct {
 // EtcdConfig etcd配置
 type EtcdConfig struct {
 	Addr []string `mapstructure:"address"`
+}
+
+// jwt 配置
+type JwtConfig struct {
+	JwtExpire int64 `mapstructure:"jwt_expire"`
 }
 
 // Init 从配置文件中获取项目所有的配置信息

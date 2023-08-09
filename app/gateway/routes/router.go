@@ -2,6 +2,7 @@ package routes
 
 import (
 	"dzug/app/gateway/handlers"
+	"dzug/app/gateway/middlewares"
 	"dzug/logger"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -24,16 +25,23 @@ func NewRouter(mode string) *gin.Engine {
 	ginRouter := gin.New()
 	ginRouter.Use(logger.GinLogger(), logger.GinRecovery(true)) // 使用自己的两个中间件
 
-	user := ginRouter.Group("/douyin/user")
+	tourist := ginRouter.Group("/douyin")
 	{
-		user.GET("/", handlers.UserInfo)              //用户信息路由
-		user.POST("/login", handlers.UserLogin)       //用户登录路由
-		user.POST("/register", handlers.UserRegister) //用户注册路由
+		//tourist.GET("/feed", handlers.feed)              //视频流
+		tourist.POST("/user/login", handlers.UserLogin)       //用户登录路由
+		tourist.POST("/user/register", handlers.UserRegister) //用户注册路由
+	}
+
+	user := ginRouter.Group("/douyin")
+	user.Use(middlewares.JWTAuthMiddleware())
+	{
+		user.GET("/user/", handlers.UserInfo)     //用户信息路由
+		user.GET("/publish/list/", handlers.List) //用户已发表的视频路由
 	}
 
 	ginRouter.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"msg": "404",
+			"msg": "404 not found",
 		})
 	})
 	return ginRouter
