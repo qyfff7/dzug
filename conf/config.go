@@ -35,22 +35,41 @@ type LogConfig struct {
 
 // MySQLConfig 数据库配置
 type MySQLConfig struct {
-	Host     string `mapstructure:"host"`
-	Port     int    `mapstructure:"port"`
-	User     string `mapstructure:"user"`
-	Password string `mapstructure:"password"`
-	DB       string `mapstructure:"dbname"`
+	Host      string `mapstructure:"host"`
+	Port      int    `mapstructure:"port"`
+	User      string `mapstructure:"user"`
+	Password  string `mapstructure:"password"`
+	Charset   string `mapstructure:"charset"`
+	ParseTime string `mapstructure:"parsetime"`
+	DB        string `mapstructure:"dbname"`
 }
 
 // RedisConfig Redis配置
 type RedisConfig struct {
 	Host string `mapstructure:"host"`
-	Port int    `mapstructure:"port"`
+	Port string `mapstructure:"port"`
+
+	MaxIdle        int  `mapstructure:"maxIdle"`
+	MaxActive      int  `mapstructure:"maxActive"`
+	ExpireTime     int  `mapstructure:"expireTime"`
+	MaxRandAddTime int  `mapstructure:"maxRandAddTime"`
+	BloomOpen      bool `mapstructure:"bloomOpen"`
 }
 
 // EtcdConfig etcd配置
 type EtcdConfig struct {
 	Addr []string `mapstructure:"address"`
+}
+
+func (d *MySQLConfig) DSN() string {
+	return fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=%s&parseTime=%s&loc=Local",
+		d.User,
+		d.Password,
+		d.Host,
+		d.DB,
+		d.Charset,
+		d.ParseTime,
+	)
 }
 
 // Init 从配置文件中获取项目所有的配置信息
