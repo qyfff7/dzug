@@ -1,4 +1,4 @@
-package main
+package userservice
 
 import (
 	"dzug/app/user/pkg/snowflake"
@@ -12,7 +12,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func main() {
+func Start() {
 	//1. 初始化配置文件
 	if err := conf.Init(); err != nil {
 		fmt.Printf("Config file initialization error,%#v", err)

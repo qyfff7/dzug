@@ -1,4 +1,4 @@
-package main
+package userclient
 
 import (
 	"dzug/app/gateway/routes"
@@ -11,7 +11,7 @@ import (
 
 //这里相当于是客户端，去访问各个服务
 
-func main() {
+func Start() {
 	//1. 初始化配置文件
 	if err := conf.Init(); err != nil {
 		fmt.Printf("Config file initialization error,%#v", err)
