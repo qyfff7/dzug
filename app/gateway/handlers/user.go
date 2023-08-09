@@ -112,17 +112,20 @@ func UserInfo(ctx *gin.Context) {
 		})
 		return
 	}
-	//2.获取当前用户的id
-	uid, err := jwt.GetUserID(ctx)
-	if err != nil {
-		zap.L().Error("获取当前用户ID失败")
-		return
-	}
-	userInfoReq.UserId = uid
-	//3.获取当前请求中的token
+
+	//2.获取当前请求中的token
 	authHeader := ctx.Request.Header.Get("Authorization")
 	parts := strings.SplitN(authHeader, " ", 2)
-	userInfoReq.Token = parts[1]
+	token := parts[1]
+	userInfoReq.Token = token
+
+	//3.从token中解析处userID
+	u, err := jwt.ParseToken(token)
+	if err != nil {
+		//错误处理
+		return
+	}
+	userInfoReq.UserId = u.UserID
 
 	//4.查询用户信息
 	userInfoResp, err := rpc.UserInfo(ctx, userInfoReq)

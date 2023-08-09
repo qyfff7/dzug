@@ -27,7 +27,7 @@ func NewRouter(mode string) *gin.Engine {
 
 	tourist := ginRouter.Group("/douyin")
 	{
-		//tourist.GET("/feed", handlers.feed)              //视频流
+		tourist.GET("/feed", handlers.Feed)                   //视频流
 		tourist.POST("/user/login", handlers.UserLogin)       //用户登录路由
 		tourist.POST("/user/register", handlers.UserRegister) //用户注册路由
 	}
@@ -35,8 +35,7 @@ func NewRouter(mode string) *gin.Engine {
 	user := ginRouter.Group("/douyin")
 	user.Use(middlewares.JWTAuthMiddleware())
 	{
-		user.GET("/user/", handlers.UserInfo)     //用户信息路由
-		user.GET("/publish/list/", handlers.List) //用户已发表的视频路由
+		user.GET("/user/", handlers.UserInfo) //用户信息路由
 	}
 
 	ginRouter.NoRoute(func(c *gin.Context) {

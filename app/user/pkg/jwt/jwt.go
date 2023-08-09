@@ -4,7 +4,6 @@ import (
 	"dzug/conf"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
 	"time"
 )
 
@@ -38,14 +37,6 @@ func GenToken(userID uint64) (aToken string, err error) {
 	aToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(CustomSecret)
 	// 使用指定的secret签名并获得完整的编码后的字符串token
 
-	/*
-		// refresh token 不需要存任何⾃自定义数据
-		rToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Duration(conf.Config.JwtExpire) * time.Hour).Unix(), // 过期时间
-			Issuer:    "douyin",                                                                // 签发⼈
-		}).SignedString(CustomSecret)
-	*/
-
 	return
 
 }
@@ -54,10 +45,7 @@ func GenToken(userID uint64) (aToken string, err error) {
 func ParseToken(tokenString string) (*CustomClaims, error) {
 	// 解析token
 	// 如果是自定义Claim结构体则需要使用 ParseWithClaims 方法
-
 	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (i interface{}, err error) {
-		// 直接使用标准的Claim则可以直接使用Parse方法
-		//token, err := jwt.Parse(tokenString, func(token *jwt.Token) (i interface{}, err error) {
 		return CustomSecret, nil
 	})
 	if err != nil {
@@ -68,21 +56,6 @@ func ParseToken(tokenString string) (*CustomClaims, error) {
 		return claims, nil
 	}
 	return nil, errors.New("invalid token")
-}
-
-// GetUserID 获取当前登录的用户ID
-func GetUserID(c *gin.Context) (userID uint64, err error) {
-	uid, ok := c.Get(CtxUserIDKey)
-	if !ok {
-		err = errors.New("获取用户 ID 出错")
-		return
-	}
-	userID, ok = uid.(uint64)
-	if !ok {
-		err = errors.New("获取用户 ID 出错")
-		return
-	}
-	return
 }
 
 // RefreshToken 刷新AccessToken，这里返回值可以只有AccessToken，也可以两个都有，根据实际业务情况进行调整
