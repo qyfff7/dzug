@@ -1,17 +1,25 @@
 package redis
 
 import (
+	"context"
 	"dzug/conf"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 )
 
-var Rdb *redis.Client
+var RDB *redis.Client
 
-func Init() {
+func Init() error {
 	addr := conf.Config.RedisConfig.Host + ":" + conf.Config.RedisConfig.Port
-	Rdb = redis.NewClient(&redis.Options{
+	RDB = redis.NewClient(&redis.Options{
 		Addr: addr,
 	})
-	zap.L().Info("redis 客户端初始化成功")
+	ctx := context.Background()
+	_, err := RDB.Ping(ctx).Result()
+	if err != nil {
+		zap.L().Error(err.Error())
+		return err
+	}
+	zap.L().Info("redis初始化完成")
+	return nil
 }

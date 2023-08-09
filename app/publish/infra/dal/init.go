@@ -11,7 +11,7 @@ import (
 
 var DB *gorm.DB
 
-func Init() {
+func Init() error {
 	var err error
 	tmp := conf.Config.DSN()
 	fmt.Println(tmp)
@@ -20,12 +20,14 @@ func Init() {
 		SkipDefaultTransaction: true,
 	})
 	if err != nil {
-		zap.L().Error("初始化数据库失败" + err.Error())
+		zap.L().Error("MySQL初始化失败：" + err.Error())
+		return err
 	}
 	err = DB.AutoMigrate(model.Video{})
 	if err != nil {
-		zap.L().Error("初始化数据表失败" + err.Error())
+		zap.L().Error("数据表创建失败：" + err.Error())
+		return err
 	}
-	zap.L().Info("数据库初始化成功")
-
+	zap.L().Info("MySQL初始化成功")
+	return nil
 }

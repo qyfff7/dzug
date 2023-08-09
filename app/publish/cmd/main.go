@@ -25,8 +25,14 @@ func main() {
 
 	defer zap.L().Sync()
 	zap.L().Info("服务启动，开始记录日志")
-	dal.Init()
-	redis.Init()
+	err := dal.Init()
+	if err != nil {
+		return
+	}
+	err = redis.Init()
+	if err != nil {
+		return
+	}
 	key := "publish"
 	value := "127.0.0.1:9003"
 	serviceRegister, grpcServer := discovery.InitRegister(key, value)
