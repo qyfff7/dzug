@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"dzug/app/favorite/dal/kafka"
 	"dzug/app/favorite/dal/redis"
 	"dzug/protos/favorite"
 	"errors"
@@ -34,7 +35,7 @@ func (f *FavoriteSrv) Favorite(ctx context.Context, in *favorite.FavoriteRequest
 			StatusMsg:  "重复点赞操作",
 		}, nil
 	}
-	// todo 加入点赞消息队列中
+	kafka.Sender(userId, videoId, 1)   // todo 测试
 	return &favorite.FavoriteResponse{ // todo ans == 1 和其他默认情况 ！！！！暂时不确定其他默认情况会不会有错误
 		StatusCode: 200,
 		StatusMsg:  "点赞成功",
@@ -57,7 +58,7 @@ func (f *FavoriteSrv) Infavorite(ctx context.Context, in *favorite.InfavoriteReq
 			StatusMsg:  "重复取消点赞操作",
 		}, nil
 	}
-	// todo 加入取消点赞消息队列中
+	kafka.Sender(userId, videoId, 2)     // todo 测试
 	return &favorite.InfavoriteResponse{ // todo ans == 1 和其他默认情况 ！！！！暂时不确定其他默认情况会不会有错误
 		StatusCode: 200,
 		StatusMsg:  "取消点赞成功",
