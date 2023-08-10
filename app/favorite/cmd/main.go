@@ -1,6 +1,7 @@
 package main
 
 import (
+	"dzug/app/favorite/dal/redis"
 	"dzug/app/favorite/service"
 	"dzug/conf"
 	"dzug/discovery"
@@ -26,7 +27,8 @@ func main() {
 	defer zap.L().Sync() //把缓冲区的日志，追加到文件中
 	zap.L().Info("服务启动，开始记录日志")
 
-	repo.Init() // 初始化数据库
+	repo.Init()       // 初始化数据库
+	redis.InitRedis() // 初始化redis
 
 	key := "favorite"         // 注册的名字
 	value := "127.0.0.1:9003" // 注册的服务地址

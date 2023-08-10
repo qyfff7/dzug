@@ -14,7 +14,7 @@ import (
 var DB *gorm.DB
 
 func Init() {
-	conf.Init() // 初始化配置文件
+	conf.Init() // 初始化配置文件 todo 这一行可以取消吗？
 	mysqlConfig := conf.Config.MySQLConfig
 	link := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		mysqlConfig.User, mysqlConfig.Password, mysqlConfig.Host, mysqlConfig.Port, mysqlConfig.DB)

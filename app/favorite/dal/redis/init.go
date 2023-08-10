@@ -8,7 +8,7 @@ import (
 
 var Rdb *redis.Client
 
-func initRedis() {
+func InitRedis() {
 	addr := conf.Config.RedisConfig.Host + ":" + strconv.Itoa(conf.Config.RedisConfig.Port)
 	Rdb = redis.NewClient(&redis.Options{
 		Addr: addr,

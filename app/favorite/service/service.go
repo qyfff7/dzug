@@ -2,33 +2,40 @@ package service
 
 import (
 	"context"
-	"dzug/app/favorite/dal/dao"
+	"dzug/app/favorite/dal/redis"
 	"dzug/protos/favorite"
-	"fmt"
+	"errors"
 )
 
 type FavoriteSrv struct {
 	favorite.UnimplementedDouyinFavoriteActionServiceServer
 }
 
-// Favorite 点赞操作（测试用）
-// 先从redis里获取点赞记录，如果点赞记录key存在在redis中，直接添加value
-// 如果没有这个key，就从数据库里读取，确保有这个key，添加到redis中后，再进行更改
+// Favorite
+// 1. 用户点击点赞按钮
+// 2. 获取到用户id和视频id
+// 3. 先去redis里寻找是否有集合 key favo:userId value video id
+// 4. 有则再把value存入set中
+// 5. 无则从mysql中查询点赞列表进行缓存（读取出这个user的所有点赞数据），然后redis再获取一次，有没有这个key和value，有这个key value就返回，没有就添加key value
+// 6. 根据写入redis的情况，放入消息队列中，定时写入数据库中
 // redis key：userId value：videoId
 func (f *FavoriteSrv) Favorite(ctx context.Context, in *favorite.FavoriteRequest) (*favorite.FavoriteResponse, error) {
 	userId := uint64(in.UserId)
 	videoId := uint64(in.VideoId)
-	//keys := redis.Rdb.Keys(context.Background(), strconv.FormatUint(userId, 10))
-
-	err := dao.Favorite(videoId, userId)
-	if err != nil {
-		fmt.Println("错误为：", err.Error())
+	ans := redis.AddFavor(userId, videoId)
+	if ans == 0 {
 		return &favorite.FavoriteResponse{
-			StatusCode: 400,
-			StatusMsg:  "点赞失败",
-		}, err
+			StatusCode: 500,
+			StatusMsg:  "服务器错误",
+		}, errors.New("redis或mysql数据库错误")
+	} else if ans == 2 {
+		return &favorite.FavoriteResponse{
+			StatusCode: 200,
+			StatusMsg:  "重复点赞操作",
+		}, nil
 	}
-	return &favorite.FavoriteResponse{
+	// todo 加入点赞消息队列中
+	return &favorite.FavoriteResponse{ // todo ans == 1 和其他默认情况 ！！！！暂时不确定其他默认情况会不会有错误
 		StatusCode: 200,
 		StatusMsg:  "点赞成功",
 	}, nil
@@ -36,9 +43,24 @@ func (f *FavoriteSrv) Favorite(ctx context.Context, in *favorite.FavoriteRequest
 
 // Infavorite 取消点赞
 func (f *FavoriteSrv) Infavorite(ctx context.Context, in *favorite.InfavoriteRequest) (*favorite.InfavoriteResponse, error) {
-	return &favorite.InfavoriteResponse{
+	userId := uint64(in.UserId)
+	videoId := uint64(in.VideoId)
+	ans := redis.DelFavor(userId, videoId)
+	if ans == 0 {
+		return &favorite.InfavoriteResponse{
+			StatusCode: 500,
+			StatusMsg:  "服务器错误",
+		}, errors.New("redis或mysql数据库错误")
+	} else if ans == 2 {
+		return &favorite.InfavoriteResponse{
+			StatusCode: 200,
+			StatusMsg:  "重复取消点赞操作",
+		}, nil
+	}
+	// todo 加入取消点赞消息队列中
+	return &favorite.InfavoriteResponse{ // todo ans == 1 和其他默认情况 ！！！！暂时不确定其他默认情况会不会有错误
 		StatusCode: 200,
-		StatusMsg:  "调用成功，你成功进行了一次取消收藏操作",
+		StatusMsg:  "取消点赞成功",
 	}, nil
 }
 
