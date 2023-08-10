@@ -13,8 +13,8 @@ var faPrefix = "favor:"
 // 1. 查询redis中是否有userid这个set，没有则从mysql中读取加入缓存，这部分出错返回，则返回代码0
 // 2. 把videoId加入set，如果加入成功，返回nil，并在service的函数中加入消息队列，等待写入mysql中 返回1
 // 3. 如果加入失败，redis返回0，即这个video id 已经存在则返 2
-func AddFavor(userId, videoId uint64) int {
-	key := faPrefix + strconv.FormatUint(userId, 10)
+func AddFavor(userId, videoId int64) int {
+	key := faPrefix + strconv.FormatInt(userId, 10)
 	cmd := Rdb.Exists(context.Background(), key)
 	if cmd.Err() != nil { // todo 暂时默认启动了redis，这里先不考虑redis没启动的情况了
 		fmt.Println(cmd.Err())
@@ -34,8 +34,8 @@ func AddFavor(userId, videoId uint64) int {
 }
 
 // DelFavor 取消点赞操作
-func DelFavor(userId, videoId uint64) int {
-	key := faPrefix + strconv.FormatUint(userId, 10)
+func DelFavor(userId, videoId int64) int {
+	key := faPrefix + strconv.FormatInt(userId, 10)
 	cmd := Rdb.Exists(context.Background(), key)
 	if cmd.Err() != nil { // todo 暂时默认启动了redis，这里先不考虑redis没启动的情况了
 		fmt.Println(cmd.Err())
@@ -55,13 +55,13 @@ func DelFavor(userId, videoId uint64) int {
 }
 
 // getSet 从数据库中得到该user的所有点赞视频数据，写入redis中
-func getSet(userId uint64) error {
+func getSet(userId int64) error {
 	videoIds, err := dao.GetFavorById(userId)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
-	key := faPrefix + strconv.FormatUint(userId, 10)
+	key := faPrefix + strconv.FormatInt(userId, 10)
 	ctx := context.Background()
 	for _, v := range videoIds { // todo 没有设置过期时间
 		Rdb.SAdd(ctx, key, v) // todo 同样，默认redis已经启动了

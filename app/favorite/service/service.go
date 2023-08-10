@@ -20,8 +20,8 @@ type FavoriteSrv struct {
 // 6. 根据写入redis的情况，放入消息队列中，定时写入数据库中
 // redis key：userId value：videoId
 func (f *FavoriteSrv) Favorite(ctx context.Context, in *favorite.FavoriteRequest) (*favorite.FavoriteResponse, error) {
-	userId := uint64(in.UserId)
-	videoId := uint64(in.VideoId)
+	userId := in.UserId
+	videoId := in.VideoId
 	ans := redis.AddFavor(userId, videoId)
 	if ans == 0 {
 		return &favorite.FavoriteResponse{
@@ -43,8 +43,8 @@ func (f *FavoriteSrv) Favorite(ctx context.Context, in *favorite.FavoriteRequest
 
 // Infavorite 取消点赞
 func (f *FavoriteSrv) Infavorite(ctx context.Context, in *favorite.InfavoriteRequest) (*favorite.InfavoriteResponse, error) {
-	userId := uint64(in.UserId)
-	videoId := uint64(in.VideoId)
+	userId := in.UserId
+	videoId := in.VideoId
 	ans := redis.DelFavor(userId, videoId)
 	if ans == 0 {
 		return &favorite.InfavoriteResponse{

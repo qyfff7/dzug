@@ -4,7 +4,7 @@ import (
 	"dzug/repo"
 )
 
-func Favorite(videoId, userId uint64) error {
+func Favorite(videoId, userId int64) error {
 	favorite := repo.Favorite{
 		UserId:  videoId,
 		VideoId: userId,
@@ -13,13 +13,13 @@ func Favorite(videoId, userId uint64) error {
 	return res.Error
 }
 
-func GetFavorById(userId uint64) ([]uint64, error) {
+func GetFavorById(userId int64) ([]int64, error) {
 	var favors []repo.Favorite
 	res := repo.DB.Where("user_id = ?", userId).Find(&favors)
 	if res.Error != nil {
 		return nil, res.Error
 	}
-	ans := make([]uint64, len(favors))
+	ans := make([]int64, len(favors))
 	for k, v := range favors {
 		ans[k] = v.VideoId
 	}
