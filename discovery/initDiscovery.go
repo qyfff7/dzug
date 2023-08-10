@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"dzug/conf"
+	pb "dzug/protos/publish"
 	"dzug/protos/relation"
 	"dzug/protos/user"
 
@@ -15,6 +16,8 @@ var (
 
 	UserClient     user.DouyinUserServiceClient
 	RelationClient relation.DouyinRelationActionServiceClient
+
+	PublishClient pb.PublishServiceClient
 )
 
 // InitDiscovery 初始化一个服务发现程序

@@ -28,7 +28,10 @@ message VideoInfo {
 }
 
 message PublishVideoReq {
-  VideoBaseInfo video_base_info = 1;
+  string token = 1;
+  bytes data = 2;
+  string title = 3;
+  string fileName = 4;
 }
 
 message PublishVideoResp {

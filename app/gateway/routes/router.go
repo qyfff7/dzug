@@ -25,5 +25,10 @@ func NewRouter(mode string) *gin.Engine {
 		relation.POST("/action", handlers.RelationAction)
 	}
 
+	publish := ginRouter.Group("/douyin/publish")
+	{
+		publish.POST("/action", handlers.UploadHandler)
+	}
+
 	return ginRouter
 }

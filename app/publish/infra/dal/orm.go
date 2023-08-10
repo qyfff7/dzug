@@ -7,7 +7,10 @@ import (
 	"gorm.io/gorm"
 )
 
-func PublishVideo(ctx context.Context, userId int64, title string, playUrl string, coverUrl string) error {
+func PublishVideo(ctx context.Context, token string, title string, playUrl string, coverUrl string) error {
+	// TODO: 根据 token 解析userid
+
+	var userId int64
 	video := &model.Video{
 		UserId:   userId,
 		Title:    title,

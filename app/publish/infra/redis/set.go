@@ -3,11 +3,10 @@ package redis
 import (
 	"context"
 	"dzug/app/publish/infra/dal/model"
-	"strconv"
 )
 
-func DelPublishList(ctx context.Context, userId int64) error {
-	err := RDB.Del(ctx, strconv.FormatInt(userId, 10)).Err()
+func DelPublishList(ctx context.Context, token string) error {
+	err := RDB.Del(ctx, token).Err()
 	if err != nil {
 		return err
 	}
