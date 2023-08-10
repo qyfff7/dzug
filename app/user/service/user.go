@@ -3,17 +3,17 @@ package service
 import (
 	"context"
 	"dzug/app/user/dao"
-	"dzug/protos/user"
+	pb "dzug/protos/user"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 type Userservice struct {
 	db *gorm.DB
-	user.UnimplementedServiceServer
+	pb.UnimplementedServiceServer
 }
 
-func (s *Userservice) Register(c context.Context, req *user.LoginAndRegisterRequest) (*user.LoginAndRegisterResponse, error) {
+func (s *Userservice) Register(c context.Context, req *pb.LoginAndRegisterRequest) (*pb.LoginAndRegisterResponse, error) {
 	resp, err := dao.InsertUser(c, req)
 	if err != nil {
 		zap.L().Error("用户注册失败", zap.Error(err))
@@ -21,7 +21,7 @@ func (s *Userservice) Register(c context.Context, req *user.LoginAndRegisterRequ
 	}
 	return resp, nil
 }
-func (s *Userservice) Login(ctx context.Context, req *user.LoginAndRegisterRequest) (*user.LoginAndRegisterResponse, error) {
+func (s *Userservice) Login(ctx context.Context, req *pb.LoginAndRegisterRequest) (*pb.LoginAndRegisterResponse, error) {
 
 	//dao层进行数据库查询操作
 	resp, err := dao.Login(ctx, req)
@@ -33,7 +33,7 @@ func (s *Userservice) Login(ctx context.Context, req *user.LoginAndRegisterReque
 
 }
 
-func (s *Userservice) UserInfo(ctx context.Context, req *user.UserInfoRequest) (*user.UserInfoResponse, error) {
+func (s *Userservice) UserInfo(ctx context.Context, req *pb.UserInfoRequest) (*pb.UserInfoResponse, error) {
 
 	resp, err := dao.GetuserInfo(ctx, req)
 	if err != nil {

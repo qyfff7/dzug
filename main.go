@@ -9,5 +9,5 @@ func main() {
 
 	go userservice.Start()
 	userclient.Start()
-
+	//binding:"required,max=32"
 }

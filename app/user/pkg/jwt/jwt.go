@@ -19,12 +19,12 @@ var CustomSecret = []byte("抖音")
 // 如果想要保存更多信息，都可以添加到这个结构体中
 type CustomClaims struct {
 	// 可根据需要自行添加字段
-	UserID             uint64 `json:"user_id"`
-	jwt.StandardClaims        // 内嵌标准的声明
+	UserID             int64 `json:"user_id"`
+	jwt.StandardClaims       // 内嵌标准的声明
 }
 
 // GenToken 生成JWT
-func GenToken(userID uint64) (aToken string, err error) {
+func GenToken(userID int64) (aToken string, err error) {
 	// 创建一个我们自己的声明
 	claims := CustomClaims{
 		userID, // 自定义字段
@@ -82,13 +82,13 @@ func RefreshToken(aToken, rToken string) (newAToken string, err error) {
 }
 
 // GetUserID 获取当前登录的用户ID
-func GetUserID(ctx *gin.Context) (userID uint64, err error) {
+func GetUserID(ctx *gin.Context) (userID int64, err error) {
 	uid, ok := ctx.Get(CtxUserIDKey)
 	if !ok {
 		err = errors.New("获取用户 ID 出错")
 		return
 	}
-	userID, ok = uid.(uint64)
+	userID, ok = uid.(int64)
 	if !ok {
 		err = errors.New("获取用户 ID 出错")
 		return

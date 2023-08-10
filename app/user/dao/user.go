@@ -5,6 +5,7 @@ package dao
 import (
 	"context"
 	"crypto/md5"
+	"dzug/app/code"
 	"dzug/app/user/pkg/jwt"
 	"dzug/app/user/pkg/snowflake"
 	"dzug/protos/user"
@@ -58,8 +59,8 @@ func InsertUser(ctx context.Context, req *user.LoginAndRegisterRequest) (*user.L
 	}
 
 	//2.生成用户ID
-	ID := snowflake.GenID()
-	userID := uint64(ID)
+	userID := snowflake.GenID()
+
 	//3.用户密码加密
 	password := encryptPassword(req.Password)
 
@@ -84,9 +85,10 @@ func InsertUser(ctx context.Context, req *user.LoginAndRegisterRequest) (*user.L
 	}
 
 	//7.返回相应
+
 	resp := &user.LoginAndRegisterResponse{
-		StatusCode: 0,
-		StatusMsg:  "注册成功",
+		StatusCode: int32(0),
+		StatusMsg:  "success",
 		UserId:     newuser.UserId,
 		Token:      token,
 	}
@@ -120,9 +122,10 @@ func Login(ctx context.Context, req *user.LoginAndRegisterRequest) (*user.LoginA
 	if err != nil {
 		zap.L().Error("token generation error")
 	}
-
+	//var success int32
+	//success = 0
 	resp := &user.LoginAndRegisterResponse{
-		StatusCode: 0,
+		StatusCode: code.Success,
 		StatusMsg:  "用户登录成功",
 		UserId:     u.UserId,
 		Token:      token,
@@ -149,7 +152,7 @@ func GetuserInfo(ctx context.Context, req *user.UserInfoRequest) (*user.UserInfo
 	//2.获取当前视频的用户ID
 
 	//3.从relation表中,查找出是否关注
-	var to_user_id uint64
+	var to_user_id int64
 	to_user_id = 211
 
 	isfollow, err := IsFollowByID(ctx, req.UserId, to_user_id)
@@ -160,14 +163,14 @@ func GetuserInfo(ctx context.Context, req *user.UserInfoRequest) (*user.UserInfo
 	userInfo := &user.User{
 		Id:              uInfo.UserId,
 		Name:            uInfo.Name,
-		FollowCount:     &uInfo.FollowCount,
-		FollowerCount:   &uInfo.FollowerCount,
-		Avatar:          &uInfo.Avatar,
-		BackgroundImage: &uInfo.BackgroundImages,
-		Signature:       &uInfo.Signature,
-		TotalFavorited:  &uInfo.TotalFavorited,
-		WorkCount:       &uInfo.WorkCount,
-		FavoriteCount:   &uInfo.FavoriteCount,
+		FollowCount:     uInfo.FollowCount,
+		FollowerCount:   uInfo.FollowerCount,
+		Avatar:          uInfo.Avatar,
+		BackgroundImage: uInfo.BackgroundImages,
+		Signature:       uInfo.Signature,
+		TotalFavorited:  uInfo.TotalFavorited,
+		WorkCount:       uInfo.WorkCount,
+		FavoriteCount:   uInfo.FavoriteCount,
 		IsFollow:        isfollow,
 	}
 
@@ -183,7 +186,7 @@ func GetuserInfo(ctx context.Context, req *user.UserInfoRequest) (*user.UserInfo
 }
 
 // IsFollowByID 判断是否关注了该用户
-func IsFollowByID(ctx context.Context, userID, touserId uint64) (bool, error) {
+func IsFollowByID(ctx context.Context, userID, touserId int64) (bool, error) {
 	var rel repo.Relation
 	result := repo.DB.WithContext(ctx).Table("relation").Where("user_id = ? AND to_user_id = ?", userID, touserId).Limit(1).Find(&rel)
 	if result.Error != nil {

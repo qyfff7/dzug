@@ -24,14 +24,14 @@ message LoginAndRegisterRequest {
 message LoginAndRegisterResponse {
   int32 status_code = 1; // 状态码，0-成功，其他值-失败
   string status_msg = 2; // 返回状态描述
-  uint64 user_id = 3; // 用户ID
+  int64 user_id = 3; // 用户ID
   string token = 4;// 用户鉴权Token
 }
 
 // 获取用户信息 的接口请求 model
 message UserInfoRequest {
   // 用户ID
-  uint64 user_id = 1;
+  int64 user_id = 1;
   // 用户鉴权Token [注：这里用 validate，是因为内部方法也必须要用到 Token，并不是所有 token 都 validate]
   string token = 2;
 }
@@ -47,9 +47,10 @@ message UserInfoResponse {
 // 调用用户信息 时返回的User
 message User {
 
-  uint64 id = 1; // 用户id
+  int64 id = 1; // 用户id
 
   string name = 2; // 用户名称
+
   int64 follow_count = 3; // 关注总数
 
   int64 follower_count = 4; // 粉丝总数
@@ -60,7 +61,7 @@ message User {
 
   string background_image = 7; //用户个人页顶部大图
 
- string signature = 8; //个人简介
+  string signature = 8; //个人简介
 
   int64 total_favorited = 9; //获赞数量
 
@@ -72,7 +73,7 @@ message User {
 //------------------以下内容暂时用不到----------------------
 // 与数据库对应的 PO 对象
 message UserPo {
-  uint64 id = 1; // 用户ID
+  int64 id = 1; // 用户ID
   string username = 2;// 用户名称
   string password = 3;// 用户密码
 }
@@ -80,7 +81,7 @@ message UserPo {
 // 用户IDs
 message UserMapRequest {
 
-  repeated uint64 user_ids = 1;  // 用户ID 列表
+  repeated int64 user_ids = 1;  // 用户ID 列表
   // 用户鉴权Token [注：这里用 validate，是因为内部方法也必须要用到 Token，并不是所有 token 都 validate]
   string token = 2;
 }
@@ -88,5 +89,5 @@ message UserMapRequest {
 // 用户列表：map[userId] = User
 message UserMapResponse {
   // 用户列表：map[userId] = User
-  map<uint64, User> user_map = 1;
+  map<int64, User> user_map = 1;
 }

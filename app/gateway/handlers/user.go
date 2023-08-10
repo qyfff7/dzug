@@ -90,8 +90,6 @@ func UserLogin(ctx *gin.Context) {
 // UserInfo 返回用户所有信息
 func UserInfo(ctx *gin.Context) {
 
-	//zap.L().Info("执行UserInfo handler函数")
-
 	//1.获取参数及参数校验
 	userInfoReq := new(pb.UserInfoRequest)
 	if err := ctx.ShouldBindJSON(userInfoReq); err != nil {
@@ -126,7 +124,7 @@ func UserInfo(ctx *gin.Context) {
 	//	return
 	//}
 	//userInfoReq.UserId = u.UserID
-
+	//3.从context中获取userID
 	userInfoReq.UserId, _ = jwt.GetUserID(ctx)
 
 	//4.查询用户信息
