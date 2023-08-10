@@ -31,3 +31,12 @@ etcd下载教程：https://www.cnblogs.com/wusenwusen/p/16572929.html
 	//此处userID就是当前用户的ID
 ```
 3. 然后进行相关的业务操作。
+
+
+
+还是这个userID的问题，如果在路由中使用了JWTmiddleware中间件，（中间件里面已经对Token进行过解析和校验），
+因此在其他业务流程中，没必要再进行一次解析，所以我在JWTmiddleware中间件的最后将userID存到了context中，并且在jwt.go文件中补充了GetUserID的函数，
+当想要获取userID时，执行 UserId, _ = jwt.GetUserID(ctx) 就可以得到userID
+这样可能效率更高一点？
+
+两种方式不冲突，看我们选择哪种方式

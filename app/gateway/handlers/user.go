@@ -120,12 +120,14 @@ func UserInfo(ctx *gin.Context) {
 	userInfoReq.Token = token
 
 	//3.从token中解析处userID
-	u, err := jwt.ParseToken(token)
-	if err != nil {
-		//错误处理
-		return
-	}
-	userInfoReq.UserId = u.UserID
+	//u, err := jwt.ParseToken(token)
+	//if err != nil {
+	//	//错误处理
+	//	return
+	//}
+	//userInfoReq.UserId = u.UserID
+
+	userInfoReq.UserId, _ = jwt.GetUserID(ctx)
 
 	//4.查询用户信息
 	userInfoResp, err := rpc.UserInfo(ctx, userInfoReq)

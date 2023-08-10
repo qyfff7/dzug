@@ -4,6 +4,7 @@ import (
 	"dzug/conf"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 	"time"
 )
 
@@ -76,6 +77,21 @@ func RefreshToken(aToken, rToken string) (newAToken string, err error) {
 	// 3.当access token是过期错误 并且 refresh token没有过期时就创建⼀一个新的access token
 	if v.Errors == jwt.ValidationErrorExpired {
 		return GenToken(claims.UserID)
+	}
+	return
+}
+
+// GetUserID 获取当前登录的用户ID
+func GetUserID(ctx *gin.Context) (userID uint64, err error) {
+	uid, ok := ctx.Get(CtxUserIDKey)
+	if !ok {
+		err = errors.New("获取用户 ID 出错")
+		return
+	}
+	userID, ok = uid.(uint64)
+	if !ok {
+		err = errors.New("获取用户 ID 出错")
+		return
 	}
 	return
 }
