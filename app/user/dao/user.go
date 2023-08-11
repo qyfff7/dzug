@@ -135,10 +135,9 @@ func Login(ctx context.Context, req *user.LoginAndRegisterRequest) (*user.LoginA
 
 }
 
-func GetuserInfo(ctx context.Context, req *user.UserInfoRequest) (*user.UserInfoResponse, error) {
+func GetuserInfoByID(ctx context.Context, req *user.UserInfoRequest) (userInfo *repo.User, error) {
 	//1.从user表中查找出用户的个人信息
-	uInfo := new(repo.User)
-	result := repo.DB.WithContext(ctx).Where("user_id = ? ", req.UserId).Limit(1).Find(&uInfo)
+	result := repo.DB.WithContext(ctx).Where("user_id = ? ", req.UserId).Limit(1).Find(&userInfo)
 
 	if result.Error != nil {
 		zap.L().Info("执行获取用户信息时出错")

@@ -35,7 +35,7 @@ func (s *Userservice) Login(ctx context.Context, req *pb.LoginAndRegisterRequest
 
 func (s *Userservice) UserInfo(ctx context.Context, req *pb.UserInfoRequest) (*pb.UserInfoResponse, error) {
 
-	resp, err := dao.GetuserInfo(ctx, req)
+	resp, err := dao.GetuserInfoByID(ctx, req)
 	if err != nil {
 		zap.L().Error("获取用户信息失败", zap.Error(err))
 		return nil, err

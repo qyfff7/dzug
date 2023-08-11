@@ -3,12 +3,31 @@ package dao
 import (
 	"context"
 	pb "dzug/protos/video"
+	"dzug/repo"
+	"math"
 )
 
 func GetVideoFeed(ctx context.Context, req *pb.GetVideoFeedReq) (*pb.GetVideoFeedResp, error) {
 
 	return nil, nil
 
+}
+
+//GetVideoInfoByTime 根据时间戳返回最近count个视频,还需要返回next time
+func GetVideoInfoByTime(ctx context.Context, req *pb.GetVideoFeedReq, count int64) (videos []*repo.Video, nextTime int64, err error) {
+
+	//1.按照时间倒序，查询所有的视频
+
+	if err := repo.DB.WithContext(ctx).Where("created_at < ?", req.LatestTime).Limit(int(count)).Order("created_at DESC").Find(&videos).Error; err != nil {
+		return nil, 0, err
+	}
+
+	nextTime = math.MaxInt32
+
+	if len(videos) != 0 { // 查到了新视频
+		nextTime = videos[0].CreatedAt.Unix()
+	}
+	return
 }
 
 /*// MGetVideoByTime 通过指定latestTime和count，从DAO层获取视频基本信息，并查出当前用户是否点赞，组装后返回
