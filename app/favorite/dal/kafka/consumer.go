@@ -1,9 +1,13 @@
 package kafka
 
 import (
+	"dzug/repo"
+	"errors"
 	"fmt"
 	"github.com/IBM/sarama"
 	"log"
+	"strconv"
+	"strings"
 )
 
 var messages chan *sarama.ConsumerMessage
@@ -23,6 +27,7 @@ func FavorConsumer() {
 	go func() {
 		for message := range messages {
 			fmt.Println(string(message.Value))
+			update(string(message.Value))
 		}
 	}()
 
@@ -48,4 +53,22 @@ func CloseConsumer() {
 	if err := KafkaConsumer.Close(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func update(message string) error {
+	arr := strings.Split(message, ":")
+	favor := repo.Favorite{}
+	favor.UserId, _ = strconv.ParseInt(arr[0], 10, 64)
+	favor.VideoId, _ = strconv.ParseInt(arr[1], 10, 64)
+	action := arr[2]
+	if action == "1" {
+		// 进行点赞
+		fmt.Println("我们进行了一次点赞操作")
+		return nil
+	} else if action == "2" {
+		// 进行取消点赞操作
+		fmt.Println("我们进行了一次取消点赞操作")
+		return nil
+	}
+	return errors.New("非法操作")
 }
