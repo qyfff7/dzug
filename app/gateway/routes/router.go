@@ -25,6 +25,17 @@ func NewRouter(mode string) *gin.Engine {
 	ginRouter := gin.New()
 	ginRouter.Use(logger.GinLogger(), logger.GinRecovery(true)) // 使用自己的两个中间件
 
+	// public directory is used to serve static resources
+	ginRouter.Static("/static", "./public")
+	ginRouter.LoadHTMLGlob("templates/*")
+
+	// home page
+	ginRouter.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"title": "Main website",
+		})
+	})
+
 	tourist := ginRouter.Group("/douyin")
 	{
 		tourist.GET("/feed", handlers.Feed)                   //视频流

@@ -5,7 +5,6 @@ package dao
 import (
 	"context"
 	"crypto/md5"
-	"dzug/app/code"
 	"dzug/app/user/pkg/jwt"
 	"dzug/app/user/pkg/snowflake"
 	"dzug/protos/user"
@@ -48,7 +47,7 @@ func CheckUserExits(ctx context.Context, username string) (check bool, err error
 }
 
 // InsertUser 用户注册相关数据库操作
-func InsertUser(ctx context.Context, req *user.LoginAndRegisterRequest) (*user.LoginAndRegisterResponse, error) {
+func InsertUser(ctx context.Context, req *user.AccountReq) (*user.AccountResp, error) {
 
 	//zap.L().Info("执行到InsertUser函数这里了")
 	//1.判断用户是否存在
@@ -86,18 +85,16 @@ func InsertUser(ctx context.Context, req *user.LoginAndRegisterRequest) (*user.L
 
 	//7.返回相应
 
-	resp := &user.LoginAndRegisterResponse{
-		StatusCode: int32(0),
-		StatusMsg:  "success",
-		UserId:     newuser.UserId,
-		Token:      token,
+	resp := &user.AccountResp{
+		UserId: newuser.UserId,
+		Token:  token,
 	}
 
 	return resp, nil
 
 }
 
-func Login(ctx context.Context, req *user.LoginAndRegisterRequest) (*user.LoginAndRegisterResponse, error) {
+func CheckAccount(ctx context.Context, req *user.AccountReq) (*user.AccountResp, error) {
 
 	//构建登录用户
 	u := repo.User{
@@ -124,70 +121,37 @@ func Login(ctx context.Context, req *user.LoginAndRegisterRequest) (*user.LoginA
 	}
 	//var success int32
 	//success = 0
-	resp := &user.LoginAndRegisterResponse{
-		StatusCode: code.Success,
-		StatusMsg:  "用户登录成功",
-		UserId:     u.UserId,
-		Token:      token,
+	resp := &user.AccountResp{
+		UserId: u.UserId,
+		Token:  token,
 	}
 
 	return resp, nil
 
 }
 
-func GetuserInfoByID(ctx context.Context, req *user.UserInfoRequest) (userInfo *repo.User, error) {
+func GetuserInfoByID(ctx context.Context, id int64) (*repo.User, error) {
+	userInfo := new(repo.User)
 	//1.从user表中查找出用户的个人信息
-	result := repo.DB.WithContext(ctx).Where("user_id = ? ", req.UserId).Limit(1).Find(&userInfo)
+	result := repo.DB.WithContext(ctx).Where("user_id = ? ", id).Limit(1).Find(userInfo)
 
 	if result.Error != nil {
 		zap.L().Info("执行获取用户信息时出错")
 		return nil, result.Error
 	}
 	if result.RowsAffected == 0 {
-		zap.L().Info("未找到当前用户")
-		err := errors.New("未找到当前用户")
+		zap.L().Info("当前用户不存在，请重试")
+		err := errors.New("当前用户不存在，请重试")
 		return nil, err
 	}
-	//2.获取当前视频的用户ID
-
-	//3.从relation表中,查找出是否关注
-	var to_user_id int64
-	to_user_id = 211
-
-	isfollow, err := IsFollowByID(ctx, req.UserId, to_user_id)
-	if err != nil {
-		return nil, err
-	}
-	//3.构建返回结构
-	userInfo := &user.User{
-		Id:              uInfo.UserId,
-		Name:            uInfo.Name,
-		FollowCount:     uInfo.FollowCount,
-		FollowerCount:   uInfo.FollowerCount,
-		Avatar:          uInfo.Avatar,
-		BackgroundImage: uInfo.BackgroundImages,
-		Signature:       uInfo.Signature,
-		TotalFavorited:  uInfo.TotalFavorited,
-		WorkCount:       uInfo.WorkCount,
-		FavoriteCount:   uInfo.FavoriteCount,
-		IsFollow:        isfollow,
-	}
-
-	//zap.L().Info("执行到dao/user/GetuserInfo函数这里了")
-
-	resp := &user.UserInfoResponse{
-		StatusCode: 0,
-		StatusMsg:  "获取用户信息成功",
-		User:       userInfo,
-	}
-	return resp, nil
+	return userInfo, nil
 
 }
 
 // IsFollowByID 判断是否关注了该用户
-func IsFollowByID(ctx context.Context, userID, touserId int64) (bool, error) {
+func IsFollowByID(ctx context.Context, userID, autherID int64) (bool, error) {
 	var rel repo.Relation
-	result := repo.DB.WithContext(ctx).Table("relation").Where("user_id = ? AND to_user_id = ?", userID, touserId).Limit(1).Find(&rel)
+	result := repo.DB.WithContext(ctx).Table("relation").Where("user_id = ? AND to_user_id = ?", userID, autherID).Limit(1).Find(&rel)
 	if result.Error != nil {
 		zap.L().Info("查找关注关系时出错")
 		return false, result.Error

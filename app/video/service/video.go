@@ -2,11 +2,7 @@ package service
 
 import (
 	"context"
-	userDao "dzug/app/user/dao"
-	"dzug/app/video/dao"
-	user "dzug/protos/user"
 	pb "dzug/protos/video"
-	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -18,7 +14,7 @@ type VideoService struct {
 // GetVideoFeed 通过指定latestTime和count，从DAO层获取视频基本信息，并查出当前用户是否点赞，组装后返回
 func (v VideoService) GetVideoFeed(ctx context.Context, req *pb.GetVideoFeedReq) (*pb.GetVideoFeedResp, error) {
 
-	var videosInfo []*pb.VideoInfo
+	/*var videosInfo []*pb.VideoInfo
 	//1.获取分页参数
 	var page int64
 
@@ -27,10 +23,9 @@ func (v VideoService) GetVideoFeed(ctx context.Context, req *pb.GetVideoFeedReq)
 
 	for _, video := range videos {
 		// 根据作者id查询作者信息
-		auther := &user.UserInfoRequest{
-			UserId: video.UserId,
-			Token:  "",
-		}
+
+		autherID :=
+		r, err := discovery.UserClient.GetUserInfo(ctx, req) // 调用注册方法
 
 		u, err := userDao.GetuserInfoByID(ctx, auther)
 		if err != nil {
@@ -58,5 +53,6 @@ func (v VideoService) GetVideoFeed(ctx context.Context, req *pb.GetVideoFeedReq)
 		zap.L().Error("获取视频流失败", zap.Error(err))
 		return nil, err
 	}
-	return resp, nil
+	return resp, nil*/
+	return nil, nil
 }

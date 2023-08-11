@@ -2,142 +2,141 @@ package handlers
 
 import (
 	"dzug/app/gateway/rpc"
-	"dzug/app/user/pkg/jwt"
-	pb "dzug/protos/user"
-	"github.com/go-playground/validator/v10"
-	"strings"
-
+	"dzug/models"
+	"dzug/protos/user"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
-	"net/http"
+	"strings"
 )
 
 func UserRegister(ctx *gin.Context) {
 
 	//1.获取参数 和 参数校验
-	userReq := new(pb.LoginAndRegisterRequest)
-	if err := ctx.ShouldBindJSON(userReq); err != nil {
+	userReq := new(user.AccountReq)
+	if err := ctx.ShouldBind(userReq); err != nil {
 		zap.L().Error("Register with invalid param", zap.Error(err))
 		// 判断err是不是validator.ValidationErrors 类型
 		errs, ok := err.(validator.ValidationErrors)
 		if !ok {
-			// 非validator.ValidationErrors类型错误直接返回
-			ctx.JSON(http.StatusBadRequest, pb.LoginAndRegisterResponse{
-				StatusCode: 400,
-				StatusMsg:  "参数错误",
-				UserId:     0,
-				Token:      "",
+			models.ResponseError(ctx, models.CodeInvalidParam, models.AccountResp{
+				UserID: 0,
+				Token:  "",
 			})
+			//既然已经出错，是不是可以不返回userid和token
+			//models.ResponseError(ctx, models.CodeInvalidParam,nil)
 			return
 		}
-		ctx.JSON(http.StatusOK, gin.H{
+		models.ResponseError(ctx, models.CodeInvalidParam, removeTopStruct(errs.Translate(trans)))
+		/*ctx.JSON(http.StatusOK, gin.H{
 			"msg": removeTopStruct(errs.Translate(trans)), //翻译错误
-		})
+		})*/
 		return
 	}
 
 	//2.注册业务处理
 	userResp, err := rpc.Register(ctx, userReq)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, pb.LoginAndRegisterResponse{
+		models.ResponseErrorWithMsg(ctx, models.CodeServerBusy, err.Error(), nil)
+
+		/*ctx.JSON(http.StatusInternalServerError, user.AccountResp{
 			StatusCode: 500,
 			StatusMsg:  err.Error(),
 			UserId:     0,
 			Token:      "",
-		})
+		})*/
 		return
 	}
 	//3.返回相应
-	ctx.JSON(http.StatusOK, userResp)
+	models.ResponseSuccess(ctx, userResp)
+	//ctx.JSON(http.StatusOK, userResp)
 }
 
 func UserLogin(ctx *gin.Context) {
 	//1.获取参数及参数校验
-	userReq := new(pb.LoginAndRegisterRequest)
+	userReq := new(user.AccountReq)
 	if err := ctx.ShouldBindJSON(userReq); err != nil {
 		zap.L().Error("Login with invalid param", zap.Error(err))
 		// 判断err是不是validator.ValidationErrors 类型
 		errs, ok := err.(validator.ValidationErrors)
 		if !ok {
 			// 非validator.ValidationErrors类型错误直接返回
-			ctx.JSON(http.StatusBadRequest, pb.LoginAndRegisterResponse{
+			models.ResponseError(ctx, models.CodeInvalidParam, nil)
+			/*ctx.JSON(http.StatusBadRequest, user.AccountResp{
 				StatusCode: 400,
 				StatusMsg:  "参数错误",
 				UserId:     0,
 				Token:      "",
-			})
+			})*/
 			return
 		}
-		ctx.JSON(http.StatusOK, gin.H{
+		models.ResponseError(ctx, models.CodeInvalidParam, removeTopStruct(errs.Translate(trans)))
+		/*ctx.JSON(http.StatusOK, gin.H{
 			"msg": removeTopStruct(errs.Translate(trans)), //翻译错误
-		})
+		})*/
 		return
 	}
 	userResp, err := rpc.Login(ctx, userReq)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, pb.LoginAndRegisterResponse{
+		models.ResponseErrorWithMsg(ctx, models.CodeInvalidPassword, err.Error(), nil)
+		/*ctx.JSON(http.StatusInternalServerError, user.AccountResp{
 			StatusCode: 500,
 			StatusMsg:  err.Error(),
 			UserId:     0,
 			Token:      "",
-		})
+		})*/
 		return
 	}
 	//3.返回相应
-	ctx.JSON(http.StatusOK, userResp)
+	models.ResponseSuccess(ctx, userResp)
+	//ctx.JSON(http.StatusOK, userResp)
 }
 
 // UserInfo 返回用户所有信息
 func UserInfo(ctx *gin.Context) {
 
 	//1.获取参数及参数校验
-	userInfoReq := new(pb.UserInfoRequest)
-	if err := ctx.ShouldBindJSON(userInfoReq); err != nil {
-		zap.L().Error("Login with invalid param", zap.Error(err))
-		// 判断err是不是validator.ValidationErrors 类型
+	to_user_id := new(models.GetUserInfoReq)
+	if err := ctx.ShouldBind(to_user_id); err != nil {
+		zap.L().Error("GetUserInfo with invalid param", zap.Error(err))
 		errs, ok := err.(validator.ValidationErrors)
 		if !ok {
-			// 非validator.ValidationErrors类型错误直接返回
-			ctx.JSON(http.StatusBadRequest, pb.UserInfoResponse{
+			models.ResponseError(ctx, models.CodeInvalidParam, nil)
+
+			/*ctx.JSON(http.StatusBadRequest, user.GetUserInfoResp{
 				StatusCode: 400,
-				StatusMsg:  "参数错误",
-				User:       nil,
-			})
+				StatusMsg:  "获取用户信息时参数错误",
+				UserInfo:   nil,
+			})*/
 			return
 		}
-		ctx.JSON(http.StatusOK, gin.H{
+		models.ResponseError(ctx, models.CodeInvalidParam, removeTopStruct(errs.Translate(trans)))
+		/*ctx.JSON(http.StatusOK, gin.H{
 			"msg": removeTopStruct(errs.Translate(trans)), //翻译错误
-		})
+		})*/
 		return
 	}
+	getuserInfoReq := new(user.GetUserInfoReq)
+	getuserInfoReq.UserId = to_user_id.UserId
 
-	//2.获取当前请求中的token
-	authHeader := ctx.Request.Header.Get("Authorization")
+	//从请求头中获取Token
+	authHeader := ctx.Request.Header.Get("Authorization") //ctx 是 Context
 	parts := strings.SplitN(authHeader, " ", 2)
-	token := parts[1]
-	userInfoReq.Token = token
-
-	//3.从token中解析处userID
-	//u, err := jwt.ParseToken(token)
-	//if err != nil {
-	//	//错误处理
-	//	return
-	//}
-	//userInfoReq.UserId = u.UserID
-	//3.从context中获取userID
-	userInfoReq.UserId, _ = jwt.GetUserID(ctx)
+	getuserInfoReq.Token = parts[1]
 
 	//4.查询用户信息
-	userInfoResp, err := rpc.UserInfo(ctx, userInfoReq)
+	userInfo, err := rpc.UserInfo(ctx, getuserInfoReq)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, pb.UserInfoResponse{
+		models.ResponseErrorWithMsg(ctx, models.CodeServerBusy, err.Error(), nil)
+		/*ctx.JSON(http.StatusInternalServerError, user.GetUserInfoResp{
 			StatusCode: 500,
 			StatusMsg:  err.Error(),
-			User:       nil,
-		})
+			UserInfo:   nil,
+		})*/
 		return
 	}
 	//3.返回相应
-	ctx.JSON(http.StatusOK, userInfoResp)
+	models.ResponseSuccess(ctx, userInfo)
+	//ctx.JSON(http.StatusOK, userInfoResp)
 
 }
