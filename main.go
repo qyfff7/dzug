@@ -1,8 +1,8 @@
 package main
 
 import (
-	userclient "dzug/app/gateway/cmd"
-	userservice "dzug/app/user/cmd"
+	"dzug/app/gateway/cmd"
+	"dzug/app/user/cmd"
 )
 
 func main() {

@@ -16,7 +16,7 @@ func JWTAuthMiddleware() func(ctx *gin.Context) {
 		// 这里的具体实现方式要依据你的实际业务情况决定
 		authHeader := ctx.Request.Header.Get("Authorization")
 		if authHeader == "" {
-			models.ResponseError(ctx, models.CodeNeedLogin, nil)
+			models.ResponseError(ctx, models.CodeNeedLogin)
 			/*	c.JSON(http.StatusOK, pb.AccountResp{
 				StatusCode: 500,
 				StatusMsg:  "需要登录后才能进行操作",
@@ -30,7 +30,7 @@ func JWTAuthMiddleware() func(ctx *gin.Context) {
 		parts := strings.SplitN(authHeader, " ", 2)
 		if !(len(parts) == 2 && parts[0] == "Bearer") {
 
-			models.ResponseError(ctx, models.CodeInvalidToken, nil)
+			models.ResponseError(ctx, models.CodeInvalidToken)
 
 			/*c.JSON(http.StatusOK, pb.AccountResp{
 				StatusCode: 500,
@@ -45,7 +45,7 @@ func JWTAuthMiddleware() func(ctx *gin.Context) {
 		// parts[1]是获取到的tokenString，我们使用之前定义好的解析JWT的函数来解析它
 		mc, err := jwt.ParseToken(parts[1])
 		if err != nil {
-			models.ResponseError(ctx, models.CodeInvalidToken, nil)
+			models.ResponseError(ctx, models.CodeInvalidToken)
 			/*c.JSON(http.StatusOK, pb.AccountResp{
 				StatusCode: 500,
 				StatusMsg:  "当前Token无效",
