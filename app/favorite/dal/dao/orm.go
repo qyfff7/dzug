@@ -8,7 +8,7 @@ import (
 )
 
 func Favor(videoId, userId int64) error {
-	favorite := repo.Favorite{
+	favor := repo.Favorite{
 		UserId:  userId,
 		VideoId: videoId,
 	}
@@ -30,7 +30,7 @@ func Favor(videoId, userId int64) error {
 	}
 
 	err := repo.DB.Transaction(func(tx *gorm.DB) (err error) {
-		if err = tx.Where("user_id = ?", userId).Save(&favorite).Error; err != nil {
+		if err = tx.Where("user_id = ?", userId).Save(&favor).Error; err != nil {
 			zap.L().Error("点赞失败")
 			return err
 		}
@@ -52,7 +52,7 @@ func Favor(videoId, userId int64) error {
 }
 
 func InFavor(videoId, userId int64) error {
-	favorite := repo.Favorite{
+	favor := repo.Favorite{
 		UserId:  userId,
 		VideoId: videoId,
 	}
@@ -74,7 +74,7 @@ func InFavor(videoId, userId int64) error {
 	}
 
 	err := repo.DB.Transaction(func(tx *gorm.DB) (err error) {
-		if err = tx.Where("user_id = ?", userId).Delete(&favorite).Error; err != nil {
+		if err = tx.Where("user_id = ?", userId).Delete(&favor).Error; err != nil {
 			zap.L().Error("取消点赞失败")
 			return err
 		}
@@ -112,5 +112,25 @@ func GetFavorById(userId int64) ([]int64, error) {
 // GetVideosByVideoIds 根据videoId返回videos
 func GetVideosByVideoIds(videoIds []int64) ([]*favorite.Video, error) {
 	// 根据videoIds一个一个查，isFavorite都设置为true，作者信息根据那啥去查？
-	return nil, nil
+	video := repo.Video{}
+	videoList := make([]*favorite.Video, len(videoIds))
+	for k, v := range videoIds {
+		video.ID = uint(v)
+		res := repo.DB.First(&video)
+		if res.Error != nil {
+			zap.L().Error("读取视频信息失败")
+			return nil, res.Error
+		}
+		videoList[k] = &favorite.Video{}
+		videoList[k].Author = &favorite.User{}
+		videoList[k].Id = videoIds[k]
+		videoList[k].Author.Id = video.UserId
+		videoList[k].Title = video.Title
+		videoList[k].CommentCount = int64(video.CommentCount)
+		videoList[k].CoverUrl = video.CoverUrl
+		videoList[k].PlayUrl = video.PlayUrl
+		videoList[k].FavoriteCount = int64(video.FavoriteCount)
+		videoList[k].IsFavorite = true
+	}
+	return videoList, nil
 }
