@@ -4,8 +4,10 @@ import (
 	"dzug/app/gateway/rpc"
 	pb "dzug/protos/publish"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"io"
 	"net/http"
+	"strconv"
 )
 
 // UploadHandler 视频投稿
@@ -43,6 +45,7 @@ func UploadHandler(ctx *gin.Context) {
 		}
 		videoData = append(videoData, buf[:n]...)
 	}
+	zap.L().Info("2")
 
 	publishReq := &pb.PublishVideoReq{
 		Token:    user_id,
@@ -54,13 +57,29 @@ func UploadHandler(ctx *gin.Context) {
 	publishVideoResp, err := rpc.PublishVideo(ctx, publishReq)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, pb.PublishVideoResp{
-			BaseResp: &pb.BaseResp{
-				StatusCode: 500,
-				StatusMsg:  "RPC 调用异常",
-			},
+			StatusCode: 500,
+			StatusMsg:  "远程RPC调用异常",
 		})
 		return
 	}
 	ctx.JSON(http.StatusOK, publishVideoResp)
+}
 
+func GetVideoListByUser(ctx *gin.Context) {
+	user_id := ctx.PostForm("user_id")
+	parsedUserId, err := strconv.ParseInt(user_id, 10, 64)
+	if err != nil {
+		zap.L().Error(err.Error())
+	}
+	getVideoListReq := &pb.GetVideoListByUserIdReq{
+		UserId: parsedUserId,
+	}
+	getVideoListResp, err := rpc.GetPublishListByUser(ctx, getVideoListReq)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, pb.PublishVideoResp{
+			StatusCode: 500,
+			StatusMsg:  "远程RPC调用异常",
+		})
+	}
+	ctx.JSON(http.StatusOK, getVideoListResp)
 }

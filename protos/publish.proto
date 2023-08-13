@@ -7,24 +7,29 @@ service PublishService {
   rpc GetVideoListByUserId(GetVideoListByUserIdReq) returns(GetVideoListByUserIdResp);  // 查询用户视频列表
 }
 
-message BaseResp {
-  int64 status_code = 1;
-  string status_msg = 2;
-}
-
-message VideoBaseInfo {
-  int64 user_id = 1;
-  string play_url = 2;
-  string cover_url = 3;
-  string title = 4;
-}
-
 message VideoInfo {
-  int64 video_id = 1;
-  VideoBaseInfo video_base_info = 2;
-  int64 like_count = 3;
-  int64 comment_count = 4;
-  bool is_favorite = 5;
+  int64 id = 1; // 视频唯一标识
+  UserInfo author = 2; // 视频作者信息
+  string play_url = 3; // 视频播放地址
+  string cover_url = 4; // 视频封面地址
+  int64 favorite_count = 5; // 视频的点赞总数
+  int64 comment_count = 6; // 视频的评论总数
+  bool is_favorite = 7; // true-已点赞，false-未点赞
+  string title = 8; // 视频标题
+}
+
+message UserInfo {
+  int64 id = 1; // 用户id
+  string name = 2; // 用户名称
+  optional int64 follow_count = 3; // 关注总数
+  optional int64 follower_count = 4; // 粉丝总数
+  bool is_follow = 5; // true-已关注，false-未关注
+  optional string avatar = 6; //用户头像
+  optional string background_image = 7; //用户个人页顶部大图
+  optional string signature = 8; //个人简介
+  optional int64 total_favorited = 9; //获赞数量
+  optional int64 work_count = 10; //作品数量
+  optional int64 favorite_count = 11; //点赞数量
 }
 
 message PublishVideoReq {
@@ -35,15 +40,17 @@ message PublishVideoReq {
 }
 
 message PublishVideoResp {
-  BaseResp base_resp = 1;
+  int64 status_code = 1;
+  string status_msg = 2;
 }
 
 message GetVideoListByUserIdReq {
-  int64 app_user_id = 1;
-  int64 user_id = 2;
+  int64 user_id = 1; // 用户id
+  string token = 2; // 用户鉴权token
 }
 
 message GetVideoListByUserIdResp {
-  BaseResp base_resp = 1;
-  repeated VideoInfo video_infos = 2;
+  int32 status_code = 1; // 状态码，0-成功，其他值-失败
+  optional string status_msg = 2; // 返回状态描述
+  repeated VideoInfo video_list = 3; // 用户发布的视频列表
 }
