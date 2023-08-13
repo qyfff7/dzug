@@ -2,57 +2,144 @@ package handlers
 
 import (
 	"dzug/app/gateway/rpc"
+	"dzug/app/user/pkg/jwt"
 	pb "dzug/protos/user"
+	"github.com/go-playground/validator/v10"
+	"strings"
+
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"net/http"
 )
 
 func UserRegister(ctx *gin.Context) {
-	var userReq pb.DouyinUserRegisterRequest
-	if err := ctx.Bind(&userReq); err != nil {
-		ctx.JSON(http.StatusBadRequest, pb.DouyinUserRegisterResponse{
-			StatusCode: 400,
-			StatusMsg:  "参数错误",
-			UserId:     0,
-			Token:      "",
+
+	//1.获取参数 和 参数校验
+	userReq := new(pb.LoginAndRegisterRequest)
+	if err := ctx.ShouldBindJSON(userReq); err != nil {
+		zap.L().Error("Register with invalid param", zap.Error(err))
+		// 判断err是不是validator.ValidationErrors 类型
+		errs, ok := err.(validator.ValidationErrors)
+		if !ok {
+			// 非validator.ValidationErrors类型错误直接返回
+			ctx.JSON(http.StatusBadRequest, pb.LoginAndRegisterResponse{
+				StatusCode: 400,
+				StatusMsg:  "参数错误",
+				UserId:     0,
+				Token:      "",
+			})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{
+			"msg": removeTopStruct(errs.Translate(trans)), //翻译错误
 		})
 		return
 	}
-	userResp, err := rpc.UserRegister(ctx, &userReq)
+
+	//2.注册业务处理
+	userResp, err := rpc.Register(ctx, userReq)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, pb.DouyinUserRegisterResponse{
+		ctx.JSON(http.StatusInternalServerError, pb.LoginAndRegisterResponse{
 			StatusCode: 500,
-			StatusMsg:  "RPC服务调用错误",
+			StatusMsg:  err.Error(),
 			UserId:     0,
 			Token:      "",
 		})
 		return
 	}
+	//3.返回相应
 	ctx.JSON(http.StatusOK, userResp)
 }
 
 func UserLogin(ctx *gin.Context) {
-	var userReq pb.DouyinUserLoginRequest
-	if err := ctx.Bind(&userReq); err != nil {
-		ctx.JSON(http.StatusBadRequest, pb.DouyinUserRegisterResponse{
-			StatusCode: 400,
-			StatusMsg:  "参数错误",
-			UserId:     0,
-			Token:      "",
+	//1.获取参数及参数校验
+	userReq := new(pb.LoginAndRegisterRequest)
+	if err := ctx.ShouldBindJSON(userReq); err != nil {
+		zap.L().Error("Login with invalid param", zap.Error(err))
+		// 判断err是不是validator.ValidationErrors 类型
+		errs, ok := err.(validator.ValidationErrors)
+		if !ok {
+			// 非validator.ValidationErrors类型错误直接返回
+			ctx.JSON(http.StatusBadRequest, pb.LoginAndRegisterResponse{
+				StatusCode: 400,
+				StatusMsg:  "参数错误",
+				UserId:     0,
+				Token:      "",
+			})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{
+			"msg": removeTopStruct(errs.Translate(trans)), //翻译错误
 		})
 		return
 	}
-
-	userResp, err := rpc.UserLogin(ctx, &userReq)
+	userResp, err := rpc.Login(ctx, userReq)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, pb.DouyinUserLoginResponse{
+		ctx.JSON(http.StatusInternalServerError, pb.LoginAndRegisterResponse{
 			StatusCode: 500,
-			StatusMsg:  "RPC服务调用错误",
+			StatusMsg:  err.Error(),
 			UserId:     0,
 			Token:      "",
 		})
 		return
 	}
-
+	//3.返回相应
 	ctx.JSON(http.StatusOK, userResp)
+}
+
+// UserInfo 返回用户所有信息
+func UserInfo(ctx *gin.Context) {
+
+	//zap.L().Info("执行UserInfo handler函数")
+
+	//1.获取参数及参数校验
+	userInfoReq := new(pb.UserInfoRequest)
+	if err := ctx.ShouldBindJSON(userInfoReq); err != nil {
+		zap.L().Error("Login with invalid param", zap.Error(err))
+		// 判断err是不是validator.ValidationErrors 类型
+		errs, ok := err.(validator.ValidationErrors)
+		if !ok {
+			// 非validator.ValidationErrors类型错误直接返回
+			ctx.JSON(http.StatusBadRequest, pb.UserInfoResponse{
+				StatusCode: 400,
+				StatusMsg:  "参数错误",
+				User:       nil,
+			})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{
+			"msg": removeTopStruct(errs.Translate(trans)), //翻译错误
+		})
+		return
+	}
+
+	//2.获取当前请求中的token
+	authHeader := ctx.Request.Header.Get("Authorization")
+	parts := strings.SplitN(authHeader, " ", 2)
+	token := parts[1]
+	userInfoReq.Token = token
+
+	//3.从token中解析处userID
+	//u, err := jwt.ParseToken(token)
+	//if err != nil {
+	//	//错误处理
+	//	return
+	//}
+	//userInfoReq.UserId = u.UserID
+
+	userInfoReq.UserId, _ = jwt.GetUserID(ctx)
+
+	//4.查询用户信息
+	userInfoResp, err := rpc.UserInfo(ctx, userInfoReq)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, pb.UserInfoResponse{
+			StatusCode: 500,
+			StatusMsg:  err.Error(),
+			User:       nil,
+		})
+		return
+	}
+	//3.返回相应
+	ctx.JSON(http.StatusOK, userInfoResp)
+
 }

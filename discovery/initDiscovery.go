@@ -3,7 +3,6 @@ package discovery
 import (
 	"dzug/conf"
 	"dzug/protos/favorite"
-	"dzug/protos/relation"
 	"dzug/protos/user"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -13,8 +12,7 @@ import (
 var (
 	SerDiscovery serviceDiscovery
 
-	UserClient     user.DouyinUserServiceClient
-	RelationClient relation.DouyinRelationActionServiceClient
+	UserClient     user.ServiceClient
 	FavoriteClient favorite.DouyinFavoriteActionServiceClient
 )
 
@@ -39,10 +37,8 @@ func LoadClient(serviceName string, client any) {
 	}
 
 	switch c := client.(type) {
-	case *user.DouyinUserServiceClient:
-		*c = user.NewDouyinUserServiceClient(conn)
-	case *relation.DouyinRelationActionServiceClient:
-		*c = relation.NewDouyinRelationActionServiceClient(conn)
+	case *user.ServiceClient:
+		*c = user.NewServiceClient(conn)
 	case *favorite.DouyinFavoriteActionServiceClient:
 		*c = favorite.NewDouyinFavoriteActionServiceClient(conn)
 	default:

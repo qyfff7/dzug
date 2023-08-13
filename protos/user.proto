@@ -1,34 +1,92 @@
 syntax = "proto3";
 
-package idl;
+package protos;
+option go_package = "./user";
 
-option go_package = "./";
 
-message douyin_user_register_request {
-  string username = 1; // 注册用户名，最长32个字符
-  string password = 2; // 密码，最长32个字符
+// 定义 user 模块的接口
+service Service {
+  rpc Register(LoginAndRegisterRequest) returns(LoginAndRegisterResponse);  // 用户注册
+  rpc Login(LoginAndRegisterRequest) returns(LoginAndRegisterResponse);  // 用户登录
+  rpc UserInfo(UserInfoRequest) returns(UserInfoResponse);  // 获取用户信息
+  rpc UserMap(UserMapRequest) returns(UserMapResponse);  // 获取用户信息 map[userId] = User
+
 }
 
-message douyin_user_register_response {
+
+message LoginAndRegisterRequest {
+// 用户注册 & 登录 的接口请求 model
+  string username = 1;// 用户名【注册的话，最长32个字符】
+  string password = 2; // 密码
+}
+
+// 用户注册 & 登录 的接口响应 model
+message LoginAndRegisterResponse {
   int32 status_code = 1; // 状态码，0-成功，其他值-失败
   string status_msg = 2; // 返回状态描述
-  int64 user_id = 3; // 用户id
-  string token = 4; // 用户鉴权token
+  uint64 user_id = 3; // 用户ID
+  string token = 4;// 用户鉴权Token
 }
 
-message douyin_user_login_request {
-  string username = 1; // 注册用户名，最长32个字符
-  string password = 2; // 密码，最长32个字符
+// 获取用户信息 的接口请求 model
+message UserInfoRequest {
+  // 用户ID
+  uint64 user_id = 1;
+  // 用户鉴权Token [注：这里用 validate，是因为内部方法也必须要用到 Token，并不是所有 token 都 validate]
+  string token = 2;
 }
 
-message douyin_user_login_response {
+// 获取用户信息 的接口响应 model
+message UserInfoResponse {
   int32 status_code = 1; // 状态码，0-成功，其他值-失败
   string status_msg = 2; // 返回状态描述
-  int64 user_id = 3; // 用户id
-  string token = 4; // 用户鉴权token
+  // 用户信息
+  User user = 3;
 }
 
-service DouyinUserService {
-  rpc Register(douyin_user_register_request) returns (douyin_user_register_response);
-  rpc Login(douyin_user_login_request) returns (douyin_user_login_response);
+// 调用用户信息 时返回的User
+message User {
+
+  uint64 id = 1; // 用户id
+
+  string name = 2; // 用户名称
+  int64 follow_count = 3; // 关注总数
+
+  int64 follower_count = 4; // 粉丝总数
+
+  bool is_follow = 5; // true-已关注，false-未关
+
+  string avatar = 6; //用户头像
+
+  string background_image = 7; //用户个人页顶部大图
+
+ string signature = 8; //个人简介
+
+  int64 total_favorited = 9; //获赞数量
+
+  int64 work_count = 10; //作品数
+
+  int64 favorite_count = 11; //点赞数量
+}
+
+//------------------以下内容暂时用不到----------------------
+// 与数据库对应的 PO 对象
+message UserPo {
+  uint64 id = 1; // 用户ID
+  string username = 2;// 用户名称
+  string password = 3;// 用户密码
+}
+
+// 用户IDs
+message UserMapRequest {
+
+  repeated uint64 user_ids = 1;  // 用户ID 列表
+  // 用户鉴权Token [注：这里用 validate，是因为内部方法也必须要用到 Token，并不是所有 token 都 validate]
+  string token = 2;
+}
+
+// 用户列表：map[userId] = User
+message UserMapResponse {
+  // 用户列表：map[userId] = User
+  map<uint64, User> user_map = 1;
 }

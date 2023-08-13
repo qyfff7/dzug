@@ -69,7 +69,7 @@ func (f *FavoriteSrv) Infavorite(ctx context.Context, in *favorite.InfavoriteReq
 
 // FavoriteList 获取点赞列表
 func (f *FavoriteSrv) FavoriteList(ctx context.Context, in *favorite.FavoriteListRequest) (*favorite.FavoriteListResponse, error) {
-	videoIds, err := redis.GetVideosByUserId(1)
+	videoIds, err := redis.GetVideosByUserId(in.UserId)
 	if err != nil {
 		return nil, err
 	}

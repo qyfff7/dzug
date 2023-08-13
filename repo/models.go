@@ -68,14 +68,14 @@ func (m *Relation) TableName() string {
 // User 用户表
 type User struct {
 	gorm.Model
-	UserId           int64 `gorm:"column:user_id;type:bigint(20);comment:用户真正的id;NOT NULL;unique" json:"user_id"` // UserId 是Relation表中，UserId和ToUserId的外键
-	Comment          []Comment
-	Favorite         []Favorite
+	UserId           int64      `gorm:"column:user_id;type:bigint(20);comment:用户真正的id;NOT NULL;unique" json:"user_id"` // UserId 是Relation表中，UserId和ToUserId的外键
+	Comment          []Comment  `gorm:"foreignKey:UserId;references:UserId"`
+	Favorite         []Favorite `gorm:"foreignKey:UserId;references:UserId"`
 	Video            []Video    `gorm:"foreignKey:UserId;references:UserId"`
-	Relation         []Relation `gorm:"foreignKey:ToUserId"`
-	Relation1        []Relation `gorm:"foreignKey:UserId"`
-	Message          []Message  `gorm:"foreignKey:ToUserId"`
-	Message1         []Message  `gorm:"foreignKey:FromUserId"`
+	Relation         []Relation `gorm:"foreignKey:ToUserId;references:UserId"`
+	Relation1        []Relation `gorm:"foreignKey:UserId;references:UserId"`
+	Message          []Message  `gorm:"foreignKey:ToUserId;references:UserId"`
+	Message1         []Message  `gorm:"foreignKey:FromUserId;references:UserId"`
 	Name             string     `gorm:"column:name;type:varchar(32);comment:用户名称;NOT NULL;unique" json:"name"`
 	BackgroundImages string     `gorm:"column:background_images;type:varchar(255);comment:主页背景图;default:" json:"background_images"`
 	Avatar           string     `gorm:"column:avatar;type:varchar(255);comment:用户头像;default:" json:"avatar"`

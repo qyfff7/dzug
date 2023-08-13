@@ -12,16 +12,17 @@ var Config = new(ProjectConfig)
 
 // ProjectConfig 项目所有的配置
 type ProjectConfig struct {
-	Name      string `mapstructure:"name"`
-	Port      int    `mapstructure:"port"`
-	Version   string `mapstructure:"version"`
-	StartTime string `mapstructure:"start_time"`
-	Mode      string `mapstructure:"mode"`
-
+	Name         string `mapstructure:"name"`
+	Port         int    `mapstructure:"port"`
+	Version      string `mapstructure:"version"`
+	StartTime    string `mapstructure:"start_time"`
+	Mode         string `mapstructure:"mode"`
+	MachineID    int64  `mapstructure:"machine_id"`
 	*LogConfig   `mapstructure:"log"`
 	*MySQLConfig `mapstructure:"mysql"`
 	*RedisConfig `mapstructure:"redis"`
 	*EtcdConfig  `mapstructure:"etcd"`
+	*JwtConfig   `mapstructure:"jwt"`
 }
 
 // LogConfig 日志文件的配置
@@ -35,11 +36,14 @@ type LogConfig struct {
 
 // MySQLConfig 数据库配置
 type MySQLConfig struct {
-	Host     string `mapstructure:"host"`
-	Port     int    `mapstructure:"port"`
-	User     string `mapstructure:"user"`
-	Password string `mapstructure:"password"`
-	DB       string `mapstructure:"dbname"`
+	Host      string `mapstructure:"host"`
+	Port      int    `mapstructure:"port"`
+	User      string `mapstructure:"user"`
+	Password  string `mapstructure:"password"`
+	DB        string `mapstructure:"database"`
+	Charset   string `mapstructure:"charset"`
+	ParseTime bool   `mapstructure:"parsetime"`
+	Loc       string `mapstructure:"loc"`
 }
 
 // RedisConfig Redis配置
@@ -51,6 +55,11 @@ type RedisConfig struct {
 // EtcdConfig etcd配置
 type EtcdConfig struct {
 	Addr []string `mapstructure:"address"`
+}
+
+// jwt 配置
+type JwtConfig struct {
+	JwtExpire int64 `mapstructure:"jwt_expire"`
 }
 
 // Init 从配置文件中获取项目所有的配置信息

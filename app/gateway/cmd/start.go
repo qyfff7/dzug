@@ -1,4 +1,4 @@
-package main
+package userclient
 
 import (
 	"dzug/app/gateway/routes"
@@ -9,7 +9,9 @@ import (
 	"go.uber.org/zap"
 )
 
-func main() {
+//这里相当于是客户端，去访问各个服务
+
+func Start() {
 	//1. 初始化配置文件
 	if err := conf.Init(); err != nil {
 		fmt.Printf("Config file initialization error,%#v", err)
@@ -32,7 +34,9 @@ func main() {
 	discovery.InitDiscovery()               // 启动服务发现程序
 	defer discovery.SerDiscovery.Close()    // 延时关闭服务发现程序
 
-	//5.启动项目
+	//5.初始化数据库
+
+	//6.启动项目
 	err := r.Run(fmt.Sprintf(":%d", conf.Config.Port))
 
 	if err != nil {
