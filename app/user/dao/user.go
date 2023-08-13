@@ -7,10 +7,12 @@ import (
 	"crypto/md5"
 	"dzug/app/user/pkg/jwt"
 	"dzug/app/user/pkg/snowflake"
+	"dzug/models"
 	"dzug/protos/user"
 	"dzug/repo"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"go.uber.org/zap"
 )
 
@@ -47,7 +49,7 @@ func CheckUserExits(ctx context.Context, username string) (check bool, err error
 }
 
 // InsertUser 用户注册相关数据库操作
-func InsertUser(ctx context.Context, req *user.LoginAndRegisterRequest) (*user.LoginAndRegisterResponse, error) {
+func InsertUser(ctx context.Context, req *user.AccountReq) (*user.AccountResp, error) {
 
 	//zap.L().Info("执行到InsertUser函数这里了")
 	//1.判断用户是否存在
@@ -58,14 +60,14 @@ func InsertUser(ctx context.Context, req *user.LoginAndRegisterRequest) (*user.L
 	}
 
 	//2.生成用户ID
-	ID := snowflake.GenID()
-	userID := uint64(ID)
+	userID := snowflake.GenID()
+
 	//3.用户密码加密
 	password := encryptPassword(req.Password)
 
 	//4.构建新用户结构体
 	newuser := &repo.User{
-		UserId:   int64(userID),
+		UserId:   userID,
 		Name:     req.Username,
 		Password: password,
 	}
@@ -78,24 +80,23 @@ func InsertUser(ctx context.Context, req *user.LoginAndRegisterRequest) (*user.L
 	}
 	zap.L().Info("用户注册成功！！！")
 	//6.生成token
-	token, err := jwt.GenToken(uint64(newuser.UserId))
+	token, err := jwt.GenToken(newuser.UserId)
 	if err != nil {
 		zap.L().Error("生成tocken出错")
 	}
 
 	//7.返回相应
-	resp := &user.LoginAndRegisterResponse{
-		StatusCode: 0,
-		StatusMsg:  "注册成功",
-		UserId:     uint64(newuser.UserId),
-		Token:      token,
+
+	resp := &user.AccountResp{
+		UserId: newuser.UserId,
+		Token:  token,
 	}
 
 	return resp, nil
 
 }
 
-func Login(ctx context.Context, req *user.LoginAndRegisterRequest) (*user.LoginAndRegisterResponse, error) {
+func CheckAccount(ctx context.Context, req *user.AccountReq) (*user.AccountResp, error) {
 
 	//构建登录用户
 	u := repo.User{
@@ -116,76 +117,47 @@ func Login(ctx context.Context, req *user.LoginAndRegisterRequest) (*user.LoginA
 	}
 	zap.L().Info("User login successful！！！")
 
-	token, err := jwt.GenToken(uint64(u.UserId))
+	token, err := jwt.GenToken(u.UserId)
 	if err != nil {
 		zap.L().Error("token generation error")
 	}
-
-	resp := &user.LoginAndRegisterResponse{
-		StatusCode: 0,
-		StatusMsg:  "用户登录成功",
-		UserId:     uint64(u.UserId),
-		Token:      token,
+	//var success int32
+	//success = 0
+	resp := &user.AccountResp{
+		UserId: u.UserId,
+		Token:  token,
 	}
 
 	return resp, nil
 
 }
 
-func GetuserInfo(ctx context.Context, req *user.UserInfoRequest) (*user.UserInfoResponse, error) {
+func GetuserInfoByID(ctx context.Context, uid int64) (*models.User, error) {
+	userInfo := new(models.User)
 	//1.从user表中查找出用户的个人信息
-	uInfo := new(repo.User)
-	result := repo.DB.WithContext(ctx).Where("user_id = ? ", req.UserId).Limit(1).Find(&uInfo)
+	zap.L().Info("按照id查询用户信息")
+
+	zap.L().Info(fmt.Sprintln(uid))
+	zap.L().Info("======================")
+	result := repo.DB.WithContext(ctx).Where("user_id = ? ", uid).Limit(1).Find(&userInfo)
 
 	if result.Error != nil {
-		zap.L().Info("执行获取用户信息时出错")
+		zap.L().Info("执行获取用户信息时gorm出错")
 		return nil, result.Error
 	}
 	if result.RowsAffected == 0 {
-		zap.L().Info("未找到当前用户")
-		err := errors.New("未找到当前用户")
+		zap.L().Info("当前用户不存在，请重试")
+		err := errors.New("当前用户不存在，请重试")
 		return nil, err
 	}
-	//2.获取当前视频的用户ID
-
-	//3.从relation表中,查找出是否关注
-	var to_user_id uint64
-	to_user_id = 211
-
-	isfollow, err := IsFollowByID(ctx, req.UserId, to_user_id)
-	if err != nil {
-		return nil, err
-	}
-	//3.构建返回结构
-	userInfo := &user.User{
-		Id:              uint64(uInfo.UserId),
-		Name:            uInfo.Name,
-		FollowCount:     &uInfo.FollowCount,
-		FollowerCount:   &uInfo.FollowerCount,
-		Avatar:          &uInfo.Avatar,
-		BackgroundImage: &uInfo.BackgroundImages,
-		Signature:       &uInfo.Signature,
-		TotalFavorited:  &uInfo.TotalFavorited,
-		WorkCount:       &uInfo.WorkCount,
-		FavoriteCount:   &uInfo.FavoriteCount,
-		IsFollow:        isfollow,
-	}
-
-	//zap.L().Info("执行到dao/user/GetuserInfo函数这里了")
-
-	resp := &user.UserInfoResponse{
-		StatusCode: 0,
-		StatusMsg:  "获取用户信息成功",
-		User:       userInfo,
-	}
-	return resp, nil
+	return userInfo, nil
 
 }
 
 // IsFollowByID 判断是否关注了该用户
-func IsFollowByID(ctx context.Context, userID, touserId uint64) (bool, error) {
+func IsFollowByID(ctx context.Context, userID, autherID int64) (bool, error) {
 	var rel repo.Relation
-	result := repo.DB.WithContext(ctx).Table("relation").Where("user_id = ? AND to_user_id = ?", userID, touserId).Limit(1).Find(&rel)
+	result := repo.DB.WithContext(ctx).Table("relation").Where("user_id = ? AND to_user_id = ?", userID, autherID).Limit(1).Find(&rel)
 	if result.Error != nil {
 		zap.L().Info("查找关注关系时出错")
 		return false, result.Error

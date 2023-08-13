@@ -3,17 +3,18 @@ package service
 import (
 	"context"
 	"dzug/app/user/dao"
-	"dzug/protos/user"
+	"dzug/app/user/pkg/jwt"
+	pb "dzug/protos/user"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 type Userservice struct {
 	db *gorm.DB
-	user.UnimplementedServiceServer
+	pb.UnimplementedServiceServer
 }
 
-func (s *Userservice) Register(c context.Context, req *user.LoginAndRegisterRequest) (*user.LoginAndRegisterResponse, error) {
+func (s *Userservice) Register(c context.Context, req *pb.AccountReq) (*pb.AccountResp, error) {
 	resp, err := dao.InsertUser(c, req)
 	if err != nil {
 		zap.L().Error("用户注册失败", zap.Error(err))
@@ -21,10 +22,10 @@ func (s *Userservice) Register(c context.Context, req *user.LoginAndRegisterRequ
 	}
 	return resp, nil
 }
-func (s *Userservice) Login(ctx context.Context, req *user.LoginAndRegisterRequest) (*user.LoginAndRegisterResponse, error) {
+func (s *Userservice) Login(ctx context.Context, req *pb.AccountReq) (*pb.AccountResp, error) {
 
 	//dao层进行数据库查询操作
-	resp, err := dao.Login(ctx, req)
+	resp, err := dao.CheckAccount(ctx, req)
 	if err != nil {
 		zap.L().Error("用户登录失败", zap.Error(err))
 		return nil, err
@@ -33,12 +34,48 @@ func (s *Userservice) Login(ctx context.Context, req *user.LoginAndRegisterReque
 
 }
 
-func (s *Userservice) UserInfo(ctx context.Context, req *user.UserInfoRequest) (*user.UserInfoResponse, error) {
+func (s *Userservice) GetUserInfo(ctx context.Context, req *pb.GetUserInfoReq) (*pb.GetUserInfoResp, error) {
 
-	resp, err := dao.GetuserInfo(ctx, req)
+	//1.获取当前已经登录用户的id（未登录的话，提示需要登录）
+	u, err := jwt.ParseToken(req.Token)
 	if err != nil {
-		zap.L().Error("获取用户信息失败", zap.Error(err))
+		//错误处理
+		zap.L().Error("解析Token出错")
 		return nil, err
+	}
+	userID := u.UserID
+
+	//2.根据请求中视频作者的id，获取相应的作者信息
+	uInfo, err := dao.GetuserInfoByID(ctx, req.UserId)
+	if err != nil {
+		zap.L().Error("获取视频用户信息失败", zap.Error(err))
+		return nil, err
+	}
+	//3.从relation表中,查找出是否关注
+	isfollow, err := dao.IsFollowByID(ctx, userID, req.UserId)
+	if err != nil {
+		zap.L().Error("查询是否关注信息出错！")
+		return nil, err
+	}
+	//3.构建返回结构
+	userInfo := &pb.User{
+		Id:              uInfo.ID,
+		Name:            uInfo.Name,
+		FollowCount:     uInfo.FollowCount,
+		FollowerCount:   uInfo.FollowerCount,
+		Avatar:          uInfo.Avatar,
+		BackgroundImage: uInfo.BackgroundImage,
+		Signature:       uInfo.Signature,
+		TotalFavorited:  uInfo.TotalFavorited,
+		WorkCount:       uInfo.WorkCount,
+		FavoriteCount:   uInfo.FavoriteCount,
+		IsFollow:        isfollow,
+	}
+
+	resp := &pb.GetUserInfoResp{
+		/*StatusCode: 0,
+		StatusMsg:  "获取用户信息成功",*/
+		User: userInfo,
 	}
 	return resp, nil
 

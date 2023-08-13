@@ -16,7 +16,6 @@ func NewRouter(mode string) *gin.Engine {
 		fmt.Printf("init validator trans failed, err:%v\n", err)
 		return nil
 	}
-
 	//如果配置文件中的mode设置为release模式，则gin框架也设置为发布模式(终端不输出任何信息)
 	if mode == gin.ReleaseMode {
 		gin.SetMode(gin.ReleaseMode) // gin设置成发布模式
@@ -25,11 +24,20 @@ func NewRouter(mode string) *gin.Engine {
 	ginRouter := gin.New()
 	ginRouter.Use(logger.GinLogger(), logger.GinRecovery(true)) // 使用自己的两个中间件
 
+	ginRouter.LoadHTMLFiles("./templates/index.html")
+	ginRouter.Static("/static", "./static")
+
+	ginRouter.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"title": "Main website",
+		})
+	})
+
 	tourist := ginRouter.Group("/douyin")
 	{
-		tourist.GET("/feed", handlers.Feed)                   //视频流
-		tourist.POST("/user/login", handlers.UserLogin)       //用户登录路由
-		tourist.POST("/user/register", handlers.UserRegister) //用户注册路由
+		tourist.GET("/feed/", handlers.Feed)                   //视频流
+		tourist.POST("/user/login/", handlers.UserLogin)       //用户登录路由
+		tourist.POST("/user/register/", handlers.UserRegister) //用户注册路由
 	}
 
 	user := ginRouter.Group("/douyin")

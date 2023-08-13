@@ -40,3 +40,8 @@ etcd下载教程：https://www.cnblogs.com/wusenwusen/p/16572929.html
 这样可能效率更高一点？
 
 两种方式不冲突，看我们选择哪种方式
+
+---
+
+
+

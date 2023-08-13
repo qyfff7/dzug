@@ -4,6 +4,7 @@ import (
 	"dzug/conf"
 	"dzug/protos/favorite"
 	"dzug/protos/user"
+	"dzug/protos/video"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -14,6 +15,7 @@ var (
 
 	UserClient     user.ServiceClient
 	FavoriteClient favorite.DouyinFavoriteActionServiceClient
+	VideoClient    video.VideoServiceClient
 )
 
 // InitDiscovery 初始化一个服务发现程序
