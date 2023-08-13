@@ -31,6 +31,7 @@ message favorite_list_request {
 message favorite_list_response {
   int32 status_code = 1; // 状态码，0-成功，其他值-失败
   string status_msg = 2; // 返回状态描述
+  repeated Video video_list = 3;
 }
 
 message Video {

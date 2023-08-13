@@ -2,10 +2,12 @@ package service
 
 import (
 	"context"
+	"dzug/app/favorite/dal/dao"
 	"dzug/app/favorite/dal/kafka"
 	"dzug/app/favorite/dal/redis"
 	"dzug/protos/favorite"
 	"errors"
+	"go.uber.org/zap"
 )
 
 type FavoriteSrv struct {
@@ -67,8 +69,21 @@ func (f *FavoriteSrv) Infavorite(ctx context.Context, in *favorite.InfavoriteReq
 
 // FavoriteList 获取点赞列表
 func (f *FavoriteSrv) FavoriteList(ctx context.Context, in *favorite.FavoriteListRequest) (*favorite.FavoriteListResponse, error) {
+	videoIds, err := redis.GetVideosByUserId(in.UserId)
+	if err != nil {
+		return nil, err
+	}
+	videos, err := dao.GetVideosByVideoIds(videoIds)
+	if err != nil {
+		zap.L().Error("获取点赞列表失败")
+		return &favorite.FavoriteListResponse{
+			StatusCode: 500,
+			StatusMsg:  "获取点赞列表失败",
+		}, nil
+	}
 	return &favorite.FavoriteListResponse{
 		StatusCode: 200,
 		StatusMsg:  "调用成功，你成功进行了一次收藏列表操作",
+		VideoList:  videos,
 	}, nil
 }

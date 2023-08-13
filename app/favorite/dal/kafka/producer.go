@@ -3,6 +3,8 @@ package kafka
 import (
 	"fmt"
 	"github.com/IBM/sarama"
+	"go.uber.org/zap"
+	"strconv"
 )
 
 func Sender(userId, videoId int64, ActionType int) {
@@ -15,8 +17,8 @@ func Sender(userId, videoId int64, ActionType int) {
 	msg.Value = sarama.StringEncoder(value)
 	pid, offset, err := KafkaProducer.SendMessage(msg)
 	if err != nil {
-		fmt.Println("send msg failed, err:", err)
+		zap.L().Debug("send msg failed, err:" + err.Error())
 		return
 	}
-	fmt.Printf("pid:%v offset:%v\n", pid, offset)
+	zap.L().Debug("pid:" + string(pid) + " offset:" + strconv.FormatInt(offset, 10))
 }
