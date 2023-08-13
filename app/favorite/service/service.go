@@ -17,7 +17,7 @@ type FavoriteSrv struct {
 // Favorite
 // 1. 用户点击点赞按钮
 // 2. 获取到用户id和视频id
-// 3. 先去redis里寻找是否有集合 key favo:userId value video id
+// 3. 先去redis里寻找是否有集合 key favor:userId value video id
 // 4. 有则再把value存入set中
 // 5. 无则从mysql中查询点赞列表进行缓存（读取出这个user的所有点赞数据），然后redis再获取一次，有没有这个key和value，有这个key value就返回，没有就添加key value
 // 6. 根据写入redis的情况，放入消息队列中，定时写入数据库中

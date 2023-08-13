@@ -20,14 +20,14 @@ func FavorConsumer() {
 	// 启动一个goroutine来消费消息
 	go func() {
 		for message := range messages {
-			err := update(string(message.Value))
+			err := update(string(message.Value)) // 我的数据库更新的地方
 			if err != nil {
 				zap.L().Fatal("消息队列更新点赞失败")
 			}
 		}
 	}()
 
-	// 开始消费消息
+	// 开始消费消息，消费favor主题，partition 0
 	partitionConsumer, err := KafkaConsumer.ConsumePartition("favor", 0, sarama.OffsetNewest)
 	if err != nil {
 		zap.L().Fatal("消费消息队列失败" + err.Error())
@@ -44,6 +44,7 @@ func FavorConsumer() {
 	}
 }
 
+// CloseConsumer 关闭消费者，在启动消息的地方进行defer close，close时关闭消息通道
 func CloseConsumer() {
 	close(messages)
 	if err := KafkaConsumer.Close(); err != nil {
