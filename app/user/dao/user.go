@@ -7,10 +7,12 @@ import (
 	"crypto/md5"
 	"dzug/app/user/pkg/jwt"
 	"dzug/app/user/pkg/snowflake"
+	"dzug/models"
 	"dzug/protos/user"
 	"dzug/repo"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"go.uber.org/zap"
 )
 
@@ -130,13 +132,17 @@ func CheckAccount(ctx context.Context, req *user.AccountReq) (*user.AccountResp,
 
 }
 
-func GetuserInfoByID(ctx context.Context, id int64) (*repo.User, error) {
-	userInfo := new(repo.User)
+func GetuserInfoByID(ctx context.Context, uid int64) (*models.User, error) {
+	userInfo := new(models.User)
 	//1.从user表中查找出用户的个人信息
-	result := repo.DB.WithContext(ctx).Where("user_id = ? ", id).Limit(1).Find(userInfo)
+	zap.L().Info("按照id查询用户信息")
+
+	zap.L().Info(fmt.Sprintln(uid))
+	zap.L().Info("======================")
+	result := repo.DB.WithContext(ctx).Where("user_id = ? ", uid).Limit(1).Find(&userInfo)
 
 	if result.Error != nil {
-		zap.L().Info("执行获取用户信息时出错")
+		zap.L().Info("执行获取用户信息时gorm出错")
 		return nil, result.Error
 	}
 	if result.RowsAffected == 0 {

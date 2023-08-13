@@ -59,12 +59,12 @@ func (s *Userservice) GetUserInfo(ctx context.Context, req *pb.GetUserInfoReq) (
 	}
 	//3.构建返回结构
 	userInfo := &pb.User{
-		Id:              uInfo.UserId,
+		Id:              uInfo.ID,
 		Name:            uInfo.Name,
 		FollowCount:     uInfo.FollowCount,
 		FollowerCount:   uInfo.FollowerCount,
 		Avatar:          uInfo.Avatar,
-		BackgroundImage: uInfo.BackgroundImages,
+		BackgroundImage: uInfo.BackgroundImage,
 		Signature:       uInfo.Signature,
 		TotalFavorited:  uInfo.TotalFavorited,
 		WorkCount:       uInfo.WorkCount,

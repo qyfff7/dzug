@@ -33,17 +33,6 @@ func NewRouter(mode string) *gin.Engine {
 		})
 	})
 
-	/*// public directory is used to serve static resources
-	ginRouter.Static("/static", "./public")
-	ginRouter.LoadHTMLGlob("templates/*")
-
-	// home page
-	ginRouter.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", gin.H{
-			"title": "Main website",
-		})
-	})*/
-
 	tourist := ginRouter.Group("/douyin")
 	{
 		tourist.GET("/feed/", handlers.Feed)                   //视频流
@@ -54,7 +43,7 @@ func NewRouter(mode string) *gin.Engine {
 	user := ginRouter.Group("/douyin")
 	user.Use(middlewares.JWTAuthMiddleware())
 	{
-		//user.GET("/user/", handlers.UserInfo) //用户信息路由
+		user.GET("/user/", handlers.UserInfo) //用户信息路由
 	}
 
 	ginRouter.NoRoute(func(c *gin.Context) {

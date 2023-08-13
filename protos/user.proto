@@ -24,10 +24,10 @@ message AccountResp {
 }
 
 message GetUserInfoReq {
-  // 用户ID
+  // 视频作者ID
   int64 user_id = 1;
-  // 用户鉴权Token
-  string token = 3;
+  // 当前登录的用户的token
+  string token = 2;
 }
 
 // 获取用户信息 的接口响应 model
