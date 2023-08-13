@@ -3,6 +3,7 @@ package main
 import (
 	"dzug/app/publish/infra/dal"
 	"dzug/app/publish/infra/redis"
+	"dzug/app/publish/pkg/oss"
 	"dzug/app/publish/service"
 	"dzug/conf"
 	"dzug/discovery"
@@ -33,6 +34,7 @@ func main() {
 	if err != nil {
 		return
 	}
+	oss.Init()
 	key := "publish"
 	value := "127.0.0.1:9003"
 	serviceRegister, grpcServer := discovery.InitRegister(key, value)

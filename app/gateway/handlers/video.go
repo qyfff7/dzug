@@ -12,12 +12,12 @@ import (
 
 // UploadHandler 视频投稿
 func UploadHandler(ctx *gin.Context) {
-	user_id := ctx.PostForm("user_id") // user_id 代指导token
+	user_id_ := ctx.PostForm("user_id")
 	title := ctx.PostForm("title")
 	file, err := ctx.FormFile("file")
 	fileName := file.Filename
 
-	// TODO: 获取token
+	user_id, _ := strconv.ParseInt(user_id_, 10, 64)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Failed to read file"})
@@ -45,10 +45,9 @@ func UploadHandler(ctx *gin.Context) {
 		}
 		videoData = append(videoData, buf[:n]...)
 	}
-	zap.L().Info("2")
 
 	publishReq := &pb.PublishVideoReq{
-		Token:    user_id,
+		UserId:   user_id,
 		Data:     videoData,
 		Title:    title,
 		FileName: fileName,

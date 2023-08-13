@@ -33,7 +33,7 @@ message UserInfo {
 }
 
 message PublishVideoReq {
-  string token = 1;
+  int64 user_id = 1;
   bytes data = 2;
   string title = 3;
   string fileName = 4;

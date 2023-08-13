@@ -5,8 +5,8 @@ import (
 	"context"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"go.uber.org/zap"
+	"io"
 	"strconv"
-	"strings"
 )
 
 type Video struct {
@@ -29,26 +29,31 @@ func UploadVideoToOss(ctx context.Context, v *Video) (*VideoUrl, error) {
 		return nil, err
 	}
 
-	bucket, err := client.Bucket(ossVideo.Bucket)
+	tmp := ossVideo
+
+	bucket, err := client.Bucket(tmp.Bucket)
 	if err != nil {
 		zap.L().Error(err.Error())
 	}
 
 	videoFileName := strconv.FormatInt(v.UserID, 10) + "/" + v.FileName
-	replaceSuffixidx := strings.LastIndex(v.FileName, ".")
-	coverFileName := strconv.FormatInt(v.UserID, 10) + "/" + v.FileName[0:replaceSuffixidx] + "_0.jpg"
+	//replaceSuffixidx := strings.LastIndex(v.FileName, ".")
+	//coverFileName := strconv.FormatInt(v.UserID, 10) + "/" + v.FileName[0:replaceSuffixidx] + "_0.jpg"
 
 	videoObjectKey := "play/" + videoFileName
-	coverObjectKey := "cover/" + coverFileName
+	//coverObjectKey := "cover/" + coverFileName
 
-	err = bucket.PutObject(videoObjectKey, bytes.NewReader(v.File))
+	var file io.Reader
+	file = bytes.NewReader(v.File)
+
+	err = bucket.PutObject(videoObjectKey, file)
 	if err != nil {
 		zap.L().Error(err.Error())
 		return nil, err
 	}
 
 	return &VideoUrl{
-		PlayUrl:  ossVideo.Bucket + "." + ossVideo.EndPoint + "/" + videoObjectKey,
-		CoverUrl: ossVideo.Bucket + "." + ossVideo.EndPoint + "/" + coverObjectKey,
+		PlayUrl: ossVideo.Bucket + "." + ossVideo.EndPoint + "/" + videoObjectKey,
+		//CoverUrl: ossVideo.Bucket + "." + ossVideo.EndPoint + "/" + coverObjectKey,
 	}, err
 }

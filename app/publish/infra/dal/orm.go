@@ -7,12 +7,10 @@ import (
 	"gorm.io/gorm"
 )
 
-func PublishVideo(ctx context.Context, token string, title string, playUrl string, coverUrl string) error {
-	// TODO: 根据 token 解析userid
+func PublishVideo(ctx context.Context, user_id int64, title string, playUrl string, coverUrl string) error {
 
-	var userId int64
 	video := &model.Video{
-		UserId:   userId,
+		UserId:   user_id,
 		Title:    title,
 		PlayUrl:  playUrl,
 		CoverUrl: coverUrl,
@@ -24,7 +22,7 @@ func PublishVideo(ctx context.Context, token string, title string, playUrl strin
 			zap.L().Error(err.Error())
 			return err
 		}
-		err = txn.Table("user").Where("id = ?", userId).Update("work_count", gorm.Expr("work_count + ?", 1)).Error
+		err = txn.Table("user").Where("id = ?", user_id).Update("work_count", gorm.Expr("work_count + ?", 1)).Error
 		if err != nil {
 			zap.L().Error(err.Error())
 			return err

@@ -4,7 +4,7 @@
 // - protoc             v3.19.6
 // source: publish.proto
 
-package __
+package publish
 
 import (
 	context "context"

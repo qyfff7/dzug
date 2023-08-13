@@ -2,7 +2,7 @@ package discovery
 
 import (
 	"dzug/conf"
-	pb "dzug/protos/publish"
+	"dzug/protos/publish"
 	"dzug/protos/relation"
 	"dzug/protos/user"
 
@@ -17,7 +17,7 @@ var (
 	UserClient     user.DouyinUserServiceClient
 	RelationClient relation.DouyinRelationActionServiceClient
 
-	PublishClient pb.PublishServiceClient
+	PublishClient publish.PublishServiceClient
 )
 
 // InitDiscovery 初始化一个服务发现程序
@@ -45,6 +45,8 @@ func LoadClient(serviceName string, client any) {
 		*c = user.NewDouyinUserServiceClient(conn)
 	case *relation.DouyinRelationActionServiceClient:
 		*c = relation.NewDouyinRelationActionServiceClient(conn)
+	case *publish.PublishServiceClient:
+		*c = publish.NewPublishServiceClient(conn)
 	default:
 		zap.L().Info("没有这种类型的服务")
 	}
