@@ -103,7 +103,8 @@ func CheckAccount(ctx context.Context, req *user.AccountReq) (*user.AccountResp,
 		Name:     req.Username,
 		Password: encryptPassword(req.Password),
 	}
-	result := repo.DB.WithContext(ctx).Where("name = ? AND password >= ?", u.Name, u.Password).Limit(1).Find(&u)
+
+	result := repo.DB.WithContext(ctx).Where("name = ? AND password = ?", u.Name, u.Password).Limit(1).Find(&u)
 
 	if result.Error != nil {
 		zap.L().Info("执行用户登录sql查询时出错")
@@ -121,8 +122,7 @@ func CheckAccount(ctx context.Context, req *user.AccountReq) (*user.AccountResp,
 	if err != nil {
 		zap.L().Error("token generation error")
 	}
-	//var success int32
-	//success = 0
+
 	resp := &user.AccountResp{
 		UserId: u.UserId,
 		Token:  token,

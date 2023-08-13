@@ -10,7 +10,7 @@ import (
 func main() {
 
 	go userservice.Start()
-	time.Sleep(time.Second * 3)
+	time.Sleep(time.Second)
 	go videoservice.Start()
 	client.Start()
 	//binding:"required,max=32"

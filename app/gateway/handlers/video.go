@@ -1,19 +1,23 @@
 package handlers
 
 import (
-	"dzug/app/gateway/rpc"
-	"dzug/discovery"
 	"dzug/models"
-	"dzug/protos/user"
-	pb "dzug/protos/video"
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"net/http"
-	"strings"
 	"time"
 )
 
-// Feed 视频流
+// Feed same demo video list for every request
+func Feed(c *gin.Context) {
+	c.JSON(http.StatusOK, models.FeedResponse{
+		Response: models.Response{StatusCode: models.CodeSuccess,
+			StatusMsg: models.CodeSuccess.Msg()},
+		VideoList: models.DemoVideos,
+		NextTime:  time.Now().Unix(),
+	})
+}
+
+/*// Feed 视频流
 func Feed(c *gin.Context) {
 
 	//1.新建视频流请求参数
@@ -31,13 +35,8 @@ func Feed(c *gin.Context) {
 	} else {
 		feedparam.Token = parts[1]
 	}
-	//视频最新投稿时间，不填则表示当前时间
-	if feedparam.LatestTime <= 0 {
-		feedparam.LatestTime = time.Now().Unix()
-	}
-	if feedparam.LatestTime > time.Now().Unix() {
-		feedparam.LatestTime = time.Now().Unix()
-	}
+	feedparam.LatestTime = time.Now().Unix()
+
 	//3.获取视频流
 	videos, err := rpc.Feed(c, feedparam)
 	if err != nil {
@@ -73,3 +72,4 @@ func Feed(c *gin.Context) {
 	c.JSON(http.StatusOK, feed)
 
 }
+*/

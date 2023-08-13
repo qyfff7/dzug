@@ -8,7 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
-	"strings"
 )
 
 func UserRegister(ctx *gin.Context) {
@@ -27,9 +26,6 @@ func UserRegister(ctx *gin.Context) {
 		err, _ := json.Marshal(removeTopStruct(errs.Translate(trans)))
 		models.ResponseErrorWithMsg(ctx, models.CodeInvalidParam, string(err))
 
-		/*ctx.JSON(http.StatusOK, gin.H{
-			"msg": removeTopStruct(errs.Translate(trans)), //翻译错误
-		})*/
 		return
 	}
 
@@ -37,13 +33,6 @@ func UserRegister(ctx *gin.Context) {
 	userResp, err := rpc.Register(ctx, userReq)
 	if err != nil {
 		models.ResponseErrorWithMsg(ctx, models.CodeServerBusy, err.Error())
-
-		/*ctx.JSON(http.StatusInternalServerError, user.AccountResp{
-			StatusCode: 500,
-			StatusMsg:  err.Error(),
-			UserId:     0,
-			Token:      "",
-		})*/
 		return
 	}
 	//3.返回相应
@@ -61,30 +50,18 @@ func UserLogin(ctx *gin.Context) {
 		if !ok {
 			// 非validator.ValidationErrors类型错误直接返回
 			models.ResponseError(ctx, models.CodeInvalidParam)
-			/*ctx.JSON(http.StatusBadRequest, user.AccountResp{
-				StatusCode: 400,
-				StatusMsg:  "参数错误",
-				UserId:     0,
-				Token:      "",
-			})*/
+
 			return
 		}
 		err, _ := json.Marshal(removeTopStruct(errs.Translate(trans)))
 		models.ResponseErrorWithMsg(ctx, models.CodeInvalidParam, string(err))
-		/*ctx.JSON(http.StatusOK, gin.H{
-			"msg": removeTopStruct(errs.Translate(trans)), //翻译错误
-		})*/
+
 		return
 	}
+	//2.调用登录服务
 	userResp, err := rpc.Login(ctx, userReq)
 	if err != nil {
 		models.ResponseErrorWithMsg(ctx, models.CodeInvalidPassword, err.Error())
-		/*ctx.JSON(http.StatusInternalServerError, user.AccountResp{
-			StatusCode: 500,
-			StatusMsg:  err.Error(),
-			UserId:     0,
-			Token:      "",
-		})*/
 		return
 	}
 	//3.返回相应
@@ -99,46 +76,26 @@ func UserInfo(ctx *gin.Context) {
 	userInfoReq := new(user.GetUserInfoReq)
 	if err := ctx.ShouldBind(userInfoReq); err != nil {
 		zap.L().Error("GetUserInfo with invalid param", zap.Error(err))
-		return
 		errs, ok := err.(validator.ValidationErrors)
 		if !ok {
 			models.ResponseError(ctx, models.CodeInvalidParam)
 
-			/*ctx.JSON(http.StatusBadRequest, user.GetUserInfoResp{
-				StatusCode: 400,
-				StatusMsg:  "获取用户信息时参数错误",
-				UserInfo:   nil,
-			})*/
 			return
 		}
 		err, _ := json.Marshal(removeTopStruct(errs.Translate(trans)))
 		models.ResponseErrorWithMsg(ctx, models.CodeInvalidParam, string(err))
-		/*ctx.JSON(http.StatusOK, gin.H{
-			"msg": removeTopStruct(errs.Translate(trans)), //翻译错误
-		})*/
+
 		return
 	}
-
-	//从请求头中获取Token
-	authHeader := ctx.Request.Header.Get("Authorization") //ctx 是 Context
-	parts := strings.SplitN(authHeader, " ", 2)
-	userInfoReq.Token = parts[1]
 
 	//4.查询用户信息
 	userInfo, err := rpc.UserInfo(ctx, userInfoReq)
 	if err != nil {
 		models.ResponseErrorWithMsg(ctx, models.CodeServerBusy, err.Error())
-		/*ctx.JSON(http.StatusInternalServerError, user.GetUserInfoResp{
-			StatusCode: 500,
-			StatusMsg:  err.Error(),
-			UserInfo:   nil,
-		})*/
 		return
 	}
 	//3.返回相应
 	u := models.UserInfoResp(userInfo)
 	models.GetUserInfoSuccess(ctx, u)
 
-	//models.ResponseSuccess(ctx, userInfo)
-	//ctx.JSON(http.StatusOK, userInfoResp)
 }
