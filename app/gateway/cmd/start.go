@@ -1,4 +1,4 @@
-package userclient
+package client
 
 import (
 	"dzug/app/gateway/routes"
@@ -38,7 +38,7 @@ func Start() {
 
 	//6.启动项目
 	err := r.Run(fmt.Sprintf(":%d", conf.Config.Port))
-  // err := r.Run()
+	// err := r.Run()
 
 	if err != nil {
 		fmt.Printf("run server failed, err:%v\n", err)

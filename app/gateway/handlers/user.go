@@ -5,7 +5,6 @@ import (
 	"dzug/models"
 	"dzug/protos/user"
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
@@ -119,14 +118,6 @@ func UserInfo(ctx *gin.Context) {
 		})*/
 		return
 	}
-
-	//getuserInfoReq := new(user.GetUserInfoReq)
-	//getuserInfoReq.UserId = to_user_id.UserId
-
-	zap.L().Info("hahhhhhhhhhhh")
-	zap.L().Info(fmt.Sprintln(userInfoReq.UserId))
-	zap.L().Info(fmt.Sprintln(userInfoReq.Token))
-	zap.L().Info("handeler   hanlder")
 
 	//从请求头中获取Token
 	authHeader := ctx.Request.Header.Get("Authorization") //ctx 是 Context

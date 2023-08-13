@@ -38,8 +38,8 @@ func LoadClient(serviceName string, client any) {
 	switch c := client.(type) {
 	case *user.ServiceClient:
 		*c = user.NewServiceClient(conn)
-	//case *relation.DouyinRelationActionServiceClient:
-	//	*c = relation.NewDouyinRelationActionServiceClient(conn)
+	case *video.VideoServiceClient:
+		*c = video.NewVideoServiceClient(conn)
 	//case *favorite.DouyinFavoriteActionServiceClient:
 	//	*c = favorite.NewDouyinFavoriteActionServiceClient(conn)
 	default:

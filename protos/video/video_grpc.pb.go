@@ -19,14 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	VideoService_GetVideoFeed_FullMethodName = "/video.VideoService/GetVideoFeed"
+	VideoService_GetVideoListByTime_FullMethodName = "/video.VideoService/GetVideoListByTime"
 )
 
 // VideoServiceClient is the client API for VideoService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type VideoServiceClient interface {
-	GetVideoFeed(ctx context.Context, in *GetVideoFeedReq, opts ...grpc.CallOption) (*GetVideoFeedResp, error)
+	GetVideoListByTime(ctx context.Context, in *GetVideoListByTimeReq, opts ...grpc.CallOption) (*GetVideoListByTimeResp, error)
 }
 
 type videoServiceClient struct {
@@ -37,9 +37,9 @@ func NewVideoServiceClient(cc grpc.ClientConnInterface) VideoServiceClient {
 	return &videoServiceClient{cc}
 }
 
-func (c *videoServiceClient) GetVideoFeed(ctx context.Context, in *GetVideoFeedReq, opts ...grpc.CallOption) (*GetVideoFeedResp, error) {
-	out := new(GetVideoFeedResp)
-	err := c.cc.Invoke(ctx, VideoService_GetVideoFeed_FullMethodName, in, out, opts...)
+func (c *videoServiceClient) GetVideoListByTime(ctx context.Context, in *GetVideoListByTimeReq, opts ...grpc.CallOption) (*GetVideoListByTimeResp, error) {
+	out := new(GetVideoListByTimeResp)
+	err := c.cc.Invoke(ctx, VideoService_GetVideoListByTime_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (c *videoServiceClient) GetVideoFeed(ctx context.Context, in *GetVideoFeedR
 // All implementations must embed UnimplementedVideoServiceServer
 // for forward compatibility
 type VideoServiceServer interface {
-	GetVideoFeed(context.Context, *GetVideoFeedReq) (*GetVideoFeedResp, error)
+	GetVideoListByTime(context.Context, *GetVideoListByTimeReq) (*GetVideoListByTimeResp, error)
 	mustEmbedUnimplementedVideoServiceServer()
 }
 
@@ -58,8 +58,8 @@ type VideoServiceServer interface {
 type UnimplementedVideoServiceServer struct {
 }
 
-func (UnimplementedVideoServiceServer) GetVideoFeed(context.Context, *GetVideoFeedReq) (*GetVideoFeedResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetVideoFeed not implemented")
+func (UnimplementedVideoServiceServer) GetVideoListByTime(context.Context, *GetVideoListByTimeReq) (*GetVideoListByTimeResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVideoListByTime not implemented")
 }
 func (UnimplementedVideoServiceServer) mustEmbedUnimplementedVideoServiceServer() {}
 
@@ -74,20 +74,20 @@ func RegisterVideoServiceServer(s grpc.ServiceRegistrar, srv VideoServiceServer)
 	s.RegisterService(&VideoService_ServiceDesc, srv)
 }
 
-func _VideoService_GetVideoFeed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetVideoFeedReq)
+func _VideoService_GetVideoListByTime_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetVideoListByTimeReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(VideoServiceServer).GetVideoFeed(ctx, in)
+		return srv.(VideoServiceServer).GetVideoListByTime(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: VideoService_GetVideoFeed_FullMethodName,
+		FullMethod: VideoService_GetVideoListByTime_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VideoServiceServer).GetVideoFeed(ctx, req.(*GetVideoFeedReq))
+		return srv.(VideoServiceServer).GetVideoListByTime(ctx, req.(*GetVideoListByTimeReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -100,8 +100,8 @@ var VideoService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*VideoServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetVideoFeed",
-			Handler:    _VideoService_GetVideoFeed_Handler,
+			MethodName: "GetVideoListByTime",
+			Handler:    _VideoService_GetVideoListByTime_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
