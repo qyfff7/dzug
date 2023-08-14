@@ -30,7 +30,7 @@ func FavoriteAction(ctx *gin.Context) {
 	//actionType := ctx.Query("action_type")
 
 	if fReq.ActionType == "1" { // 进行点赞
-		fAction := pb.FavoriteRequest{ // 测试数据，为转换
+		fAction := pb.FavoriteRequest{
 			UserId:  userId,
 			VideoId: int64(videoid),
 		}
@@ -44,7 +44,7 @@ func FavoriteAction(ctx *gin.Context) {
 		}
 		ctx.JSON(http.StatusOK, fResp)
 	} else if fReq.ActionType == "2" { // 取消点赞操作
-		fAction := pb.InfavoriteRequest{ // 测试数据
+		fAction := pb.InfavoriteRequest{
 			UserId:  userId,
 			VideoId: int64(videoid),
 		}
