@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"dzug/app/publish/infra/dal"
-	"dzug/app/publish/infra/dal/model"
 	"dzug/app/publish/infra/redis"
 	"dzug/app/publish/pkg/oss"
 	pb "dzug/protos/publish"
@@ -48,7 +47,6 @@ func (p *VideoServer) PublishVideo(ctx context.Context, req *pb.PublishVideoReq)
 func (p *VideoServer) GetVideoListByUserId(ctx context.Context, req *pb.GetVideoListByUserIdReq) (*pb.GetVideoListByUserIdResp, error) {
 	resp := pb.GetVideoListByUserIdResp{}
 	user_id := req.UserId
-	var videoModels []*model.Video
 
 	videoModels, err := redis.GetPublishList(user_id)
 
@@ -62,12 +60,26 @@ func (p *VideoServer) GetVideoListByUserId(ctx context.Context, req *pb.GetVideo
 			}
 
 			// 查询结果写入 redis
-			if err := redis.PutPublishList(videoModels, user_id); err != nil {
+			if err := redis.PutPublishList(ctx, videoModels, user_id); err != nil {
 				zap.L().Error(err.Error())
 			}
 		}
 	}
 
-	// TODO: 查询该用户是否点赞
+	var videoInfoList []*pb.VideoInfo
+	for i := 0; i < len(videoModels); i++ {
+		tmp := &pb.VideoInfo{
+			PlayUrl:       videoModels[i].PlayUrl,
+			CoverUrl:      videoModels[i].CoverUrl,
+			FavoriteCount: videoModels[i].FavoriteCount,
+			CommentCount:  videoModels[i].CommentCount,
+		}
+		videoInfoList = append(videoInfoList, tmp)
+	}
+
+	resp.StatusCode = 200
+	resp.StatusMsg = "success"
+	resp.VideoList = videoInfoList
+
 	return &resp, nil
 }

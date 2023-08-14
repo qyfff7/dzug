@@ -1,7 +1,6 @@
 package main
 
 import (
-	"dzug/app/publish/infra/dal"
 	"dzug/app/publish/infra/redis"
 	"dzug/app/publish/pkg/oss"
 	"dzug/app/publish/service"
@@ -9,6 +8,7 @@ import (
 	"dzug/discovery"
 	"dzug/logger"
 	pb "dzug/protos/publish"
+	"dzug/repo"
 	"fmt"
 	"go.uber.org/zap"
 )
@@ -26,15 +26,13 @@ func main() {
 
 	defer zap.L().Sync()
 	zap.L().Info("服务启动，开始记录日志")
-	err := dal.Init()
-	if err != nil {
-		return
-	}
-	err = redis.Init()
+
+	err := redis.Init()
 	if err != nil {
 		return
 	}
 	oss.Init()
+	_ = repo.Init()
 	key := "publish"
 	value := "127.0.0.1:9003"
 	serviceRegister, grpcServer := discovery.InitRegister(key, value)

@@ -28,7 +28,7 @@ func NewRouter(mode string) *gin.Engine {
 	publish := ginRouter.Group("/douyin/publish")
 	{
 		publish.POST("/action", handlers.UploadHandler)
-		publish.POST("/list", handlers.UploadHandler)
+		publish.POST("/list", handlers.GetVideoListByUser)
 	}
 
 	return ginRouter

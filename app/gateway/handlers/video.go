@@ -64,6 +64,7 @@ func UploadHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, publishVideoResp)
 }
 
+// GetVideoListByUser 获取用户投稿信息
 func GetVideoListByUser(ctx *gin.Context) {
 	user_id := ctx.PostForm("user_id")
 	parsedUserId, err := strconv.ParseInt(user_id, 10, 64)
