@@ -45,7 +45,6 @@ func NewRouter(mode string) *gin.Engine {
 	{
 		user.GET("/user/", handlers.UserInfo) //用户信息路由
 	}
-
 	ginRouter.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"msg": "404 not found",

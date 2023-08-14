@@ -20,12 +20,10 @@ func UserRegister(ctx *gin.Context) {
 		errs, ok := err.(validator.ValidationErrors)
 		if !ok {
 			models.ResponseError(ctx, models.CodeInvalidParam)
-
 			return
 		}
 		err, _ := json.Marshal(removeTopStruct(errs.Translate(trans)))
 		models.ResponseErrorWithMsg(ctx, models.CodeInvalidParam, string(err))
-
 		return
 	}
 
@@ -37,7 +35,6 @@ func UserRegister(ctx *gin.Context) {
 	}
 	//3.返回相应
 	models.AccountRespSuccess(ctx, userResp)
-
 }
 
 func UserLogin(ctx *gin.Context) {
@@ -50,12 +47,10 @@ func UserLogin(ctx *gin.Context) {
 		if !ok {
 			// 非validator.ValidationErrors类型错误直接返回
 			models.ResponseError(ctx, models.CodeInvalidParam)
-
 			return
 		}
 		err, _ := json.Marshal(removeTopStruct(errs.Translate(trans)))
 		models.ResponseErrorWithMsg(ctx, models.CodeInvalidParam, string(err))
-
 		return
 	}
 	//2.调用登录服务

@@ -8,7 +8,6 @@ import (
 //调用方法：
 //在主程序先snowflake.Init(conf.Config.StartTime, conf.Config.MachineID)
 //然后在需要生成id时，直接	id := snowflake.GenID() 即可获取
-//
 
 var node *sf.Node
 

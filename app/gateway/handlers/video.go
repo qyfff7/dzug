@@ -13,16 +13,6 @@ import (
 	"go.uber.org/zap"
 )
 
-/*// Feed same demo video list for every request
-func Feed(c *gin.Context) {
-	c.JSON(http.StatusOK, models.FeedResponse{
-		Response: models.Response{StatusCode: models.CodeSuccess,
-			StatusMsg: models.CodeSuccess.Msg()},
-		VideoList: models.DemoVideos,
-		NextTime:  time.Now().Unix(),
-	})
-}*/
-
 // Feed 视频流
 func Feed(c *gin.Context) {
 
@@ -64,9 +54,6 @@ func Feed(c *gin.Context) {
 			UserId: v.AutherId,
 			Token:  vparams.Token,
 		}
-		zap.L().Info("查询视频作者信息" + fmt.Sprintln(u.UserId))
-		zap.L().Info("查询视频作者信息" + fmt.Sprintln(u.Token))
-
 		authorInfo, err := rpc.UserInfo(c, u)
 		if err != nil {
 			zap.L().Error("获取视频作者信息失败", zap.Error(err))
@@ -75,33 +62,5 @@ func Feed(c *gin.Context) {
 		v := models.GetFeedResp(v, author)
 		videofeed = append(videofeed, v)
 	}
-
 	models.GetFeedSuccess(c, videofeed, videos.NextTime)
-
-	/*feed := make([]*models.Video, 0, len(videos.VideoList))
-	//4. 为每个视频查询作者信息
-	for _, video := range videos.VideoList {
-		// 根据作者id查询作者信息
-		auther := &user.GetUserInfoReq{UserId: video.AutherId, Token: feedparam.Token}
-		autherInfo, err := discovery.UserClient.GetUserInfo(c, auther) // 调用查询用户信息的方法
-		if err != nil {
-			zap.L().Error("获取视频作者信息失败")
-			continue
-		}
-		//查询当前用户是否给当前视频点赞
-
-		v := &models.Video{
-			Id:            video.VideoId,
-			Auther:        models.UserInfoResp(autherInfo),
-			PlayUrl:       video.PlayUrl,
-			CoverUrl:      video.CoverUrl,
-			FavoriteCount: video.FavoriteCount,
-			CommentCount:  video.CommentCount,
-			IsFavorite:    video.IsFavorite,
-			Title:         video.Title,
-		}
-		feed = append(feed, v)
-	}
-	c.JSON(http.StatusOK, feed)*/
-
 }

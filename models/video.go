@@ -24,9 +24,6 @@ type Feed struct {
 	VideoList []*Video `json:"video_list,omitempty"`
 }
 
-type VideoList struct {
-}
-
 func GetFeedResp(v *video.Video, author User) *Video {
 	vv := &Video{
 		Id:            v.VideoId,

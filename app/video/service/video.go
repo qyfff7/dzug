@@ -28,7 +28,6 @@ func (v VideoService) GetVideoListByTime(ctx context.Context, req *video.GetVide
 	videosInfos := make([]*video.Video, 0, len(videos))
 	//2.如果用户已登录,查询是否点赞
 	for _, v := range videos {
-		//zap.L().Info(" 视频id " + fmt.Sprintln(v.ID))
 		var videosInfo video.Video
 		if req.Token != "" {
 			u, _ := jwt.ParseToken(req.Token)
