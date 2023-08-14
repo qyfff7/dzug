@@ -10,7 +10,6 @@ import (
 
 // InitRegister 放入服务名称和服务的链接，返回etcdServiceRegister和grpc服务器
 func InitRegister(key, value string) (*ServiceRegister, *grpc.Server) {
-	fmt.Println(conf.Config.EtcdConfig.Addr)
 	endpoints := conf.Config.EtcdConfig.Addr
 	sRegister := &ServiceRegister{
 		EtcdAddrs: endpoints,
@@ -20,8 +19,7 @@ func InitRegister(key, value string) (*ServiceRegister, *grpc.Server) {
 	}
 	err := sRegister.newServiceRegister()
 	if err != nil {
-		zap.L().Error("初始化服务注册失败" + err.Error())
-		panic("初始化服务注册失败" + err.Error())
+		zap.L().Fatal("初始化服务注册失败" + err.Error())
 	}
 
 	server := grpc.NewServer()
@@ -32,11 +30,11 @@ func InitRegister(key, value string) (*ServiceRegister, *grpc.Server) {
 func GrpcListen(server *grpc.Server, value string) {
 	lis, err := net.Listen("tcp", value)
 	if err != nil {
-		zap.L().Error("启动监听失败")
+		zap.L().Fatal("启动监听失败")
 	}
 	fmt.Println("listening...")
 	if err = server.Serve(lis); err != nil {
-		zap.L().Error("连接grpc服务失败" + err.Error())
+		zap.L().Fatal("连接grpc服务失败" + err.Error())
 		return
 	}
 }

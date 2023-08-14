@@ -8,8 +8,9 @@ import (
 	"gorm.io/gorm"
 )
 
+// Favor 点赞数据库操作
 func Favor(videoId, userId int64) error {
-	favor := repo.Favorite{
+	favor := repo.Favorite{ // 初始化结构体
 		UserId:  userId,
 		VideoId: videoId,
 	}
@@ -19,7 +20,7 @@ func Favor(videoId, userId int64) error {
 		},
 	}
 	res := repo.DB.First(&video)
-	if res.Error != nil {
+	if res.Error != nil { // 查询作者id，便于后续进行更新
 		zap.L().Error("查询视频作者失败")
 		return res.Error
 	}
@@ -52,8 +53,9 @@ func Favor(videoId, userId int64) error {
 	return err
 }
 
+// InFavor 取消点赞数据库操作
 func InFavor(videoId, userId int64) error {
-	favor := repo.Favorite{
+	favor := repo.Favorite{ // 初始化结构体
 		UserId:  userId,
 		VideoId: videoId,
 	}
@@ -62,7 +64,7 @@ func InFavor(videoId, userId int64) error {
 			ID: uint(videoId),
 		},
 	}
-	res := repo.DB.First(&video)
+	res := repo.DB.First(&video) // 查询作者id，便于后续事务更新数据
 	if res.Error != nil {
 		zap.L().Error("查询视频作者失败")
 		return res.Error
@@ -74,6 +76,7 @@ func InFavor(videoId, userId int64) error {
 		UserId: userId,
 	}
 
+	// 开启事务，写入点赞数据，插入点赞表，更新用户表，视频表
 	err := repo.DB.Transaction(func(tx *gorm.DB) (err error) {
 		if err = tx.Where("user_id = ?", userId).Delete(&favor).Error; err != nil {
 			zap.L().Error("取消点赞失败")
@@ -99,12 +102,12 @@ func InFavor(videoId, userId int64) error {
 // GetFavorById 获取用户的所有点赞视频
 func GetFavorById(userId int64) ([]int64, error) {
 	var favors []repo.Favorite
-	res := repo.DB.Where("user_id = ?", userId).Find(&favors)
+	res := repo.DB.Where("user_id = ?", userId).Find(&favors) // 查询该用户所有点赞视频数据
 	if res.Error != nil {
 		return nil, res.Error
 	}
 	ans := make([]int64, len(favors))
-	for k, v := range favors {
+	for k, v := range favors { // 写入返回的数组
 		ans[k] = v.VideoId
 	}
 	return ans, nil
@@ -112,7 +115,7 @@ func GetFavorById(userId int64) ([]int64, error) {
 
 // GetVideosByVideoIds 根据videoId返回videos
 func GetVideosByVideoIds(userId int64, videoIds []int64) ([]*favorite.Video, error) {
-	// 根据videoIds一个一个查，isFavorite都设置为true，作者信息根据那啥去查？
+	// 根据videoIds一个一个查，isFavorite都设置为true，作者信息也进行查询拼接
 	video := repo.Video{}
 	videoList := make([]*favorite.Video, len(videoIds))
 	for k, v := range videoIds {
@@ -122,20 +125,20 @@ func GetVideosByVideoIds(userId int64, videoIds []int64) ([]*favorite.Video, err
 			zap.L().Error("读取视频信息失败")
 			return nil, res.Error
 		}
-		videoList[k] = &favorite.Video{}
+		videoList[k] = &favorite.Video{} // 初始化
 		videoList[k].Author = &favorite.User{}
 		videoList[k].Id = videoIds[k]
 		res = repo.DB.Where("user_id = ?", video.UserId).First(&videoList[k].Author)
-		videoList[k].Author.Id = video.UserId
+		videoList[k].Author.Id = video.UserId // 查询并设置视频作者信息
 
-		videoList[k].Title = video.Title
+		videoList[k].Title = video.Title // 设置视频基本数据
 		videoList[k].CommentCount = int64(video.CommentCount)
 		videoList[k].CoverUrl = video.CoverUrl
 		videoList[k].PlayUrl = video.PlayUrl
 		videoList[k].FavoriteCount = int64(video.FavoriteCount)
 
-		videoList[k].Author.IsFollow = isFollowById(userId, video.UserId)
-		videoList[k].IsFavorite = true
+		videoList[k].Author.IsFollow = isFollowById(userId, video.UserId) // 更新是否关注
+		videoList[k].IsFavorite = true                                    // 设置已喜欢
 	}
 	return videoList, nil
 }

@@ -5,6 +5,7 @@ import (
 	"dzug/protos/favorite"
 	"dzug/protos/user"
 	"dzug/protos/video"
+	"errors"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -24,28 +25,32 @@ func InitDiscovery() {
 	SerDiscovery = serviceDiscovery{EtcdAddrs: endpoints} // 放入etcd地址
 	err := SerDiscovery.newServiceDiscovery()             // 实例化
 	if err != nil {
-		zap.L().Error("启动服务发现失败: " + err.Error())
+		zap.L().Fatal("启动服务发现失败: " + err.Error())
 		return
 	}
 }
 
 // LoadClient 加载etcd客户端调用实例，每一次客户端调用一个方法都会调用这个方法
 // 先去etcd中拿去现在的链接，再去通过grpc进行远程调用
-func LoadClient(serviceName string, client any) {
+func LoadClient(serviceName string, client any) error {
 	conn, err := connectService(serviceName) // 找到grpc连接链接
 	if err != nil {
 		zap.L().Error("grpc连接服务: " + serviceName + "失败, error: " + err.Error())
-		return
+		return err
 	}
 
 	switch c := client.(type) {
 	case *user.ServiceClient:
 		*c = user.NewServiceClient(conn)
+		return nil
 	case *favorite.DouyinFavoriteActionServiceClient:
 		*c = favorite.NewDouyinFavoriteActionServiceClient(conn)
+		return nil
 	default:
-		zap.L().Info("没有这种类型的服务")
+		err = errors.New("没有该类型的服务")
+		zap.L().Error(err.Error())
 	}
+	return err
 }
 
 // connectService 通过服务名字找到对应的链接

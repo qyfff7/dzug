@@ -29,11 +29,6 @@ func FavoriteAction(ctx *gin.Context) {
 	//videoId := ctx.Query("video_id")
 	//actionType := ctx.Query("action_type")
 
-	ctx.JSON(http.StatusOK, pb.FavoriteResponse{
-		StatusCode: 200,
-		StatusMsg:  "操作成功",
-	})
-
 	if fReq.ActionType == "1" { // 进行点赞
 		fAction := pb.FavoriteRequest{ // 测试数据，为转换
 			UserId:  userId,
@@ -57,7 +52,7 @@ func FavoriteAction(ctx *gin.Context) {
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, pb.InfavoriteResponse{
 				StatusCode: 500,
-				StatusMsg:  "点赞失败",
+				StatusMsg:  "取消点赞失败",
 			})
 			return
 		}

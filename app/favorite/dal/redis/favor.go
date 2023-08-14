@@ -6,10 +6,11 @@ import (
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 	"strconv"
+	"time"
 )
 
-var faPrefix = "favor:"
-var key string
+var faPrefix = "favor:" // redis中favor前缀
+var key string          // redis的key
 
 // AddFavor 点赞操作
 // 1. 查询redis中是否有userid这个set，没有则从mysql中读取加入缓存，这部分出错返回，则返回代码0
@@ -20,11 +21,11 @@ func AddFavor(userId, videoId int64) int {
 	if err != nil {
 		return 0
 	}
-	cmd = Rdb.SAdd(context.Background(), key, videoId) // 这个key现在已经存在了，去添加这个videoid
+	cmd = Rdb.SAdd(context.Background(), key, videoId) // 这个key现在已经存在了，去添加这个videoId
 	if cmd.Val() == 0 {                                // 已经存在这个value了
 		return 2
 	}
-	return 1
+	return 1 // 理论上为1就是操作正确，应该不会有其他意外情况
 }
 
 // DelFavor 取消点赞操作
@@ -33,7 +34,7 @@ func DelFavor(userId, videoId int64) int {
 	if err != nil {
 		return 0
 	}
-	cmd = Rdb.SRem(context.Background(), key, videoId) // 这个key现在已经存在了，去删除这个videoid
+	cmd = Rdb.SRem(context.Background(), key, videoId) // 这个key现在已经存在了，去删除这个videoId
 	if cmd.Val() == 0 {                                // 已经存在这个value了
 		return 2
 	}
@@ -55,10 +56,11 @@ func GetVideosByUserId(userId int64) ([]int64, error) {
 	return videos, err
 }
 
+// 确保当前key存在redis中
 func exist(userId int64) (*redis.IntCmd, error) {
 	key = faPrefix + strconv.FormatInt(userId, 10)
 	cmd := Rdb.Exists(context.Background(), key)
-	if cmd.Err() != nil { // todo 暂时默认启动了redis，这里先不考虑redis没启动的情况了
+	if cmd.Err() != nil {
 		zap.L().Error("查询redis失败")
 		return nil, cmd.Err()
 	}
@@ -81,8 +83,9 @@ func getSet(userId int64) error {
 	}
 	//key = faPrefix + strconv.FormatInt(userId, 10)
 	ctx := context.Background()
-	for _, v := range videoIds { // todo 没有设置过期时间
-		Rdb.SAdd(ctx, key, v) // todo 同样，默认redis已经启动了
+	for _, v := range videoIds {
+		Rdb.SAdd(ctx, key, v)
 	}
+	Rdb.Expire(ctx, key, time.Hour*3) // 设置过期时间
 	return nil
 }

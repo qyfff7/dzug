@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func Sender(userId, videoId int64, ActionType int) {
+func Sender(userId, videoId int64, ActionType int) error {
 	msg := &sarama.ProducerMessage{} // 发送的消息
 	msg.Topic = "favor"              // 消息的主题
 	//key := fmt.Sprintf("%d", userId)
@@ -18,7 +18,8 @@ func Sender(userId, videoId int64, ActionType int) {
 	pid, offset, err := KafkaProducer.SendMessage(msg)            // 发送消息进消息队列
 	if err != nil {
 		zap.L().Debug("send msg failed, err:" + err.Error())
-		return
+		return err
 	}
 	zap.L().Debug("pid:" + string(pid) + " offset:" + strconv.FormatInt(offset, 10))
+	return nil
 }

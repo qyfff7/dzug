@@ -22,6 +22,7 @@ type ProjectConfig struct {
 	*MySQLConfig `mapstructure:"mysql"`
 	*RedisConfig `mapstructure:"redis"`
 	*EtcdConfig  `mapstructure:"etcd"`
+	*KafkaConfig `mapstructure:"kafka"`
 	*JwtConfig   `mapstructure:"jwt"`
 	*Video       `mapstructure:"video"`
 }
@@ -55,6 +56,11 @@ type RedisConfig struct {
 
 // EtcdConfig etcd配置
 type EtcdConfig struct {
+	Addr []string `mapstructure:"address"`
+}
+
+// KafkaConfig kafka配置
+type KafkaConfig struct {
 	Addr []string `mapstructure:"address"`
 }
 
