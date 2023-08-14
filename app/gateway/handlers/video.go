@@ -1,13 +1,19 @@
 package handlers
 
 import (
+	"dzug/app/gateway/rpc"
+	"dzug/app/user/pkg/jwt"
 	"dzug/models"
+	"dzug/protos/user"
+	"dzug/protos/video"
+	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"time"
+	"github.com/go-playground/validator/v10"
+	"go.uber.org/zap"
 )
 
-// Feed same demo video list for every request
+/*// Feed same demo video list for every request
 func Feed(c *gin.Context) {
 	c.JSON(http.StatusOK, models.FeedResponse{
 		Response: models.Response{StatusCode: models.CodeSuccess,
@@ -15,37 +21,64 @@ func Feed(c *gin.Context) {
 		VideoList: models.DemoVideos,
 		NextTime:  time.Now().Unix(),
 	})
-}
+}*/
 
-/*// Feed 视频流
+// Feed 视频流
 func Feed(c *gin.Context) {
 
 	//1.新建视频流请求参数
-	feedparam := new(pb.GetVideoListByTimeReq)
-	if err := c.ShouldBind(feedparam); err != nil { //获取参数
-		zap.L().Error("获取视频流参数出错", zap.Error(err))
+	vparams := new(video.GetVideoListByTimeReq)
+	if err := c.ShouldBind(vparams); err != nil { //获取参数与参数校验
+		zap.L().Error("Feed with invalid param", zap.Error(err))
+		errs, ok := err.(validator.ValidationErrors)
+		if !ok {
+			models.ResponseError(c, models.CodeInvalidParam)
+			return
+		}
+		err, _ := json.Marshal(removeTopStruct(errs.Translate(trans)))
+		models.ResponseErrorWithMsg(c, models.CodeInvalidParam, string(err))
 		return
 	}
-	//2.判断当前用户是否登录
-	authHeader := c.Request.Header.Get("Authorization") //ctx 是 Context
-	parts := strings.SplitN(authHeader, " ", 2)
-
-	if parts[1] == "" { //如果未登录，Token为空
-		feedparam.Token = ""
-	} else {
-		feedparam.Token = parts[1]
+	//2.判断当前是否登录
+	if vparams.Token != "" {
+		//当前登录，进行token校验
+		u, err := jwt.ParseToken(vparams.Token)
+		if err != nil {
+			zap.L().Error(fmt.Sprintln(models.CodeInvalidToken))
+		}
+		// 将当前请求的userID信息保存到请求的上下文ctx上
+		c.Set(jwt.CtxUserIDKey, u.UserID)
 	}
-	feedparam.LatestTime = time.Now().Unix()
 
-	//3.获取视频流
-	videos, err := rpc.Feed(c, feedparam)
+	//3.调用获取视频流服务
+	videos, err := rpc.Feed(c, vparams)
 	if err != nil {
-		zap.L().Error("获取视频流出错", zap.Error(err))
+		zap.L().Error("rpc调用视频流服务出错", zap.Error(err))
 		return
 	}
 
-	feed := make([]*models.Video, 0, len(videos.VideoList))
+	videofeed := make([]*models.Video, 0, len(videos.VideoList))
+	//4.对于每个视频,查询作者的信息
+	for _, v := range videos.VideoList {
+		u := &user.GetUserInfoReq{
+			UserId: v.AutherId,
+			Token:  vparams.Token,
+		}
+		zap.L().Info("查询视频作者信息" + fmt.Sprintln(u.UserId))
+		zap.L().Info("查询视频作者信息" + fmt.Sprintln(u.Token))
 
+		authorInfo, err := rpc.UserInfo(c, u)
+		if err != nil {
+			zap.L().Error("获取视频作者信息失败", zap.Error(err))
+		}
+		author := models.UserInfoResp(authorInfo)
+		v := models.GetFeedResp(v, author)
+		videofeed = append(videofeed, v)
+	}
+
+	models.GetFeedSuccess(c, videofeed, videos.NextTime)
+
+	/*feed := make([]*models.Video, 0, len(videos.VideoList))
 	//4. 为每个视频查询作者信息
 	for _, video := range videos.VideoList {
 		// 根据作者id查询作者信息
@@ -69,7 +102,6 @@ func Feed(c *gin.Context) {
 		}
 		feed = append(feed, v)
 	}
-	c.JSON(http.StatusOK, feed)
+	c.JSON(http.StatusOK, feed)*/
 
 }
-*/

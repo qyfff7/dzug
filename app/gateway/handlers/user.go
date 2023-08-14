@@ -79,12 +79,10 @@ func UserInfo(ctx *gin.Context) {
 		errs, ok := err.(validator.ValidationErrors)
 		if !ok {
 			models.ResponseError(ctx, models.CodeInvalidParam)
-
 			return
 		}
 		err, _ := json.Marshal(removeTopStruct(errs.Translate(trans)))
 		models.ResponseErrorWithMsg(ctx, models.CodeInvalidParam, string(err))
-
 		return
 	}
 

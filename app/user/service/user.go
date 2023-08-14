@@ -35,35 +35,44 @@ func (s *Userservice) Login(ctx context.Context, req *pb.AccountReq) (*pb.Accoun
 
 }
 
-func (s *Userservice) GetUserInfo(ctx context.Context, req *pb.GetUserInfoReq) (*pb.GetUserInfoResp, error) {
-
-	//1.获取当前已经登录用户的id（未登录的话，提示需要登录）
-	u, err := jwt.ParseToken(req.Token)
-	if err != nil {
-		//错误处理
-		zap.L().Error("解析Token出错")
-		return nil, err
-	}
+func (s *Userservice) GetUserInfo(ctx context.Context, req *pb.GetUserInfoReq) (resp *pb.GetUserInfoResp, err error) {
 	var uInfo *models.User
 	isfollow := false
-	//查询本人的信息
-	if u.UserID == req.UserId {
-		uInfo, err = dao.GetuserInfoByID(ctx, u.UserID)
+
+	if req.Token != "" {
+		//1.获取当前已经登录用户的id（未登录的话，提示需要登录）
+		u, err := jwt.ParseToken(req.Token)
 		if err != nil {
-			zap.L().Error("获取用户个人信息失败", zap.Error(err))
+			zap.L().Error("解析Token出错", zap.Error(err))
 			return nil, err
 		}
+
+		//查询本人的信息  或未登录查视频作者
+		if u.UserID == req.UserId {
+			uInfo, err = dao.GetuserInfoByID(ctx, req.UserId)
+			if err != nil {
+				zap.L().Error("获取用户个人信息失败", zap.Error(err))
+				return nil, err
+			}
+		} else {
+			//2.根据请求中视频作者的id，获取相应的作者信息
+			uInfo, err = dao.GetuserInfoByID(ctx, req.UserId)
+			if err != nil {
+				zap.L().Error("获取视频用户信息失败", zap.Error(err))
+				return nil, err
+			}
+			//3.从relation表中,查找出是否关注
+			isfollow, err = dao.IsFollowByID(ctx, u.UserID, req.UserId)
+			if err != nil {
+				zap.L().Error("查询是否关注信息出错！")
+				return nil, err
+			}
+		}
+
 	} else {
-		//2.根据请求中视频作者的id，获取相应的作者信息
 		uInfo, err = dao.GetuserInfoByID(ctx, req.UserId)
 		if err != nil {
-			zap.L().Error("获取视频用户信息失败", zap.Error(err))
-			return nil, err
-		}
-		//3.从relation表中,查找出是否关注
-		isfollow, err = dao.IsFollowByID(ctx, u.UserID, req.UserId)
-		if err != nil {
-			zap.L().Error("查询是否关注信息出错！")
+			zap.L().Error("获取用户个人信息失败", zap.Error(err))
 			return nil, err
 		}
 	}
@@ -83,7 +92,7 @@ func (s *Userservice) GetUserInfo(ctx context.Context, req *pb.GetUserInfoReq) (
 		IsFollow:        isfollow,
 	}
 
-	resp := &pb.GetUserInfoResp{
+	resp = &pb.GetUserInfoResp{
 		/*StatusCode: 0,
 		StatusMsg:  "获取用户信息成功",*/
 		User: userInfo,
