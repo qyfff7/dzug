@@ -42,10 +42,8 @@ func LoadClient(serviceName string, client any) error {
 	switch c := client.(type) {
 	case *user.ServiceClient:
 		*c = user.NewServiceClient(conn)
-		return nil
 	case *favorite.DouyinFavoriteActionServiceClient:
 		*c = favorite.NewDouyinFavoriteActionServiceClient(conn)
-		return nil
 	default:
 		err = errors.New("没有该类型的服务")
 		zap.L().Error(err.Error())
