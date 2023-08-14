@@ -73,7 +73,7 @@ func (f *FavoriteSrv) FavoriteList(ctx context.Context, in *favorite.FavoriteLis
 	if err != nil {
 		return nil, err
 	}
-	videos, err := dao.GetVideosByVideoIds(videoIds)
+	videos, err := dao.GetVideosByVideoIds(in.UserId, videoIds)
 	if err != nil {
 		zap.L().Error("获取点赞列表失败")
 		return &favorite.FavoriteListResponse{
