@@ -2,9 +2,9 @@ package conf
 
 import (
 	"fmt"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
-	"os"
 )
 
 // Config 全局变量，用来保存项目所有的配置信息
@@ -53,12 +53,16 @@ type EtcdConfig struct {
 	Addr []string `mapstructure:"address"`
 }
 
+type JwtConfig struct {
+	JwtExpire int64 `mapstructure:"jwt_expire"`
+}
+
 // Init 从配置文件中获取项目所有的配置信息
 func Init() (err error) {
-	workDir, _ := os.Getwd()               // 获取当前文件夹路径
-	viper.SetConfigName("config")          // 配置文件名
-	viper.SetConfigType("yml")             // 配置文件格式
-	viper.AddConfigPath(workDir + "/conf") // 添加配置路径
+	//	workDir, _ := os.Getwd()               // 获取当前文件夹路径
+	viper.SetConfigName("config")                             // 配置文件名
+	viper.SetConfigType("yaml")                               // 配置文件格式
+	viper.AddConfigPath("c:\\Users\\Mr\\Desktop\\dzug\\conf") // 添加配置路径
 
 	if err = viper.ReadInConfig(); err != nil { // 查找并读取配置文件
 		panic(fmt.Errorf("viper.ReadInConfig error config file: %s \n", err)) // 处理读取配置文件的错误
