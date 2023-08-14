@@ -30,7 +30,7 @@ func InitRegister(key, value string) (*ServiceRegister, *grpc.Server) {
 func GrpcListen(server *grpc.Server, value string) {
 	lis, err := net.Listen("tcp", value)
 	if err != nil {
-		zap.L().Fatal("启动监听失败")
+		zap.L().Fatal("启动监听失败" + err.Error())
 	}
 	fmt.Println("listening...")
 	if err = server.Serve(lis); err != nil {

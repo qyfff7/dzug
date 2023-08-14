@@ -39,7 +39,7 @@ func main() {
 	defer kafka.CloseConsumer()
 
 	key := "favorite"         // 注册的名字
-	value := "127.0.0.1:9003" // 注册的服务地址
+	value := "127.0.0.1:9007" // 注册的服务地址
 	// 传入注册的服务名和注册的服务地址进行注册
 	serviceRegister, grpcServer := discovery.InitRegister(key, value)
 	defer serviceRegister.Close()

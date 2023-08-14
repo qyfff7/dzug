@@ -2,72 +2,84 @@ package dao
 
 import (
 	"context"
-	pb "dzug/protos/video"
+	"dzug/app/user/pkg/jwt"
+	"dzug/protos/video"
 	"dzug/repo"
+	"fmt"
+	"go.uber.org/zap"
 	"math"
 )
 
-func GetVideoFeed(ctx context.Context, req *pb.GetVideoFeedReq) (*pb.GetVideoFeedResp, error) {
+/*func GetVideoFeed(ctx context.Context, req *pb.GetVideoFeedReq) (*pb.GetVideoFeedResp, error) {
 
 	return nil, nil
 
-}
+}*/
 
-//GetVideoInfoByTime 根据时间戳返回最近count个视频,还需要返回next time
-func GetVideoInfoByTime(ctx context.Context, req *pb.GetVideoFeedReq, count int64) (videos []*repo.Video, nextTime int64, err error) {
+// GetVideoInfoByTime 根据时间戳返回最近count个视频,还需要返回next time
+func GetVideoInfoByTime(ctx context.Context, req *video.GetVideoListByTimeReq, size int64) ([]*video.Video, int64, error) {
 
 	//1.按照时间倒序，查询所有的视频
-
-	if err := repo.DB.WithContext(ctx).Where("created_at < ?", req.LatestTime).Limit(int(count)).Order("created_at DESC").Find(&videos).Error; err != nil {
+	//videos := make([]*repo.Video, 0, size)
+	var videos []*repo.Video
+	if err := repo.DB.WithContext(ctx).Where("created_at < ?", req.LatestTime).Limit(int(size)).Order("created_at DESC").Find(&videos).Error; err != nil {
+		zap.L().Info("获取所有视频orm语句出错")
 		return nil, 0, err
 	}
+	zap.L().Info("查到的视频数量" + fmt.Sprintln(len(videos)))
+	for i, _ := range videos {
+		zap.L().Info("视频id" + fmt.Sprintln(videos[i].ID))
+		zap.L().Info("userid" + fmt.Sprintln(videos[i].UserId))
+		zap.L().Info("title" + fmt.Sprintln(videos[i].Title))
+		zap.L().Info("视频id" + fmt.Sprintln(videos[i].PlayUrl))
+		zap.L().Info("视频id" + fmt.Sprintln(videos[i].CoverUrl))
+		zap.L().Info("视频id" + fmt.Sprintln(videos[i].FavoriteCount))
+		zap.L().Info("视频id" + fmt.Sprintln(videos[i].CommentCount))
+	}
 
-	nextTime = math.MaxInt32
+	zap.L().Info("从video表中查询最新的视频，orm操作完成")
 
+	var nextTime int64
+	nextTime = math.MaxInt64
 	if len(videos) != 0 { // 查到了新视频
 		nextTime = videos[0].CreatedAt.Unix()
 	}
-	return
+
+	var videosInfo *video.Video
+	//var videosInfos []*video.Video
+	videosInfos := make([]*video.Video, 0, len(videos))
+	for i, _ := range videos {
+		if req.Token != "" {
+			u, _ := jwt.ParseToken(req.Token)
+			IsFavorite, _ := IsFavoriteByID(ctx, u.UserID, videos[i].UserId)
+			videosInfo.IsFavorite = IsFavorite
+		} else {
+			videosInfo.IsFavorite = false
+		}
+		videosInfo.VideoId = int64(videos[i].ID)
+		videosInfo.AutherId = videos[i].UserId
+		videosInfo.PlayUrl = videos[i].PlayUrl
+		videosInfo.CoverUrl = videos[i].CoverUrl
+		videosInfo.Title = videos[i].Title
+		videosInfo.FavoriteCount = int64(videos[i].FavoriteCount)
+		videosInfo.CommentCount = int64(videos[i].CommentCount)
+		zap.L().Info(fmt.Sprintln(videos[i].ID))
+		videosInfos = append(videosInfos, videosInfo)
+
+	}
+	return videosInfos, nextTime, nil
 }
 
-/*// MGetVideoByTime 通过指定latestTime和count，从DAO层获取视频基本信息，并查出当前用户是否点赞，组装后返回
-func (s *MGetVideoByTimeService) MGetVideoByTime(req *videoproto.GetVideoListByTimeReq) ([]*videoproto.VideoInfo, int64, error) {
-	span := Tracer.StartSpan("feed")
-	defer span.Finish()
-	s.ctx = opentracing.ContextWithSpan(s.ctx, span)
-	videoModels, nextTime, err := dal.MGetVideoByTime(s.ctx, time.Unix(req.LatestTime, 0), req.Count)
-	// 只能得到视频id，uid，title，play_url,cover_url,created_time
-	if err != nil {
-		return nil, 0, err
+// IsFavoriteByID 判断是否点赞了该视频
+func IsFavoriteByID(ctx context.Context, userID, videoID int64) (bool, error) {
+	var rel repo.Favorite
+	result := repo.DB.WithContext(ctx).Where("user_id = ? AND video_id = ?", userID, videoID).Limit(1).Find(&rel)
+	if result.Error != nil {
+		zap.L().Info("查找点赞关系时出错")
+		return false, result.Error
 	}
-	videos := pack.Videos(videoModels) // 类型转换：视频id、base_info、点赞数、评论数已经得到，还需要判断是否点赞
-
-	appUserID := req.AppUserId
-	// 没有登录，直接返回不再查询是否点赞
-	if appUserID < 0 {
-		return videos, nextTime, nil
+	if result.RowsAffected > 0 { //点赞
+		return true, nil
 	}
-	isLikeKeyExist, err := redis.IsLikeKeyExist(appUserID)
-	if err != nil {
-		klog.Error(err)
-	}
-	if isLikeKeyExist == false {
-		// 如果redis没有appUserID的记录，则去mysql查询一次点赞列表进行缓存
-		likeList, err := dal.MGetLikeList(s.ctx, appUserID)
-		if err != nil {
-			return nil, 0, err
-		}
-		if err := redis.AddLikeList(appUserID, likeList); err != nil {
-			klog.Error(err)
-		}
-	}
-	for i := 0; i < len(videos); i++ {
-		isFavorite, err := redis.GetIsLikeById(appUserID, videos[i].VideoId)
-		if err != nil {
-			isFavorite, _ = dal.IsFavorite(s.ctx, videos[i].VideoId, appUserID)
-		}
-		videos[i].IsFavorite = isFavorite
-	}
-	return videos, nextTime, nil
+	return false, nil //未点赞
 }
-*/

@@ -73,14 +73,14 @@ func InsertUser(ctx context.Context, req *user.AccountReq) (*user.AccountResp, e
 	}
 	//zap.L().Info("构建新用户的结构体完毕")
 	//5.保存到数据库中
-	err = repo.DB.WithContext(ctx).Create(&newuser).Error
+	err = repo.DB.WithContext(ctx).Create(newuser).Error
 	if err != nil {
 		zap.L().Error("create user data fail ", zap.Error(err))
 		return nil, err
 	}
 	zap.L().Info("用户注册成功！！！")
 	//6.生成token
-	token, err := jwt.GenToken(newuser.UserId)
+	token, err := jwt.GenToken(userID)
 	if err != nil {
 		zap.L().Error("生成tocken出错")
 	}
@@ -103,7 +103,8 @@ func CheckAccount(ctx context.Context, req *user.AccountReq) (*user.AccountResp,
 		Name:     req.Username,
 		Password: encryptPassword(req.Password),
 	}
-	result := repo.DB.WithContext(ctx).Where("name = ? AND password >= ?", u.Name, u.Password).Limit(1).Find(&u)
+
+	result := repo.DB.WithContext(ctx).Where("name = ? AND password = ?", u.Name, u.Password).Limit(1).Find(&u)
 
 	if result.Error != nil {
 		zap.L().Info("执行用户登录sql查询时出错")
@@ -121,8 +122,7 @@ func CheckAccount(ctx context.Context, req *user.AccountReq) (*user.AccountResp,
 	if err != nil {
 		zap.L().Error("token generation error")
 	}
-	//var success int32
-	//success = 0
+
 	resp := &user.AccountResp{
 		UserId: u.UserId,
 		Token:  token,
@@ -166,5 +166,4 @@ func IsFollowByID(ctx context.Context, userID, autherID int64) (bool, error) {
 		return true, nil
 	}
 	return false, nil //未关注
-
 }

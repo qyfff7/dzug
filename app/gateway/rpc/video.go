@@ -3,13 +3,13 @@ package rpc
 import (
 	"context"
 	"dzug/discovery"
-	pb "dzug/protos/video"
+	"dzug/protos/video"
 )
 
-func Feed(ctx context.Context, req *pb.GetVideoFeedReq) (*pb.GetVideoFeedResp, error) {
+func Feed(ctx context.Context, req *video.GetVideoListByTimeReq) (*video.GetVideoListByTimeResp, error) {
 
-	discovery.LoadClient("video", &discovery.UserClient)
-	r, err := discovery.VideoClient.GetVideoFeed(ctx, req) // 调用注册方法
+	discovery.LoadClient("video", &discovery.VideoClient)
+	r, err := discovery.VideoClient.GetVideoListByTime(ctx, req) // 调用注册方法
 	if err != nil {
 		return nil, err
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"dzug/app/user/dao"
 	"dzug/app/user/pkg/jwt"
+	"dzug/models"
 	pb "dzug/protos/user"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -27,7 +28,7 @@ func (s *Userservice) Login(ctx context.Context, req *pb.AccountReq) (*pb.Accoun
 	//dao层进行数据库查询操作
 	resp, err := dao.CheckAccount(ctx, req)
 	if err != nil {
-		zap.L().Error("用户登录失败", zap.Error(err))
+		zap.L().Error("用户登录失败：", zap.Error(err))
 		return nil, err
 	}
 	return resp, nil
@@ -43,20 +44,30 @@ func (s *Userservice) GetUserInfo(ctx context.Context, req *pb.GetUserInfoReq) (
 		zap.L().Error("解析Token出错")
 		return nil, err
 	}
-	userID := u.UserID
+	var uInfo *models.User
+	isfollow := false
+	//查询本人的信息
+	if u.UserID == req.UserId {
+		uInfo, err = dao.GetuserInfoByID(ctx, u.UserID)
+		if err != nil {
+			zap.L().Error("获取用户个人信息失败", zap.Error(err))
+			return nil, err
+		}
+	} else {
+		//2.根据请求中视频作者的id，获取相应的作者信息
+		uInfo, err = dao.GetuserInfoByID(ctx, req.UserId)
+		if err != nil {
+			zap.L().Error("获取视频用户信息失败", zap.Error(err))
+			return nil, err
+		}
+		//3.从relation表中,查找出是否关注
+		isfollow, err = dao.IsFollowByID(ctx, u.UserID, req.UserId)
+		if err != nil {
+			zap.L().Error("查询是否关注信息出错！")
+			return nil, err
+		}
+	}
 
-	//2.根据请求中视频作者的id，获取相应的作者信息
-	uInfo, err := dao.GetuserInfoByID(ctx, req.UserId)
-	if err != nil {
-		zap.L().Error("获取视频用户信息失败", zap.Error(err))
-		return nil, err
-	}
-	//3.从relation表中,查找出是否关注
-	isfollow, err := dao.IsFollowByID(ctx, userID, req.UserId)
-	if err != nil {
-		zap.L().Error("查询是否关注信息出错！")
-		return nil, err
-	}
 	//3.构建返回结构
 	userInfo := &pb.User{
 		Id:              uInfo.ID,

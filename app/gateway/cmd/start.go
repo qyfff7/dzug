@@ -1,4 +1,4 @@
-package userclient
+package client
 
 import (
 	"dzug/app/gateway/routes"
