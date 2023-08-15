@@ -56,6 +56,7 @@ type RedisConfig struct {
 	DB           int    `mapstructure:"db"`
 	PoolSize     int    `mapstructure:"pool_size"`
 	MinIdleConns int    `mapstructure:"min_idle_conns"`
+	RedisExpire  int    `mapstructure:"redis_expire"`
 }
 
 // EtcdConfig etcd配置

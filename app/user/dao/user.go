@@ -7,6 +7,7 @@ import (
 	"crypto/md5"
 	"dzug/app/user/pkg/jwt"
 	"dzug/app/user/pkg/snowflake"
+	"dzug/app/user/redis"
 	"dzug/models"
 	"dzug/protos/user"
 	"dzug/repo"
@@ -75,13 +76,19 @@ func InsertUser(ctx context.Context, req *user.AccountReq) (*user.AccountResp, e
 		return nil, err
 	}
 	zap.L().Info("用户注册成功！！！")
-	//6.生成token
+
+	//6.将用户信息存到redis中
+	if err = redis.AddUser(ctx, newuser); err != nil {
+		zap.L().Error("用户id保存redis出错，", zap.Error(err))
+	}
+
+	//7.生成token
 	token, err := jwt.GenToken(userID)
 	if err != nil {
 		zap.L().Error("生成tocken出错")
 	}
 
-	//7.返回相应
+	//8.返回相应
 	resp := &user.AccountResp{
 		UserId: newuser.UserId,
 		Token:  token,
@@ -92,13 +99,13 @@ func InsertUser(ctx context.Context, req *user.AccountReq) (*user.AccountResp, e
 
 func CheckAccount(ctx context.Context, req *user.AccountReq) (*user.AccountResp, error) {
 
-	//构建登录用户
-	u := repo.User{
+	//1.构建登录用户
+	u := &repo.User{
 		Name:     req.Username,
 		Password: encryptPassword(req.Password),
 	}
-	result := repo.DB.WithContext(ctx).Where("name = ? AND password = ?", u.Name, u.Password).Limit(1).Find(&u)
 
+	result := repo.DB.WithContext(ctx).Where("name = ? AND password = ?", u.Name, u.Password).Limit(1).Find(u)
 	if result.Error != nil {
 		zap.L().Info("执行用户登录sql查询时出错")
 		return nil, result.Error
@@ -109,6 +116,12 @@ func CheckAccount(ctx context.Context, req *user.AccountReq) (*user.AccountResp,
 		return nil, err
 	}
 	zap.L().Info("User login successful！！！")
+
+	//将用户id和信息存到redis中，
+	if err := redis.AddUser(ctx, u); err != nil {
+		zap.L().Error("用户信息保存redis出错", zap.Error(err))
+	}
+
 	token, err := jwt.GenToken(u.UserId)
 	if err != nil {
 		zap.L().Error("token generation error")

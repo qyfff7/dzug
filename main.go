@@ -2,9 +2,9 @@ package main
 
 import (
 	"dzug/app/gateway/cmd"
-	"dzug/app/redis"
 	"dzug/app/user/cmd"
 	"dzug/app/user/pkg/snowflake"
+	"dzug/app/user/redis"
 	"dzug/app/video/cmd"
 	"dzug/conf"
 	"dzug/logger"

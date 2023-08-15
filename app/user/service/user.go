@@ -4,6 +4,7 @@ import (
 	"context"
 	"dzug/app/user/dao"
 	"dzug/app/user/pkg/jwt"
+	"dzug/app/user/redis"
 	"dzug/models"
 	pb "dzug/protos/user"
 	"go.uber.org/zap"
@@ -38,37 +39,14 @@ func (s *Userservice) Login(ctx context.Context, req *pb.AccountReq) (*pb.Accoun
 func (s *Userservice) GetUserInfo(ctx context.Context, req *pb.GetUserInfoReq) (resp *pb.GetUserInfoResp, err error) {
 	var uInfo *models.User
 	isfollow := false
-
-	if req.Token != "" {
-		//1.获取当前已经登录用户的id（未登录的话，提示需要登录）
-		u, err := jwt.ParseToken(req.Token)
+	//不管怎么说，都是要获取req.UserId的信息，所以先查redis,没有再查mysql
+	ok, _ := redis.Rdb.SIsMember(ctx, redis.GetRedisKey(redis.KeyUserId, ""), req.UserId).Result()
+	if ok {
+		uInfo, err = redis.GetUserInfoByID(ctx, req.UserId)
 		if err != nil {
-			zap.L().Error("解析Token出错", zap.Error(err))
+			zap.L().Error("从redis中获取用户信息失败，", zap.Error(err))
 			return nil, err
 		}
-
-		//查询本人的信息  或未登录查视频作者
-		if u.UserID == req.UserId {
-			uInfo, err = dao.GetuserInfoByID(ctx, req.UserId)
-			if err != nil {
-				zap.L().Error("获取用户个人信息失败", zap.Error(err))
-				return nil, err
-			}
-		} else {
-			//2.根据请求中视频作者的id，获取相应的作者信息
-			uInfo, err = dao.GetuserInfoByID(ctx, req.UserId)
-			if err != nil {
-				zap.L().Error("获取视频用户信息失败", zap.Error(err))
-				return nil, err
-			}
-			//3.从relation表中,查找出是否关注
-			isfollow, err = dao.IsFollowByID(ctx, u.UserID, req.UserId)
-			if err != nil {
-				zap.L().Error("查询是否关注信息出错！")
-				return nil, err
-			}
-		}
-
 	} else {
 		uInfo, err = dao.GetuserInfoByID(ctx, req.UserId)
 		if err != nil {
@@ -76,7 +54,19 @@ func (s *Userservice) GetUserInfo(ctx context.Context, req *pb.GetUserInfoReq) (
 			return nil, err
 		}
 	}
-
+	u, err := jwt.ParseToken(req.Token)
+	if err != nil {
+		zap.L().Error("解析Token出错", zap.Error(err))
+		return nil, err
+	}
+	if u.UserID != req.UserId {
+		//当前是登录用户，查询视频作者信息  //从relation表中,查找出是否关注
+		isfollow, err = dao.IsFollowByID(ctx, u.UserID, req.UserId)
+		if err != nil {
+			zap.L().Error("查询是否关注信息出错！")
+			return nil, err
+		}
+	}
 	//3.构建返回结构
 	userInfo := &pb.User{
 		Id:              uInfo.ID,
