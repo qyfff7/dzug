@@ -1,4 +1,12 @@
+# 合并说明
+
+1. 按照lxxx的模式，改写了start
+2. 按照lxxx分支的模式，增改了新的yml配置
+3. favorite模块需要配置kafka，如果新合并分支没有该环境，直接在main中注释掉相关代码应该可以了
+4. favorite模块使用了自己的redis，没有使用lxxx分支下，app/redis包
+
 # dzug
+
 ### 抖声 demo
 
 此demo使用框架为 grpc+etcd+gin，使用etcd来进行服务注册发现，主要使用两个服务，来测试服务注册与发现功能，使用viper和zap加上了配置管理与日志功能

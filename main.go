@@ -1,6 +1,7 @@
 package main
 
 import (
+	favorservice "dzug/app/favorite/cmd"
 	"dzug/app/gateway/cmd"
 	"dzug/app/redis"
 	"dzug/app/user/cmd"
@@ -56,5 +57,6 @@ func main() {
 	go userservice.Start()
 	time.Sleep(time.Second)
 	go videoservice.Start()
+	go favorservice.Start()
 	client.Start()
 }

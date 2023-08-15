@@ -16,7 +16,7 @@ log:
   level: "debug"   #日志级别
 
 mysql:
-  host: localhost   #主机名
+  host: 你的mysql host   #主机名
   port: 3306   #端口
   user: "root"   #用户名
   password: "password"  #密码
@@ -30,4 +30,15 @@ etcd:
   address: 127.0.0.1:2379
 
 kafka:
-  address: 127.0.0.1:9092 #kafka配置路径
+  address: 127.0.0.1:9092
+
+service:
+  user_service_name: "user"
+  user_service_url: 127.0.0.1:9001
+  video_service_name: "video"
+  video_service_url: 127.0.0.1:9002
+  favorite_service_name: "favorite"
+  favorite_service_url: 127.0.0.1:9003
+
+video:
+  feedcount: 30
