@@ -84,7 +84,7 @@ func (s *ServiceRegister) keepAlive() {
 				return // 未尝试重新注册
 			}
 			// 处理续租响应
-			zap.L().Info(s.Key + "收到续租响应，续租成功 " + time.Now().Format("2006-01-02 15:04:05"))
+			//zap.L().Info(s.Key + "收到续租响应，续租成功 " + time.Now().Format("2006-01-02 15:04:05"))
 		case <-time.After(5 * time.Second):
 			// 定时执行续租操作
 			if err := s.putKeyWithLease(); err != nil {

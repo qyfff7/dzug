@@ -1,0 +1,40 @@
+#项目相关配置信息
+name: "Douyin"   #项目名称
+port: 8080    #启动的端口
+version: "v0.0.1"   #项目版本
+start_time: "2023-07-30"  #项目开始时间
+mode: "develop"   #项目模式(开发阶段是develop模式，即日志输出到终端，也写入日志文件，项目最终正式发布阶段是release模式，日志只输出到文件)
+machine_id: 1
+
+#jwt验证过期时间
+jwt:
+  jwt_expire: 8760
+
+#video相关参数
+video:
+  feedcount: 30
+
+#日志相关配置信息
+log:
+  filename: "./logger/douyin.log"  #日志文件的名称
+  max_size: 200    #单个日志文件的大小
+  max_backups: 7  #日志备份数量
+  max_age: 30   #日志备份天数
+  level: "debug"   #日志级别
+
+mysql:
+  host: "127.0.0.1"   #主机名
+  port: 13306   #端口
+  user: "root"   #用户名
+  password: "123456"  #密码
+  database: "douyin"   #数据库名
+  charset: "utf8mb4"
+  parsetime: true
+  loc: "Local"
+
+redis:
+  host: redis507    #主机名
+  port: 6379     #端口
+
+etcd:
+  address: 127.0.0.1:2379

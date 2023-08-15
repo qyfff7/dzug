@@ -42,6 +42,8 @@ func LoadClient(serviceName string, client any) error {
 	switch c := client.(type) {
 	case *user.ServiceClient:
 		*c = user.NewServiceClient(conn)
+	case *video.VideoServiceClient:
+		*c = video.NewVideoServiceClient(conn)
 	case *favorite.DouyinFavoriteActionServiceClient:
 		*c = favorite.NewDouyinFavoriteActionServiceClient(conn)
 	default:

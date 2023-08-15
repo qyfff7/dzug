@@ -4,6 +4,7 @@ import (
 	"context"
 	"dzug/protos/favorite"
 	"dzug/repo"
+	"fmt"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -32,7 +33,7 @@ func Favor(videoId, userId int64) error {
 	}
 
 	err := repo.DB.Transaction(func(tx *gorm.DB) (err error) {
-		if err = tx.Where("user_id = ?", userId).Save(&favor).Error; err != nil {
+		if err = tx.Create(&favor).Error; err != nil {
 			zap.L().Error("点赞失败")
 			return err
 		}
@@ -125,7 +126,7 @@ func GetVideosByVideoIds(userId int64, videoIds []int64) ([]*favorite.Video, err
 			zap.L().Error("读取视频信息失败")
 			return nil, res.Error
 		}
-		videoList[k] = &favorite.Video{} // 初始化
+		videoList[k] = new(favorite.Video) // 初始化
 		videoList[k].Author = &favorite.User{}
 		videoList[k].Id = videoIds[k]
 		res = repo.DB.Where("user_id = ?", video.UserId).First(&videoList[k].Author)
@@ -139,6 +140,7 @@ func GetVideosByVideoIds(userId int64, videoIds []int64) ([]*favorite.Video, err
 
 		videoList[k].Author.IsFollow = isFollowById(userId, video.UserId) // 更新是否关注
 		videoList[k].IsFavorite = true                                    // 设置已喜欢
+		fmt.Println(videoList[k])
 	}
 	return videoList, nil
 }

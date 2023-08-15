@@ -20,12 +20,10 @@ func UserRegister(ctx *gin.Context) {
 		errs, ok := err.(validator.ValidationErrors)
 		if !ok {
 			models.ResponseError(ctx, models.CodeInvalidParam)
-
 			return
 		}
 		err, _ := json.Marshal(removeTopStruct(errs.Translate(trans)))
 		models.ResponseErrorWithMsg(ctx, models.CodeInvalidParam, string(err))
-
 		return
 	}
 
@@ -37,7 +35,6 @@ func UserRegister(ctx *gin.Context) {
 	}
 	//3.返回相应
 	models.AccountRespSuccess(ctx, userResp)
-
 }
 
 func UserLogin(ctx *gin.Context) {
@@ -50,21 +47,23 @@ func UserLogin(ctx *gin.Context) {
 		if !ok {
 			// 非validator.ValidationErrors类型错误直接返回
 			models.ResponseError(ctx, models.CodeInvalidParam)
-
 			return
 		}
 		err, _ := json.Marshal(removeTopStruct(errs.Translate(trans)))
 		models.ResponseErrorWithMsg(ctx, models.CodeInvalidParam, string(err))
-
 		return
 	}
-	//2.调用登录服务
+	//2.从redis中查询是否存在该用户，如果存在，直接返回userid和token
+
+	//3.当前用户不在redis,只能从mysql中查询，调用登录服务
 	userResp, err := rpc.Login(ctx, userReq)
 	if err != nil {
 		models.ResponseErrorWithMsg(ctx, models.CodeInvalidPassword, err.Error())
 		return
 	}
-	//3.返回相应
+	//4.将当前用户的信息存到redis中
+
+	//5.返回相应
 	models.AccountRespSuccess(ctx, userResp)
 
 }
@@ -79,12 +78,10 @@ func UserInfo(ctx *gin.Context) {
 		errs, ok := err.(validator.ValidationErrors)
 		if !ok {
 			models.ResponseError(ctx, models.CodeInvalidParam)
-
 			return
 		}
 		err, _ := json.Marshal(removeTopStruct(errs.Translate(trans)))
 		models.ResponseErrorWithMsg(ctx, models.CodeInvalidParam, string(err))
-
 		return
 	}
 

@@ -49,8 +49,8 @@ func NewRouter(mode string) *gin.Engine {
 	favorite := ginRouter.Group("/douyin/favorite")
 	favorite.Use(middlewares.JWTAuthMiddleware())
 	{
-		favorite.POST("/action", handlers.FavoriteAction)
-		favorite.GET("/list", handlers.FavoriteList)
+		favorite.POST("/action/", handlers.FavoriteAction)
+		favorite.GET("/list/", handlers.FavoriteList)
 	}
 
 	ginRouter.NoRoute(func(c *gin.Context) {

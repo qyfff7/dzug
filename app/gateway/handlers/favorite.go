@@ -4,6 +4,7 @@ import (
 	"dzug/app/gateway/rpc"
 	"dzug/app/user/pkg/jwt"
 	pb "dzug/protos/favorite"
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -20,14 +21,14 @@ type favoriteReq struct {
 func FavoriteAction(ctx *gin.Context) {
 	var fReq favoriteReq
 	userId, _ := jwt.GetUserID(ctx)
-	err := ctx.ShouldBind(&fReq)
-	if err != nil {
-		zap.L().Fatal("绑定参数出错" + err.Error())
-	}
+	//err := ctx.ShouldBind(&fReq)
+	//if err != nil {
+	//	zap.L().Fatal("绑定参数出错" + err.Error())
+	//}
 	zap.L().Info(fmt.Sprintf("userId:", userId, " VideoId:", fReq.VideoId, " ActionType:", fReq.ActionType))
+	fReq.VideoId = ctx.Query("video_id")
+	fReq.ActionType = ctx.Query("action_type")
 	videoid, _ := strconv.Atoi(fReq.VideoId)
-	//videoId := ctx.Query("video_id")
-	//actionType := ctx.Query("action_type")
 
 	if fReq.ActionType == "1" { // 进行点赞
 		fAction := pb.FavoriteRequest{
@@ -78,5 +79,11 @@ func FavoriteList(ctx *gin.Context) {
 		})
 		return
 	}
-	ctx.JSON(http.StatusOK, fResp)
+	marshal, err := json.Marshal(fResp)
+	fmt.Println(fResp)
+	fmt.Println(marshal)
+	if err != nil {
+		return
+	}
+	ctx.Data(200, "json", marshal)
 }

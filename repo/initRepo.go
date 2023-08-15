@@ -13,17 +13,18 @@ import (
 // DB 提供给对外操作数据库
 var DB *gorm.DB
 
-func Init() {
+func Init() (err error) {
+
 	mysqlConfig := conf.Config.MySQLConfig
 	link := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		mysqlConfig.User, mysqlConfig.Password, mysqlConfig.Host, mysqlConfig.Port, mysqlConfig.DB)
-	var err error
 	DB, err = gorm.Open(mysql.Open(link), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 		NamingStrategy: &schema.NamingStrategy{
 			SingularTable: true,
 		},
 	})
+
 	if err != nil {
 		zap.L().Error(link + "连接数据库失败" + err.Error())
 		panic(err)
@@ -33,4 +34,5 @@ func Init() {
 	//	zap.L().Error("数据表初始化失败")
 	//	panic(err)
 	//}
+	return err
 }

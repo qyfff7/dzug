@@ -12,7 +12,6 @@ import (
 	"dzug/repo"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"go.uber.org/zap"
 )
 
@@ -28,9 +27,9 @@ func encryptPassword(oPassword string) string {
 // CheckUserExits 检查指定用户名的用户是否存在
 func CheckUserExits(ctx context.Context, username string) (check bool, err error) {
 
-	var user repo.User
+	var u repo.User
 	//zap.L().Info("开始执行CheckUserExits")
-	result := repo.DB.WithContext(ctx).Where("name = ?", username).Limit(1).Find(&user)
+	result := repo.DB.WithContext(ctx).Where("name = ?", username).Limit(1).Find(&u)
 
 	if result.Error != nil {
 		zap.L().Info("查询是否存在当前用户时出错")
@@ -42,7 +41,6 @@ func CheckUserExits(ctx context.Context, username string) (check bool, err error
 		err = errors.New("当前用户名已存在,请更换用户名再尝试。")
 		return true, err
 	}
-
 	//zap.L().Info("执行到CheckUserExits函数这里了，执行完毕")
 	return false, nil
 
@@ -51,7 +49,6 @@ func CheckUserExits(ctx context.Context, username string) (check bool, err error
 // InsertUser 用户注册相关数据库操作
 func InsertUser(ctx context.Context, req *user.AccountReq) (*user.AccountResp, error) {
 
-	//zap.L().Info("执行到InsertUser函数这里了")
 	//1.判断用户是否存在
 	exits, err := CheckUserExits(ctx, req.Username)
 
@@ -71,7 +68,6 @@ func InsertUser(ctx context.Context, req *user.AccountReq) (*user.AccountResp, e
 		Name:     req.Username,
 		Password: password,
 	}
-	//zap.L().Info("构建新用户的结构体完毕")
 	//5.保存到数据库中
 	err = repo.DB.WithContext(ctx).Create(newuser).Error
 	if err != nil {
@@ -86,12 +82,10 @@ func InsertUser(ctx context.Context, req *user.AccountReq) (*user.AccountResp, e
 	}
 
 	//7.返回相应
-
 	resp := &user.AccountResp{
 		UserId: newuser.UserId,
 		Token:  token,
 	}
-
 	return resp, nil
 
 }
@@ -103,31 +97,26 @@ func CheckAccount(ctx context.Context, req *user.AccountReq) (*user.AccountResp,
 		Name:     req.Username,
 		Password: encryptPassword(req.Password),
 	}
-
 	result := repo.DB.WithContext(ctx).Where("name = ? AND password = ?", u.Name, u.Password).Limit(1).Find(&u)
 
 	if result.Error != nil {
 		zap.L().Info("执行用户登录sql查询时出错")
 		return nil, result.Error
 	}
-
 	if result.RowsAffected == 0 {
 		zap.L().Info("用户名或密码错误")
 		err := errors.New("用户名或密码错误")
 		return nil, err
 	}
 	zap.L().Info("User login successful！！！")
-
 	token, err := jwt.GenToken(u.UserId)
 	if err != nil {
 		zap.L().Error("token generation error")
 	}
-
 	resp := &user.AccountResp{
 		UserId: u.UserId,
 		Token:  token,
 	}
-
 	return resp, nil
 
 }
@@ -135,12 +124,7 @@ func CheckAccount(ctx context.Context, req *user.AccountReq) (*user.AccountResp,
 func GetuserInfoByID(ctx context.Context, uid int64) (*models.User, error) {
 	userInfo := new(models.User)
 	//1.从user表中查找出用户的个人信息
-	zap.L().Info("按照id查询用户信息")
-
-	zap.L().Info(fmt.Sprintln(uid))
-	zap.L().Info("======================")
 	result := repo.DB.WithContext(ctx).Where("user_id = ? ", uid).Limit(1).Find(&userInfo)
-
 	if result.Error != nil {
 		zap.L().Info("执行获取用户信息时gorm出错")
 		return nil, result.Error
