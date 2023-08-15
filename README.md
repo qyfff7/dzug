@@ -1,9 +1,10 @@
-# 合并说明
+# qkyufw与lxxx分支 合并说明
 
 1. 按照lxxx的模式，改写了start
 2. 按照lxxx分支的模式，增改了新的yml配置
 3. favorite模块需要配置kafka，如果新合并分支没有该环境，直接在main中注释掉相关代码应该可以了
 4. favorite模块使用了自己的redis，没有使用lxxx分支下，app/redis包
+5. 「2023年08月15日 19:23:00」by qkyufw
 
 # dzug
 
