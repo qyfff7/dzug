@@ -2,6 +2,7 @@ package main
 
 import (
 	"dzug/app/gateway/cmd"
+	"dzug/app/redis"
 	"dzug/app/user/cmd"
 	"dzug/app/user/pkg/snowflake"
 	"dzug/app/video/cmd"
@@ -36,12 +37,22 @@ func main() {
 		return
 	}
 
-	//4. snowflake初始化
+	//defer repo.Close()
+
+	//4.初始化redis连接
+	if err := redis.Init(conf.Config.RedisConfig); err != nil {
+		fmt.Printf("init redis failed, err:%v\n", err)
+		return
+	}
+	// 程序退出关闭数据库连接
+	defer redis.Close()
+
+	//5. snowflake初始化
 	if err := snowflake.Init(conf.Config.StartTime, conf.Config.MachineID); err != nil {
 		zap.L().Error("snowflake initialization error", zap.Error(err))
 		return
 	}
-
+	//6.启动服务（后续可将所有的服务单独写到一个文件）
 	go userservice.Start()
 	time.Sleep(time.Second)
 	go videoservice.Start()

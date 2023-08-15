@@ -2,17 +2,17 @@ package userservice
 
 import (
 	"dzug/app/user/service"
+	"dzug/conf"
 	"dzug/discovery"
 	pb "dzug/protos/user"
 )
 
 func Start() {
-	key := "user"             // 注册的名字
-	value := "127.0.0.1:9000" // 注册的服务地址
+
 	// 传入注册的服务名和注册的服务地址进行注册
-	serviceRegister, grpcServer := discovery.InitRegister(key, value)
+	serviceRegister, grpcServer := discovery.InitRegister(conf.Config.UserServiceName, conf.Config.UserServiceUrl)
 	defer serviceRegister.Close()
 	defer grpcServer.Stop()
 	pb.RegisterServiceServer(grpcServer, &service.Userservice{}) // 绑定grpc
-	discovery.GrpcListen(grpcServer, value)                      // 开启监听
+	discovery.GrpcListen(grpcServer, conf.Config.UserServiceUrl) // 开启监听
 }

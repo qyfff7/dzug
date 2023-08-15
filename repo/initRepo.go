@@ -15,8 +15,6 @@ var DB *gorm.DB
 
 func Init() (err error) {
 
-	//conf.Init() // 初始化配置文件
-
 	mysqlConfig := conf.Config.MySQLConfig
 	link := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		mysqlConfig.User, mysqlConfig.Password, mysqlConfig.Host, mysqlConfig.Port, mysqlConfig.DB)
@@ -26,6 +24,7 @@ func Init() (err error) {
 			SingularTable: true,
 		},
 	})
+
 	if err != nil {
 		zap.L().Error(link + "连接数据库失败" + err.Error())
 		panic(err)
