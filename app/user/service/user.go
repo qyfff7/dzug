@@ -54,19 +54,22 @@ func (s *Userservice) GetUserInfo(ctx context.Context, req *pb.GetUserInfoReq) (
 			return nil, err
 		}
 	}
-	u, err := jwt.ParseToken(req.Token)
-	if err != nil {
-		zap.L().Error("解析Token出错", zap.Error(err))
-		return nil, err
-	}
-	if u.UserID != req.UserId {
-		//当前是登录用户，查询视频作者信息  //从relation表中,查找出是否关注
-		isfollow, err = dao.IsFollowByID(ctx, u.UserID, req.UserId)
+	if req.Token != "" {
+		u, err := jwt.ParseToken(req.Token)
 		if err != nil {
-			zap.L().Error("查询是否关注信息出错！")
+			zap.L().Error("解析Token出错", zap.Error(err))
 			return nil, err
 		}
+		if u.UserID != req.UserId {
+			//当前是登录用户，查询视频作者信息  //从relation表中,查找出是否关注
+			isfollow, err = dao.IsFollowByID(ctx, u.UserID, req.UserId)
+			if err != nil {
+				zap.L().Error("查询是否关注信息出错！")
+				return nil, err
+			}
+		}
 	}
+
 	//3.构建返回结构
 	userInfo := &pb.User{
 		Id:              uInfo.ID,

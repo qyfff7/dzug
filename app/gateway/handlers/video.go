@@ -30,6 +30,11 @@ func Feed(c *gin.Context) {
 		return
 	}
 	//2.判断当前是否登录
+
+	zap.L().Info("----------")
+	zap.L().Info(vparams.Token)
+	zap.L().Info("=========")
+
 	if vparams.Token != "" {
 		//当前登录，进行token校验
 		u, err := jwt.ParseToken(vparams.Token)
@@ -49,6 +54,7 @@ func Feed(c *gin.Context) {
 
 	videofeed := make([]*models.Video, 0, len(videos.VideoList))
 	//4.对于每个视频,查询作者的信息
+
 	for _, v := range videos.VideoList {
 		u := &user.GetUserInfoReq{
 			UserId: v.AutherId,

@@ -2,7 +2,12 @@ package service
 
 import (
 	"context"
+	"dzug/app/user/pkg/snowflake"
+	"dzug/app/user/redis"
+	"dzug/conf"
+	"dzug/logger"
 	"dzug/protos/user"
+	"dzug/repo"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -10,7 +15,15 @@ import (
 
 var client user.ServiceClient
 
+func iinit() {
+	conf.Init()
+	logger.Init()
+	repo.Init()
+	redis.Init()
+	snowflake.Init()
+}
 func TestRegister(t *testing.T) {
+	iinit()
 	should := assert.New(t)
 	newuser := new(user.AccountReq)
 	newuser.Username = "uuu"
