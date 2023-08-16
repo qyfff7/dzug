@@ -2,9 +2,9 @@ package main
 
 import (
 	"dzug/app/gateway/cmd"
+	"dzug/app/redis"
 	"dzug/app/user/cmd"
 	"dzug/app/user/pkg/snowflake"
-	"dzug/app/user/redis"
 	"dzug/app/video/cmd"
 	"dzug/conf"
 	"dzug/logger"
@@ -23,7 +23,7 @@ func main() {
 	}
 
 	//2. 初始化日志
-	if err := logger.Init(); err != nil {
+	if err := logger.Init(conf.Config.LogConfig, conf.Config.Mode); err != nil {
 		fmt.Printf("log file initialization error,%#v", err)
 		return
 	}
@@ -48,7 +48,7 @@ func main() {
 	defer redis.Close()
 
 	//5. snowflake初始化
-	if err := snowflake.Init(); err != nil {
+	if err := snowflake.Init(conf.Config.StartTime, conf.Config.MachineID); err != nil {
 		zap.L().Error("snowflake initialization error", zap.Error(err))
 		return
 	}
@@ -56,5 +56,6 @@ func main() {
 	go userservice.Start()
 	time.Sleep(time.Second)
 	go videoservice.Start()
+	//go favorservice.Start()
 	client.Start()
 }

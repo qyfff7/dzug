@@ -26,7 +26,7 @@ type GetVideoListByTimeReq struct {
 	unknownFields protoimpl.UnknownFields
 
 	LatestTime int64  `protobuf:"varint,1,opt,name=latest_time,json=latestTime,proto3" json:"latest_time,omitempty" form:"latest_time"` //限制返回视频的最新投稿时间戳，精确到秒，不填表示当前时间
-	Token      string `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty" form:"token"`                              //判断用户是否登录
+	Token      string `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty" form:"token"`                                    //判断用户是否登录
 }
 
 func (x *GetVideoListByTimeReq) Reset() {

@@ -30,11 +30,6 @@ func Feed(c *gin.Context) {
 		return
 	}
 	//2.判断当前是否登录
-
-	zap.L().Info("----------")
-	zap.L().Info(vparams.Token)
-	zap.L().Info("=========")
-
 	if vparams.Token != "" {
 		//当前登录，进行token校验
 		u, err := jwt.ParseToken(vparams.Token)

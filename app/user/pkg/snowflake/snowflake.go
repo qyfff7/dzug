@@ -1,7 +1,6 @@
 package snowflake
 
 import (
-	"dzug/conf"
 	sf "github.com/bwmarrin/snowflake"
 	"time"
 )
@@ -12,14 +11,14 @@ import (
 
 var node *sf.Node
 
-func Init() (err error) {
+func Init(startTime string, machineID int64) (err error) {
 	var st time.Time
-	st, err = time.Parse("2006-01-02", conf.Config.StartTime)
+	st, err = time.Parse("2006-01-02", startTime)
 	if err != nil {
 		return
 	}
 	sf.Epoch = st.UnixNano() / 1000000
-	node, err = sf.NewNode(conf.Config.MachineID)
+	node, err = sf.NewNode(machineID)
 	return
 }
 func GenID() int64 {

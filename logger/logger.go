@@ -17,22 +17,22 @@ import (
 )
 
 // Init 初始化Logger
-func Init() (err error) {
+func Init(cfg *conf.LogConfig, mode string) (err error) {
 	writeSyncer := getLogWriter(
-		conf.Config.LogConfig.Filename,
-		conf.Config.LogConfig.MaxSize,
-		conf.Config.LogConfig.MaxBackups,
-		conf.Config.LogConfig.MaxAge,
+		cfg.Filename,
+		cfg.MaxSize,
+		cfg.MaxBackups,
+		cfg.MaxAge,
 	)
 	encoder := getEncoder()
 	var l = new(zapcore.Level)
-	err = l.UnmarshalText([]byte(conf.Config.LogConfig.Level))
+	err = l.UnmarshalText([]byte(cfg.Level))
 	if err != nil {
 		return
 	}
 
 	var core zapcore.Core
-	if conf.Config.Mode == "develop" {
+	if mode == "develop" {
 		//开发模式，日志输出到终端
 		consoleEnbcoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
 		core = zapcore.NewTee(

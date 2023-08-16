@@ -1,8 +1,8 @@
 package middlewares
 
 import (
+	"dzug/app/redis"
 	"dzug/app/user/pkg/jwt"
-	"dzug/app/user/redis"
 	"dzug/models"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"

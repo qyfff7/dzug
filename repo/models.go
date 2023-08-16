@@ -72,8 +72,8 @@ type User struct {
 	Comment          []Comment  `gorm:"foreignKey:UserId;references:UserId"`
 	Favorite         []Favorite `gorm:"foreignKey:UserId;references:UserId"`
 	Video            []Video    `gorm:"foreignKey:UserId;references:UserId"`
-	Relation1        []Relation `gorm:"foreignKey:UserId;references:UserId"`
 	Relation         []Relation `gorm:"foreignKey:ToUserId;references:UserId"`
+	Relation1        []Relation `gorm:"foreignKey:UserId;references:UserId"`
 	Message          []Message  `gorm:"foreignKey:ToUserId;references:UserId"`
 	Message1         []Message  `gorm:"foreignKey:FromUserId;references:UserId"`
 	Name             string     `gorm:"column:name;type:varchar(32);comment:用户名称;NOT NULL;unique" json:"name"`

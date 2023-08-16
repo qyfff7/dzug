@@ -44,6 +44,14 @@ func NewRouter(mode string) *gin.Engine {
 	{
 		user.GET("/user/", handlers.UserInfo) //用户信息路由
 	}
+
+	favorite := ginRouter.Group("/douyin/favorite")
+	favorite.Use(middlewares.JWTAuthMiddleware())
+	{
+		favorite.POST("/action/", handlers.FavoriteAction)
+		favorite.GET("/list/", handlers.FavoriteList)
+	}
+
 	ginRouter.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"msg": "404 not found",

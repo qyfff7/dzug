@@ -5,9 +5,9 @@ package dao
 import (
 	"context"
 	"crypto/md5"
+	"dzug/app/redis"
 	"dzug/app/user/pkg/jwt"
 	"dzug/app/user/pkg/snowflake"
-	"dzug/app/user/redis"
 	"dzug/models"
 	"dzug/protos/user"
 	"dzug/repo"

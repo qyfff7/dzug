@@ -16,8 +16,8 @@ var DB *gorm.DB
 func Init() (err error) {
 
 	mysqlConfig := conf.Config.MySQLConfig
-	link := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		mysqlConfig.User, mysqlConfig.Password, mysqlConfig.Host, mysqlConfig.Port, mysqlConfig.DB)
+	link := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=%t&loc=%s",
+		mysqlConfig.User, mysqlConfig.Password, mysqlConfig.Host, mysqlConfig.Port, mysqlConfig.DB, mysqlConfig.Charset, mysqlConfig.ParseTime, mysqlConfig.Loc)
 	DB, err = gorm.Open(mysql.Open(link), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 		NamingStrategy: &schema.NamingStrategy{

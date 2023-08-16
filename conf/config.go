@@ -22,6 +22,7 @@ type ProjectConfig struct {
 	*MySQLConfig `mapstructure:"mysql"`
 	*RedisConfig `mapstructure:"redis"`
 	*EtcdConfig  `mapstructure:"etcd"`
+	*KafkaConfig `mapstructure:"kafka"`
 	*JwtConfig   `mapstructure:"jwt"`
 	*Video       `mapstructure:"video"`
 	*Service     `mapstructure:"service"`
@@ -64,6 +65,11 @@ type EtcdConfig struct {
 	Addr []string `mapstructure:"address"`
 }
 
+// KafkaConfig kafka配置
+type KafkaConfig struct {
+	Addr []string `mapstructure:"address"`
+}
+
 // jwt 配置
 type JwtConfig struct {
 	JwtExpire int64 `mapstructure:"jwt_expire"`
@@ -72,12 +78,14 @@ type Video struct {
 	FeedCount int64 `mapstructure:"feedcount"`
 }
 
-// 所有服务相关的配置（主要是服务名称和地址）
+// Service 所有服务相关的配置（主要是服务名称和地址）
 type Service struct {
-	UserServiceName  string `mapstructure:"user_service_name"`
-	UserServiceUrl   string `mapstructure:"user_service_url"`
-	VideoServiceName string `mapstructure:"video_service_name"`
-	VideoServiceUrl  string `mapstructure:"video_service_url"`
+	UserServiceName     string `mapstructure:"user_service_name"`
+	UserServiceUrl      string `mapstructure:"user_service_url"`
+	VideoServiceName    string `mapstructure:"video_service_name"`
+	VideoServiceUrl     string `mapstructure:"video_service_url"`
+	FavoriteServiceName string `mapstructure:"favorite_service_name"`
+	FavoriteServiceUrl  string `mapstructure:"favorite_service_url"`
 }
 
 // Init 从配置文件中获取项目所有的配置信息
