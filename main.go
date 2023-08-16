@@ -1,8 +1,12 @@
 package main
 
 import (
+	favorservice "dzug/app/favorite/cmd"
+	client "dzug/app/gateway/cmd"
 	"dzug/app/redis"
+	userservice "dzug/app/user/cmd"
 	"dzug/app/user/pkg/snowflake"
+	videoservice "dzug/app/video/cmd"
 	"dzug/conf"
 	"dzug/logger"
 	"dzug/repo"
