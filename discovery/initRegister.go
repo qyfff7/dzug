@@ -19,7 +19,8 @@ func InitRegister(key, value string) (*ServiceRegister, *grpc.Server) {
 	}
 	err := sRegister.newServiceRegister()
 	if err != nil {
-		zap.L().Fatal("初始化服务注册失败" + err.Error())
+		zap.L().Error("初始化服务注册失败" + err.Error())
+		panic("初始化服务注册失败" + err.Error())
 	}
 
 	server := grpc.NewServer()
