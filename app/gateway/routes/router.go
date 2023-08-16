@@ -23,7 +23,6 @@ func NewRouter(mode string) *gin.Engine {
 
 	ginRouter := gin.New()
 	ginRouter.Use(logger.GinLogger(), logger.GinRecovery(true)) // 使用自己的两个中间件
-
 	ginRouter.LoadHTMLFiles("./templates/index.html")
 	ginRouter.Static("/static", "./static")
 

@@ -77,15 +77,14 @@ func InsertUser(ctx context.Context, req *user.AccountReq) (*user.AccountResp, e
 	}
 	zap.L().Info("用户注册成功！！！")
 
-	//6.将用户信息存到redis中
-	if err = redis.AddUser(ctx, newuser); err != nil {
-		zap.L().Error("用户id保存redis出错，", zap.Error(err))
-	}
-
-	//7.生成token
+	//6.生成token
 	token, err := jwt.GenToken(userID)
 	if err != nil {
 		zap.L().Error("生成tocken出错")
+	}
+	//7.将用户信息存到redis中
+	if err = redis.AddUser(ctx, newuser, token); err != nil {
+		zap.L().Error("用户id保存redis出错，", zap.Error(err))
 	}
 
 	//8.返回相应
@@ -117,14 +116,14 @@ func CheckAccount(ctx context.Context, req *user.AccountReq) (*user.AccountResp,
 	}
 	zap.L().Info("User login successful！！！")
 
-	//将用户id和信息存到redis中，
-	if err := redis.AddUser(ctx, u); err != nil {
-		zap.L().Error("用户信息保存redis出错", zap.Error(err))
-	}
-
 	token, err := jwt.GenToken(u.UserId)
 	if err != nil {
 		zap.L().Error("token generation error")
+	}
+
+	//将用户id和信息存到redis中，
+	if err := redis.AddUser(ctx, u, token); err != nil {
+		zap.L().Error("用户信息保存redis出错", zap.Error(err))
 	}
 	resp := &user.AccountResp{
 		UserId: u.UserId,

@@ -40,7 +40,7 @@ func main() {
 	//defer repo.Close()
 
 	//4.初始化redis连接
-	if err := redis.Init(conf.Config.RedisConfig); err != nil {
+	if err := redis.Init(); err != nil {
 		fmt.Printf("init redis failed, err:%v\n", err)
 		return
 	}
@@ -48,7 +48,7 @@ func main() {
 	defer redis.Close()
 
 	//5. snowflake初始化
-	if err := snowflake.Init(conf.Config.StartTime, conf.Config.MachineID); err != nil {
+	if err := snowflake.Init(); err != nil {
 		zap.L().Error("snowflake initialization error", zap.Error(err))
 		return
 	}

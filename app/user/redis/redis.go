@@ -30,13 +30,13 @@ var (
 )
 
 // Init 初始化连接
-func Init(cfg *conf.RedisConfig) (err error) {
+func Init() (err error) {
 	Rdb = redis.NewClient(&redis.Options{
-		Addr:         fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
-		Password:     cfg.Password, // no password set
-		DB:           cfg.DB,       // use default DB
-		PoolSize:     cfg.PoolSize,
-		MinIdleConns: cfg.MinIdleConns,
+		Addr:         fmt.Sprintf("%s:%d", conf.Config.RedisConfig.Host, conf.Config.RedisConfig.Port),
+		Password:     conf.Config.RedisConfig.Password, // no password set
+		DB:           conf.Config.RedisConfig.DB,       // use default DB
+		PoolSize:     conf.Config.RedisConfig.PoolSize,
+		MinIdleConns: conf.Config.RedisConfig.MinIdleConns,
 	})
 	ctx := context.Background()
 	_, err = Rdb.Ping(ctx).Result()
@@ -50,7 +50,7 @@ func Close() {
 	_ = Rdb.Close()
 }
 
-func AddUser(ctx context.Context, newuser *repo.User) error {
+func AddUser(ctx context.Context, newuser *repo.User, newtoken string) error {
 	//以userid为key,用户的其他所有信息为value,存到redis中
 	userinfo := make(map[string]interface{})
 	userinfo["user_id"] = newuser.UserId
@@ -65,6 +65,11 @@ func AddUser(ctx context.Context, newuser *repo.User) error {
 	userinfo["avatar"] = newuser.Avatar
 	userinfo["work_count"] = newuser.WorkCount
 
+	//只要登录就将新的token存到redis中
+	err := Rdb.HSet(ctx, GetRedisKey(KeyUserInfo, strconv.Itoa(int(newuser.UserId))), "token", newtoken).Err()
+	if err != nil {
+		panic(err)
+	}
 	ok, _ := Rdb.SIsMember(ctx, GetRedisKey(KeyUserId, ""), newuser.UserId).Result()
 	if !ok {
 		err := Rdb.SAdd(ctx, GetRedisKey(KeyUserId, ""), newuser.UserId).Err()
