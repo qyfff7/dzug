@@ -22,6 +22,7 @@ type ProjectConfig struct {
 	*MySQLConfig `mapstructure:"mysql"`
 	*RedisConfig `mapstructure:"redis"`
 	*EtcdConfig  `mapstructure:"etcd"`
+	*JwtConfig   `mapstructure:"jwt"`
 }
 
 // LogConfig 日志文件的配置

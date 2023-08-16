@@ -2,6 +2,7 @@ package main
 
 import (
 	"dzug/app/comment/service"
+	"dzug/app/redis"
 	"dzug/conf"
 	"dzug/discovery"
 	"dzug/logger"
@@ -28,6 +29,7 @@ func main() {
 	defer zap.L().Sync() //把缓冲区的日志，追加到文件中
 
 	repo.Init()
+	redis.Init(conf.Config.RedisConfig)
 	zap.L().Info("服务启动，开始记录日志")
 
 	key := "comment"          // 注册的名字

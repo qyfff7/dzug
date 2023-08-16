@@ -2,10 +2,10 @@ package discovery
 
 import (
 	"dzug/conf"
+
 	"dzug/protos/comment"
 	"dzug/protos/relation"
 	"dzug/protos/user"
-	"go/doc/comment"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
