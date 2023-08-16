@@ -1,11 +1,8 @@
 package main
 
 import (
-	"dzug/app/gateway/cmd"
 	"dzug/app/redis"
-	"dzug/app/user/cmd"
 	"dzug/app/user/pkg/snowflake"
-	"dzug/app/video/cmd"
 	"dzug/conf"
 	"dzug/logger"
 	"dzug/repo"
@@ -56,6 +53,6 @@ func main() {
 	go userservice.Start()
 	time.Sleep(time.Second)
 	go videoservice.Start()
-	//go favorservice.Start()
+	go favorservice.Start()
 	client.Start()
 }
