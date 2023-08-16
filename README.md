@@ -1,4 +1,14 @@
+# qkyufw与lxxx分支 合并说明
+
+1. 按照lxxx的模式，改写了start
+2. 按照lxxx分支的模式，增改了新的yml配置
+3. favorite模块需要配置kafka，如果新合并分支没有该环境，直接在main中注释掉相关代码应该可以了
+4. favorite模块使用了自己的redis，没有使用lxxx分支下，app/redis包
+5. 「2023年08月15日 19:23:00」by qkyufw
+6. 整合user，feed，favorite 「2023年08月17日 0:25:00」by lxxx
+
 # dzug
+
 ### 抖声 demo
 
 此demo使用框架为 grpc+etcd+gin，使用etcd来进行服务注册发现，主要使用两个服务，来测试服务注册与发现功能，使用viper和zap加上了配置管理与日志功能
@@ -67,6 +77,14 @@
 1. etcd端口：使用默认2379端口
 2. user服务：使用9000端口
 3. relation服务：使用9001端口
+
+# User相关接口
+
+1.用户注册、登录、查询个人（或视频作者）信息已完成
+
+# Feed视频流相关接口
+由于数据库中没有视频流数据，因此我在用户登录后，直接插入了三条视频数据用于测试，详情：`app/user/dao/user.go`
+
 
 
 

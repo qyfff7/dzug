@@ -12,16 +12,20 @@ var Config = new(ProjectConfig)
 
 // ProjectConfig 项目所有的配置
 type ProjectConfig struct {
-	Name      string `mapstructure:"name"`
-	Port      int    `mapstructure:"port"`
-	Version   string `mapstructure:"version"`
-	StartTime string `mapstructure:"start_time"`
-	Mode      string `mapstructure:"mode"`
-
+	Name         string `mapstructure:"name"`
+	Port         int    `mapstructure:"port"`
+	Version      string `mapstructure:"version"`
+	StartTime    string `mapstructure:"start_time"`
+	Mode         string `mapstructure:"mode"`
+	MachineID    int64  `mapstructure:"machine_id"`
 	*LogConfig   `mapstructure:"log"`
 	*MySQLConfig `mapstructure:"mysql"`
 	*RedisConfig `mapstructure:"redis"`
 	*EtcdConfig  `mapstructure:"etcd"`
+	*KafkaConfig `mapstructure:"kafka"`
+	*JwtConfig   `mapstructure:"jwt"`
+	*Video       `mapstructure:"video"`
+	*Service     `mapstructure:"service"`
 }
 
 // LogConfig 日志文件的配置
@@ -35,22 +39,53 @@ type LogConfig struct {
 
 // MySQLConfig 数据库配置
 type MySQLConfig struct {
-	Host     string `mapstructure:"host"`
-	Port     int    `mapstructure:"port"`
-	User     string `mapstructure:"user"`
-	Password string `mapstructure:"password"`
-	DB       string `mapstructure:"dbname"`
+	Host      string `mapstructure:"host"`
+	Port      int    `mapstructure:"port"`
+	User      string `mapstructure:"user"`
+	Password  string `mapstructure:"password"`
+	DB        string `mapstructure:"database"`
+	Charset   string `mapstructure:"charset"`
+	ParseTime bool   `mapstructure:"parsetime"`
+	Loc       string `mapstructure:"loc"`
 }
 
 // RedisConfig Redis配置
 type RedisConfig struct {
-	Host string `mapstructure:"host"`
-	Port int    `mapstructure:"port"`
+	Host         string `mapstructure:"host"`
+	Port         int    `mapstructure:"port"`
+	Password     string `mapstructure:"password"`
+	DB           int    `mapstructure:"db"`
+	PoolSize     int    `mapstructure:"pool_size"`
+	MinIdleConns int    `mapstructure:"min_idle_conns"`
+	RedisExpire  int    `mapstructure:"redis_expire"`
 }
 
 // EtcdConfig etcd配置
 type EtcdConfig struct {
 	Addr []string `mapstructure:"address"`
+}
+
+// KafkaConfig kafka配置
+type KafkaConfig struct {
+	Addr []string `mapstructure:"address"`
+}
+
+// jwt 配置
+type JwtConfig struct {
+	JwtExpire int64 `mapstructure:"jwt_expire"`
+}
+type Video struct {
+	FeedCount int64 `mapstructure:"feedcount"`
+}
+
+// Service 所有服务相关的配置（主要是服务名称和地址）
+type Service struct {
+	UserServiceName     string `mapstructure:"user_service_name"`
+	UserServiceUrl      string `mapstructure:"user_service_url"`
+	VideoServiceName    string `mapstructure:"video_service_name"`
+	VideoServiceUrl     string `mapstructure:"video_service_url"`
+	FavoriteServiceName string `mapstructure:"favorite_service_name"`
+	FavoriteServiceUrl  string `mapstructure:"favorite_service_url"`
 }
 
 // Init 从配置文件中获取项目所有的配置信息
