@@ -42,7 +42,6 @@ func FavoriteAction(ctx *gin.Context) {
 			})
 			return
 		}
-		fResp.StatusCode = 0
 		ctx.JSON(0, fResp)
 	} else if fReq.ActionType == "2" { // 取消点赞操作
 		fAction := pb.InfavoriteRequest{
@@ -57,7 +56,6 @@ func FavoriteAction(ctx *gin.Context) {
 			})
 			return
 		}
-		fResp.StatusCode = 0
 		ctx.JSON(0, fResp)
 	} else { // 非法操作
 		ctx.JSON(http.StatusBadRequest, pb.FavoriteResponse{
