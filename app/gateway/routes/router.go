@@ -3,10 +3,12 @@ package routes
 import (
 	"dzug/app/gateway/handlers"
 	"dzug/app/gateway/middlewares"
+	"dzug/conf"
 	"dzug/logger"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"time"
 )
 
 func NewRouter(mode string) *gin.Engine {
@@ -22,7 +24,7 @@ func NewRouter(mode string) *gin.Engine {
 	}
 
 	ginRouter := gin.New()
-	ginRouter.Use(logger.GinLogger(), logger.GinRecovery(true)) // 使用自己的两个中间件
+	ginRouter.Use(logger.GinLogger(), logger.GinRecovery(true), middlewares.RateLimitMiddleware(time.Duration(conf.Config.Ratelimit.Rate)*time.Second, conf.Config.Ratelimit.Cap)) // 使用自己的两个中间件
 	ginRouter.LoadHTMLFiles("./templates/index.html")
 	ginRouter.Static("/static", "./static")
 

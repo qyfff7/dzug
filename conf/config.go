@@ -26,6 +26,7 @@ type ProjectConfig struct {
 	*JwtConfig   `mapstructure:"jwt"`
 	*Video       `mapstructure:"video"`
 	*Service     `mapstructure:"service"`
+	*Ratelimit   `mapstructure:"ratelimit"`
 }
 
 // LogConfig 日志文件的配置
@@ -86,6 +87,11 @@ type Service struct {
 	VideoServiceUrl     string `mapstructure:"video_service_url"`
 	FavoriteServiceName string `mapstructure:"favorite_service_name"`
 	FavoriteServiceUrl  string `mapstructure:"favorite_service_url"`
+}
+
+type Ratelimit struct {
+	Rate int64 `mapstructure:"rate"`
+	Cap  int64 `mapstructure:"cap"`
 }
 
 // Init 从配置文件中获取项目所有的配置信息
