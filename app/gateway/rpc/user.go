@@ -3,23 +3,39 @@ package rpc
 import (
 	"context"
 	"dzug/discovery"
-	"dzug/protos/user"
+	pb "dzug/protos/user"
 )
 
-func UserLogin(ctx context.Context, req *user.DouyinUserLoginRequest) (resp *user.DouyinUserLoginResponse, err error) {
-	discovery.LoadClient("user", &discovery.UserClient) // 加载etcd客户端程序
-	r, err := discovery.UserClient.Login(ctx, req)      // 调用登录方法
+// 这里应该做的事情是与用户服务建立连接，调用远程的方法
+
+func Login(ctx context.Context, req *pb.AccountReq) (*pb.AccountResp, error) {
+
+	discovery.LoadClient("user", &discovery.UserClient)
+	r, err := discovery.UserClient.Login(ctx, req) // 调用注册方法
 	if err != nil {
-		return
+		return nil, err
 	}
 	return r, nil
+
 }
 
-func UserRegister(ctx context.Context, req *user.DouyinUserRegisterRequest) (resp *user.DouyinUserRegisterResponse, err error) {
+func Register(ctx context.Context, req *pb.AccountReq) (*pb.AccountResp, error) {
+
 	discovery.LoadClient("user", &discovery.UserClient)
 	r, err := discovery.UserClient.Register(ctx, req) // 调用注册方法
 	if err != nil {
-		return
+		return nil, err
 	}
 	return r, nil
+
+}
+
+func UserInfo(ctx context.Context, req *pb.GetUserInfoReq) (*pb.GetUserInfoResp, error) {
+	discovery.LoadClient("user", &discovery.UserClient)
+	r, err := discovery.UserClient.GetUserInfo(ctx, req) // 调用注册方法
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+
 }
