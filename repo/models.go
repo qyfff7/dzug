@@ -41,7 +41,7 @@ type Message struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time      `gorm:"uniqueIndex:m"`
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
-	MessageUuid int64          `gorm:"column:message_uuid;type:bigint(20) unsigned;default:0;comment:消息uuid;NOT NULL" json:"message_uuid"`
+	MessageUuid int64          `gorm:"column:message_uuid;type:bigint(20) unsigned;default:0;comment:消息uuid;NOT NULL;" json:"message_uuid"`
 	ToUserId    int64          `gorm:"column:to_user_id;type:bigint(20) unsigned;default:0;comment:该消息接收者的id;NOT NULL;uniqueIndex:m" json:"to_user_id"`
 	FromUserId  int64          `gorm:"column:from_user_id;type:bigint(20) unsigned;default:0;comment:该消息发送者的id;NOT NULL;uniqueIndex:m" json:"from_user_id"`
 	Contents    string         `gorm:"column:contents;type:varchar(255);comment:消息内容;NOT NULL" json:"contents"`

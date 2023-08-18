@@ -49,6 +49,11 @@ service:
   video_service_url: 127.0.0.1:9002
   favorite_service_name: "favorite"
   favorite_service_url: 127.0.0.1:9003
+  message_service_name: "message"
+  message_service_url: "127.0.0.1:9006"
 
 video:
   feedcount: 30
+
+mongodb:
+  address: 127.0.0.1:27017 #mongodb配置路径

@@ -23,6 +23,10 @@ func NewRouter(mode string) *gin.Engine {
 
 	ginRouter := gin.New()
 	ginRouter.Use(logger.GinLogger(), logger.GinRecovery(true)) // 使用自己的两个中间件
+<<<<<<< HEAD
+=======
+
+>>>>>>> feat(-): message module
 	ginRouter.LoadHTMLFiles("./templates/index.html")
 	ginRouter.Static("/static", "./static")
 
@@ -52,6 +56,16 @@ func NewRouter(mode string) *gin.Engine {
 		favorite.GET("/list/", handlers.FavoriteList)
 	}
 
+<<<<<<< HEAD
+=======
+	message := ginRouter.Group("/douyin/message")
+	message.Use(middlewares.JWTAuthMiddleware())
+	{
+		message.GET("/chat", handlers.MessageChatList)
+		message.POST("/action", handlers.MessagePostAction)
+	}
+
+>>>>>>> feat(-): message module
 	ginRouter.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"msg": "404 not found",

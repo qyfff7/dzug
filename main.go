@@ -1,7 +1,9 @@
 package main
 
 import (
+	favorservice "dzug/app/favorite/cmd"
 	"dzug/app/gateway/cmd"
+	messageservice "dzug/app/message/cmd"
 	"dzug/app/redis"
 	"dzug/app/user/cmd"
 	"dzug/app/user/pkg/snowflake"
@@ -40,7 +42,7 @@ func main() {
 	//defer repo.Close()
 
 	//4.初始化redis连接
-	if err := redis.Init(); err != nil {
+	if err := redis.Init(conf.Config.RedisConfig); err != nil {
 		fmt.Printf("init redis failed, err:%v\n", err)
 		return
 	}
@@ -57,5 +59,6 @@ func main() {
 	time.Sleep(time.Second)
 	go videoservice.Start()
 	go favorservice.Start()
+	go messageservice.Start()
 	client.Start()
 }
