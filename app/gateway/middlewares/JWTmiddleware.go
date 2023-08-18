@@ -20,6 +20,7 @@ func JWTAuthMiddleware() func(ctx *gin.Context) {
 			ctx.Abort()
 			return
 		}
+
 		oldtoken, err := redis.Rdb.HGet(ctx, redis.GetRedisKey(redis.KeyUserInfo, strconv.Itoa(int(mc.UserID))), "token").Result()
 		if err != nil {
 			zap.L().Error("获取redis中的用户 token 出错", zap.Error(err))
@@ -33,6 +34,7 @@ func JWTAuthMiddleware() func(ctx *gin.Context) {
 			ctx.Abort()
 			return
 		}
+
 		// 将当前请求的userID信息保存到请求的上下文ctx上
 		ctx.Set(jwt.CtxUserIDKey, mc.UserID)
 		ctx.Next()

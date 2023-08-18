@@ -3,6 +3,7 @@ package discovery
 import (
 	"dzug/conf"
 	"dzug/protos/favorite"
+	"dzug/protos/message"
 	"dzug/protos/user"
 	"dzug/protos/video"
 	"errors"
@@ -12,11 +13,11 @@ import (
 )
 
 var (
-	SerDiscovery serviceDiscovery
-
+	SerDiscovery   serviceDiscovery
 	UserClient     user.ServiceClient
-	FavoriteClient favorite.DouyinFavoriteActionServiceClient
 	VideoClient    video.VideoServiceClient
+	MessageClient  message.DouyinMessageServiceClient
+	FavoriteClient favorite.DouyinFavoriteActionServiceClient
 )
 
 // InitDiscovery 初始化一个服务发现程序
@@ -46,6 +47,8 @@ func LoadClient(serviceName string, client any) error {
 		*c = video.NewVideoServiceClient(conn)
 	case *favorite.DouyinFavoriteActionServiceClient:
 		*c = favorite.NewDouyinFavoriteActionServiceClient(conn)
+	case *message.DouyinMessageServiceClient:
+		*c = message.NewDouyinMessageServiceClient(conn)
 	default:
 		err = errors.New("没有该类型的服务")
 		zap.L().Error(err.Error())

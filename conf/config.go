@@ -12,20 +12,21 @@ var Config = new(ProjectConfig)
 
 // ProjectConfig 项目所有的配置
 type ProjectConfig struct {
-	Name         string `mapstructure:"name"`
-	Port         int    `mapstructure:"port"`
-	Version      string `mapstructure:"version"`
-	StartTime    string `mapstructure:"start_time"`
-	Mode         string `mapstructure:"mode"`
-	MachineID    int64  `mapstructure:"machine_id"`
-	*LogConfig   `mapstructure:"log"`
-	*MySQLConfig `mapstructure:"mysql"`
-	*RedisConfig `mapstructure:"redis"`
-	*EtcdConfig  `mapstructure:"etcd"`
-	*KafkaConfig `mapstructure:"kafka"`
-	*JwtConfig   `mapstructure:"jwt"`
-	*Video       `mapstructure:"video"`
-	*Service     `mapstructure:"service"`
+	Name           string `mapstructure:"name"`
+	Port           int    `mapstructure:"port"`
+	Version        string `mapstructure:"version"`
+	StartTime      string `mapstructure:"start_time"`
+	Mode           string `mapstructure:"mode"`
+	MachineID      int64  `mapstructure:"machine_id"`
+	*LogConfig     `mapstructure:"log"`
+	*MySQLConfig   `mapstructure:"mysql"`
+	*RedisConfig   `mapstructure:"redis"`
+	*EtcdConfig    `mapstructure:"etcd"`
+	*KafkaConfig   `mapstructure:"kafka"`
+	*JwtConfig     `mapstructure:"jwt"`
+	*Video         `mapstructure:"video"`
+	*Service       `mapstructure:"service"`
+	*MongoDbConfig `mapstructure:"mongodb"`
 }
 
 // LogConfig 日志文件的配置
@@ -78,6 +79,10 @@ type Video struct {
 	FeedCount int64 `mapstructure:"feedcount"`
 }
 
+type MongoDbConfig struct {
+	Addr string `mapstructure:"address"`
+}
+
 // Service 所有服务相关的配置（主要是服务名称和地址）
 type Service struct {
 	UserServiceName     string `mapstructure:"user_service_name"`
@@ -86,6 +91,8 @@ type Service struct {
 	VideoServiceUrl     string `mapstructure:"video_service_url"`
 	FavoriteServiceName string `mapstructure:"favorite_service_name"`
 	FavoriteServiceUrl  string `mapstructure:"favorite_service_url"`
+	MessageServiceName  string `mapstructure:"message_service_name"`
+	MessageServiceUrl   string `mapstructure:"message_service_url"`
 }
 
 // Init 从配置文件中获取项目所有的配置信息
