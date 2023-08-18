@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package protos;
+option go_package = "./user";
+
+
+// 定义 user 模块的接口
+service Service {
+  rpc Register(AccountReq) returns(AccountResp);  // 用户注册
+  rpc Login(AccountReq) returns(AccountResp);  // 用户登录
+  rpc GetUserInfo(GetUserInfoReq) returns(GetUserInfoResp);  // 获取用户信息
+}
+
+message AccountReq {
+  string username = 1;// 用户名
+  string password = 2; // 密码
+}
+
+message AccountResp {
+//  int32 status_code = 1; // 状态码，0-成功，其他值-失败
+//  string status_msg = 2; // 返回状态描述
+  int64 user_id = 1; // 用户ID
+  string token = 2;// 用户鉴权Token
+}
+
+message GetUserInfoReq {
+  // 视频作者ID
+  int64 user_id = 1;
+  // 当前登录的用户的token
+  string token = 2;
+}
+
+// 获取用户信息 的接口响应 model
+message GetUserInfoResp {
+//  int32 status_code = 1; // 状态码，0-成功，其他值-失败
+//  string status_msg = 2; // 返回状态描述
+  // 用户信息
+  User user = 1;
+}
+
+// 调用用户信息 时返回的User
+message User {
+  int64 id = 1; // 用户id
+  string name = 2; // 用户名称
+  int64 follow_count = 3; // 关注总数
+  int64 follower_count = 4; // 粉丝总数
+  bool is_follow = 5; // true-已关注，false-未关
+  string avatar = 6; //用户头像
+  string background_image = 7; //用户个人页顶部大图
+  string signature = 8; //个人简介
+  int64 total_favorited = 9; //获赞数量
+  int64 work_count = 10; //作品数
+  int64 favorite_count = 11; //点赞数量
+}
