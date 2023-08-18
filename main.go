@@ -42,7 +42,7 @@ func main() {
 	//defer repo.Close()
 
 	//4.初始化redis连接
-	if err := redis.Init(conf.Config.RedisConfig); err != nil {
+	if err := redis.Init(); err != nil {
 		fmt.Printf("init redis failed, err:%v\n", err)
 		return
 	}

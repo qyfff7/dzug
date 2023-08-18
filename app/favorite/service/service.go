@@ -33,11 +33,7 @@ func (f *FavoriteSrv) Favorite(ctx context.Context, in *favorite.FavoriteRequest
 		}, errors.New("redis或mysql数据库错误")
 	} else if ans == 2 {
 		return &favorite.FavoriteResponse{ // 不需要写入消息队列
-<<<<<<< HEAD
 			StatusCode: 0,
-=======
-			StatusCode: 200,
->>>>>>> feat(-): message module
 			StatusMsg:  "重复点赞操作",
 		}, nil
 	}
@@ -49,11 +45,7 @@ func (f *FavoriteSrv) Favorite(ctx context.Context, in *favorite.FavoriteRequest
 		return nil, err
 	}
 	return &favorite.FavoriteResponse{
-<<<<<<< HEAD
 		StatusCode: 0,
-=======
-		StatusCode: 200,
->>>>>>> feat(-): message module
 		StatusMsg:  "点赞成功",
 	}, nil
 }
@@ -70,11 +62,7 @@ func (f *FavoriteSrv) Infavorite(ctx context.Context, in *favorite.InfavoriteReq
 		}, errors.New("redis或mysql数据库错误")
 	} else if ans == 2 {
 		return &favorite.InfavoriteResponse{
-<<<<<<< HEAD
 			StatusCode: 0,
-=======
-			StatusCode: 200,
->>>>>>> feat(-): message module
 			StatusMsg:  "重复取消点赞操作",
 		}, nil
 	}
@@ -86,11 +74,7 @@ func (f *FavoriteSrv) Infavorite(ctx context.Context, in *favorite.InfavoriteReq
 		return nil, err
 	}
 	return &favorite.InfavoriteResponse{
-<<<<<<< HEAD
 		StatusCode: 0,
-=======
-		StatusCode: 200,
->>>>>>> feat(-): message module
 		StatusMsg:  "取消点赞成功",
 	}, nil
 }
