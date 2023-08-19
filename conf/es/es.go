@@ -33,7 +33,6 @@ func Init(addr, index string, goroutineNum, maxSize int) (err error) {
 		logDataChan: make(chan interface{}, maxSize),
 	}
 
-	//fmt.Println("connect to es success")
 	zap.L().Info("connect to es success")
 
 	// 从通道中取出数据,写入到kafka中去
@@ -45,11 +44,6 @@ func Init(addr, index string, goroutineNum, maxSize int) (err error) {
 
 func sendToES() {
 	for m1 := range esClient.logDataChan {
-		//b, err := json.Marshal(m1)
-		//if err != nil {
-		//	fmt.Printf("marshal m1 failed, err:%v\n", err)
-		//	continue
-		//}
 		_, err := esClient.client.Index().
 			Index(esClient.index).
 			BodyJson(m1).
@@ -58,8 +52,6 @@ func sendToES() {
 			// Handle error
 			panic(err)
 		}
-		//fmt.Printf("Indexed user %s to index %s, type %s\n", put1.Id, put1.Index, put1.Type)
-		//zap.L().Info("Indexed user: " + fmt.Sprintf("%s", put1.Id) + " to index: " + fmt.Sprintf("%s", put1.Index) + ", type: " + fmt.Sprintf("%s", put1.Type))
 	}
 }
 

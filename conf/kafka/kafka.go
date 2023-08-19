@@ -41,9 +41,7 @@ func sendMsg() {
 	for {
 		select {
 		case msg := <-msgChan:
-			//, offset, err := client.SendMessage(msg)
 			_, _, err := client.SendMessage(msg)
-			//_, _, err := client.SendMessage(msg)
 			if err != nil {
 				zap.L().Warn("send msg failed, err:", zap.Error(err))
 				return
@@ -73,7 +71,7 @@ func ConsumerInit(addr []string, topic string) (err error) {
 		fmt.Printf("fail to get list of partition:err%v\n", err)
 		return
 	}
-	fmt.Println(partitionList)
+	//fmt.Println(partitionList)
 	for partition := range partitionList { // 遍历所有的分区
 		// 针对每个分区创建一个对应的分区消费者
 		var pc sarama.PartitionConsumer
@@ -84,13 +82,11 @@ func ConsumerInit(addr []string, topic string) (err error) {
 		}
 		//defer pc.AsyncClose()
 		// 异步从每个分区消费信息
-		//fmt.Println("start to consume...")
 		zap.L().Info("start to consume...")
 		go func(sarama.PartitionConsumer) {
-			fmt.Println("in sarama.PartitionConsumer")
 			for msg := range pc.Messages() {
 				//logDataChan<-msg // 为了将同步流程异步化,所以将取出的日志数据先放到channel中
-				fmt.Println(msg.Topic, string(msg.Value))
+				//fmt.Println(msg.Topic, string(msg.Value))
 				var m1 map[string]interface{}
 				err = json.Unmarshal(msg.Value, &m1)
 				if err != nil {

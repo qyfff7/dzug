@@ -78,7 +78,7 @@ func Init() (err error) {
 func Collectlog() (err error) {
 	err = confrun(Config.LogConfig.Topic)
 	if err != nil {
-		zap.L().Error("将日志数据发送到kafka出错 : ", zap.Error(err))
+		zap.L().Error("Error sending log data to kafka : ", zap.Error(err))
 		return
 	}
 	return
@@ -98,9 +98,8 @@ func confrun(topic string) (err error) {
 			time.Sleep(time.Second) // 读取出错等一秒
 			continue
 		}
-
 		// 如果是空行就略过
-		fmt.Printf("%#v\n", line.Text)
+		//fmt.Printf("%#v\n", line.Text)
 		if len(strings.Trim(line.Text, "\r")) == 0 { //strings.Trim  用来去除  "\r"
 			zap.L().Info("出现空行拉,直接跳过...")
 			continue

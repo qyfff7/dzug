@@ -23,6 +23,7 @@ func Init() {
 		panic(err)
 	}
 	zap.L().Info("Init kafka success")
+	zap.L().Info("log transfer start ...")
 	// 在这儿停顿!
 	select {}
 }
