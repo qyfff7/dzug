@@ -6,6 +6,7 @@ import (
 	"dzug/conf"
 	"dzug/logger"
 	"fmt"
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
@@ -53,6 +54,7 @@ func NewRouter(mode string) *gin.Engine {
 		favorite.POST("/action/", handlers.FavoriteAction)
 		favorite.GET("/list/", handlers.FavoriteList)
 	}
+	pprof.Register(ginRouter) // 注册pprof相关路由
 
 	ginRouter.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{

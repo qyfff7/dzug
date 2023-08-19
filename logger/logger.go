@@ -12,27 +12,29 @@ import (
 	"os"
 	"runtime/debug"
 	"strings"
-
 	"time"
 )
 
 // Init 初始化Logger
-func Init(cfg *conf.LogConfig, mode string) (err error) {
-	writeSyncer := getLogWriter(
-		cfg.Filename,
-		cfg.MaxSize,
-		cfg.MaxBackups,
-		cfg.MaxAge,
-	)
-	encoder := getEncoder()
-	var l = new(zapcore.Level)
-	err = l.UnmarshalText([]byte(cfg.Level))
+func Init(filepath string, level string, maxsize, maxbackups, maxage int) (err error) {
+	var writeSyncer zapcore.WriteSyncer
+	var encoder zapcore.Encoder
+
+	//对于每一个配置项，新建一个日志对象，这样在项目中实现分开收集各自的日志
+	//for _, logconf := range allConf {
+	writeSyncer = getLogWriter(filepath, maxsize, maxbackups, maxage)
+	encoder = getEncoder()
+	//fmt.Sprintf("%s",logconf.Topic)
+
+	l := new(zapcore.Level)
+	err = l.UnmarshalText([]byte(level))
 	if err != nil {
 		return
 	}
+	//}
 
 	var core zapcore.Core
-	if mode == "develop" {
+	if conf.Config.Mode == "develop" {
 		//开发模式，日志输出到终端
 		consoleEnbcoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
 		core = zapcore.NewTee(

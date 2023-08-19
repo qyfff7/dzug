@@ -7,6 +7,11 @@
 5. 「2023年08月15日 19:23:00」by qkyufw
 6. 整合user，feed，favorite 「2023年08月17日 0:25:00」by lxxx
 
+存在的问题：
+在etcd.go 60行存在写定的”douyin“
+
+
+
 # dzug
 
 ### 抖声 demo

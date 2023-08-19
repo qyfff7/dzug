@@ -21,21 +21,23 @@ type ProjectConfig struct {
 	*LogConfig   `mapstructure:"log"`
 	*MySQLConfig `mapstructure:"mysql"`
 	*RedisConfig `mapstructure:"redis"`
-	*EtcdConfig  `mapstructure:"etcd"`
+	//*EtcdConfig   `mapstructure:"etcd"`
 	*KafkaConfig `mapstructure:"kafka"`
 	*JwtConfig   `mapstructure:"jwt"`
 	*Video       `mapstructure:"video"`
 	*Service     `mapstructure:"service"`
 	*Ratelimit   `mapstructure:"ratelimit"`
+	//*CollectEntry `mapstructure:"collectentry"`
 }
 
 // LogConfig 日志文件的配置
 type LogConfig struct {
 	Level      string `mapstructure:"level"`
-	Filename   string `mapstructure:"filename"`
+	Filename   string `mapstructure:"path"`
 	MaxSize    int    `mapstructure:"max_size"`
 	MaxAge     int    `mapstructure:"max_age"`
 	MaxBackups int    `mapstructure:"max_backups"`
+	Topic      int    `mapstructure:"topic"`
 }
 
 // MySQLConfig 数据库配置
@@ -63,12 +65,14 @@ type RedisConfig struct {
 
 // EtcdConfig etcd配置
 type EtcdConfig struct {
-	Addr []string `mapstructure:"address"`
+	Addr          []string `mapstructure:"address"`
+	LogCollectKey string   `mapstructure:"logcollectkey"`
 }
 
 // KafkaConfig kafka配置
 type KafkaConfig struct {
-	Addr []string `mapstructure:"address"`
+	Addr     []string `mapstructure:"address"`
+	ChanSize int64    `mapstructure:"chansize"`
 }
 
 // jwt 配置
@@ -94,8 +98,19 @@ type Ratelimit struct {
 	Cap  int64 `mapstructure:"cap"`
 }
 
+// CollectEntry 要收集的日志的配置项结构体
+type CollectEntry struct {
+	Path       string `json:"path"`  //去哪个路径读取日志文件
+	Topic      string `json:"topic"` //日志文件发往kafka的哪个topic
+	MaxSize    int    `json:"max_size"`
+	MaxBackups int    `json:"max_backups"`
+	MaxAage    int    `json:"max_age"`
+	Level      string `json:"level"`
+}
+
 // Init 从配置文件中获取项目所有的配置信息
 func Init() (err error) {
+
 	workDir, _ := os.Getwd()               // 获取当前文件夹路径
 	viper.SetConfigName("config")          // 配置文件名
 	viper.SetConfigType("yml")             // 配置文件格式

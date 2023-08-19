@@ -29,10 +29,10 @@ func Init() (err error) {
 		zap.L().Error(link + "连接数据库失败" + err.Error())
 		panic(err)
 	}
-	err = DB.AutoMigrate(User{}, Video{}, Comment{}, Message{}, Favorite{}, Relation{}) // 迁移数据表
-	if err != nil {
-		zap.L().Error("数据表初始化失败")
-		panic(err)
-	}
+	//err = DB.AutoMigrate(User{}, Video{}, Comment{}, Message{}, Favorite{}, Relation{}) // 迁移数据表
+	//if err != nil {
+	//	zap.L().Error("数据表初始化失败")
+	//	panic(err)
+	//}
 	return err
 }

@@ -13,8 +13,7 @@ import (
 
 // serviceDiscovery 用于服务发现
 type serviceDiscovery struct {
-	EtcdAddrs []string
-
+	EtcdAddrs  []string
 	cli        *clientv3.Client
 	serverList map[string][]string // 存储解析后的地址
 	lock       sync.Mutex
