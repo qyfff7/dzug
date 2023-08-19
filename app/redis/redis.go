@@ -9,17 +9,21 @@ import (
 )
 
 var (
-	client *redis.Client
-	Nil    = redis.Nil
+	Rdb *redis.Client
+	Nil = redis.Nil
 )
 
 // Init 初始化连接
 func Init(cfg *conf.RedisConfig) (err error) {
-	client = redis.NewClient(&redis.Options{
-		Addr: fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
+	Rdb = redis.NewClient(&redis.Options{
+		Addr:         fmt.Sprintf("%s:%d", conf.Config.RedisConfig.Host, conf.Config.RedisConfig.Port),
+		Password:     conf.Config.RedisConfig.Password, // no password set
+		DB:           conf.Config.RedisConfig.DB,       // use default DB
+		PoolSize:     conf.Config.RedisConfig.PoolSize,
+		MinIdleConns: conf.Config.RedisConfig.MinIdleConns,
 	})
 	ctx := context.Background()
-	_, err = client.Ping(ctx).Result()
+	_, err = Rdb.Ping(ctx).Result()
 	if err != nil {
 		return err
 	}
@@ -27,5 +31,5 @@ func Init(cfg *conf.RedisConfig) (err error) {
 }
 
 func Close() {
-	_ = client.Close()
+	_ = Rdb.Close()
 }

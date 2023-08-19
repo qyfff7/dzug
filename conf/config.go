@@ -23,6 +23,7 @@ type ProjectConfig struct {
 	*RedisConfig `mapstructure:"redis"`
 	*EtcdConfig  `mapstructure:"etcd"`
 	*JwtConfig   `mapstructure:"jwt"`
+	*Service     `mapstructure:"service"`
 }
 
 // LogConfig 日志文件的配置
@@ -40,13 +41,18 @@ type MySQLConfig struct {
 	Port     int    `mapstructure:"port"`
 	User     string `mapstructure:"user"`
 	Password string `mapstructure:"password"`
-	DB       string `mapstructure:"dbname"`
+	DB       string `mapstructure:"database"`
 }
 
 // RedisConfig Redis配置
 type RedisConfig struct {
-	Host string `mapstructure:"host"`
-	Port int    `mapstructure:"port"`
+	Host         string `mapstructure:"host"`
+	Port         int    `mapstructure:"port"`
+	Password     string `mapstructure:"password"`
+	DB           int    `mapstructure:"db"`
+	PoolSize     int    `mapstructure:"pool_size"`
+	MinIdleConns int    `mapstructure:"min_idle_conns"`
+	RedisExpire  int    `mapstructure:"redis_expire"`
 }
 
 // EtcdConfig etcd配置
@@ -56,6 +62,16 @@ type EtcdConfig struct {
 
 type JwtConfig struct {
 	JwtExpire int64 `mapstructure:"jwt_expire"`
+}
+type Service struct {
+	UserServiceName     string `mapstructure:"user_service_name"`
+	UserServiceUrl      string `mapstructure:"user_service_url"`
+	VideoServiceName    string `mapstructure:"video_service_name"`
+	VideoServiceUrl     string `mapstructure:"video_service_url"`
+	FavoriteServiceName string `mapstructure:"favorite_service_name"`
+	FavoriteServiceUrl  string `mapstructure:"favorite_service_url"`
+	CommentServiceUrl   string `mapstructure:"comment_service_url"`
+	CommentServiceName  string `mapstructure:"comment_service_name"`
 }
 
 // Init 从配置文件中获取项目所有的配置信息

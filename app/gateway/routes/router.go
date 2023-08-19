@@ -2,11 +2,14 @@ package routes
 
 import (
 	"dzug/app/gateway/handlers"
+	"dzug/app/gateway/middlewares"
 	"dzug/logger"
+
 	"github.com/gin-gonic/gin"
 )
 
 func NewRouter(mode string) *gin.Engine {
+
 	//如果配置文件中的mode设置为release模式，则gin框架也设置为发布模式(终端不输出任何信息)
 	if mode == gin.ReleaseMode {
 		gin.SetMode(gin.ReleaseMode) // gin设置成发布模式
@@ -23,6 +26,11 @@ func NewRouter(mode string) *gin.Engine {
 	relation := ginRouter.Group("/douyin/relation")
 	{
 		relation.POST("/action", handlers.RelationAction)
+	}
+	comment := ginRouter.Group("/douyin/comment")
+	{
+		comment.GET("/list/", handlers.CommentList)
+		comment.POST("/action/", middlewares.JWTAuthMiddleware(), handlers.CommentAction)
 	}
 
 	return ginRouter

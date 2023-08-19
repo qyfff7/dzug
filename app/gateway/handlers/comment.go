@@ -2,7 +2,8 @@ package handlers
 
 import (
 	"dzug/app/gateway/rpc"
-	"dzug/app/user/pkg/jwt"
+	"dzug/app/user/pkg/snowflake"
+
 	pb "dzug/protos/comment"
 	"fmt"
 	"net/http"
@@ -20,8 +21,10 @@ type CommentReq struct {
 // 评论相关操作
 func CommentAction(ctx *gin.Context) {
 	var CReq CommentReq
-	userId, _ := jwt.GetUserID(ctx)
-	token, _ := jwt.GenToken(userId)
+
+	//userId, _ := jwt.GetUserID(ctx)
+
+	token := ctx.Query("token")
 
 	err := ctx.ShouldBind(&CReq)
 	if err != nil {
@@ -30,8 +33,12 @@ func CommentAction(ctx *gin.Context) {
 	zap.L().Info(fmt.Sprintf("token:", token, " VideoId:", CReq.VideoId, " ActionType:", CReq.ActionType))
 	videoid, _ := strconv.Atoi(CReq.VideoId)
 	//videoId := ctx.Query("video_id")
-	//actionType := ctx.Query("action_type")
 
+	ac, _ := strconv.Atoi(CReq.ActionType)
+	actionType := int32(ac)
+	commentText := ctx.Query("comment_text")
+	commId := snowflake.GenID()
+	commentId, _ := strconv.ParseInt(commId, 10, 64)
 	ctx.JSON(http.StatusOK, pb.DouyinCommentActionResponse{
 		StatusCode: 200,
 		StatusMsg:  "操作成功",
@@ -39,9 +46,13 @@ func CommentAction(ctx *gin.Context) {
 
 	if CReq.ActionType == "1" { // 进行评论
 		CAction := pb.DouyinCommentActionRequest{ // 测试数据，为转换
-			Token:   token,
-			VideoId: int64(videoid),
+			Token:       token,
+			VideoId:     int64(videoid),
+			ActionType:  int32(actionType),
+			CommentText: string(commentText),
+			CommentId:   int64(commentId),
 		}
+
 		CResp, err := rpc.CommentAction(ctx, &CAction)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, pb.DouyinCommentActionResponse{
@@ -53,8 +64,10 @@ func CommentAction(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, CResp)
 	} else if CReq.ActionType == "2" { // 删除评论操作
 		CAction := pb.DouyinCommentActionRequest{ // 测试数据
-			Token:   token,
-			VideoId: int64(videoid),
+			Token:      token,
+			ActionType: int32(actionType),
+			VideoId:    int64(videoid),
+			CommentId:  int64(commentId),
 		}
 		CResp, err := rpc.CommentAction(ctx, &CAction)
 		if err != nil {
@@ -76,6 +89,7 @@ func CommentAction(ctx *gin.Context) {
 // 读取评论列表
 func CommentList(ctx *gin.Context) {
 	var CReq CommentReq
+	CReq.VideoId = ctx.Query("VideoId")
 	videoID, _ := strconv.ParseInt(CReq.VideoId, 10, 64)
 	var commentList pb.DouyinCommentListRequest
 	commentList.VideoId = videoID

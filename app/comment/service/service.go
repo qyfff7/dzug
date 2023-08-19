@@ -41,6 +41,7 @@ func (c *CommentSrv) Action(ctx context.Context, in *comment.DouyinCommentAction
 				StatusMsg:  "服务器错误",
 			}, errors.New("redis数据库错误")
 		}
+		ans = 0
 		ans = dao.Comm(ctx, commentid, userId, videoId, context)
 		if ans == 0 {
 			return &comment.DouyinCommentActionResponse{
@@ -61,6 +62,7 @@ func (c *CommentSrv) Action(ctx context.Context, in *comment.DouyinCommentAction
 				StatusMsg:  "服务器错误",
 			}, errors.New("redis数据库错误")
 		}
+		ans = 0
 		ans = dao.Incomm(commentid)
 		if ans == 0 {
 			return &comment.DouyinCommentActionResponse{
@@ -82,11 +84,11 @@ func (c *CommentSrv) Action(ctx context.Context, in *comment.DouyinCommentAction
 func (c *CommentSrv) List(ctx context.Context, in *comment.DouyinCommentListRequest) (*comment.DouyinCommentListResponse, error) {
 	videoId := in.VideoId
 	commentIds, err := redis.GetComm(ctx, videoId)
-	if err == nil {
+	if err != nil {
 		zap.L().Error("redis获取视频评论列表失败")
 		return nil, err
 	}
-	comments, err := dao.GetcommByVideoId(commentIds)
+	comments, err := dao.GetcommByCommentIDs(commentIds)
 	if err != nil {
 		zap.L().Error("获取评论列表失败")
 		return &comment.DouyinCommentListResponse{
