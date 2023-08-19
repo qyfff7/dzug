@@ -2,13 +2,13 @@ package models
 
 // ProjectConfig 项目所有的配置
 type ProjectConfig struct {
-	Name         string `mapstructure:"name" json:"name"`
-	Port         int    `mapstructure:"port" json:"port"`
-	Version      string `mapstructure:"version" json:"version"`
-	StartTime    string `mapstructure:"start_time" json:"start_time"`
-	Mode         string `mapstructure:"mode" json:"mode"`
-	MachineID    int64  `mapstructure:"machine_id" json:"machine_id"`
-	*LogConfig   `mapstructure:"logcollectkey" json:"log"`
+	Name      string `mapstructure:"name" json:"name"`
+	Port      int    `mapstructure:"port" json:"port"`
+	Version   string `mapstructure:"version" json:"version"`
+	StartTime string `mapstructure:"start_time" json:"start_time"`
+	//Mode         string `mapstructure:"mode" json:"mode"`
+	MachineID    int64 `mapstructure:"machine_id" json:"machine_id"`
+	*LogConfig   `mapstructure:"logconfig" json:"logconfig"`
 	*MySQLConfig `mapstructure:"mysql" json:"mysql"`
 	*RedisConfig `mapstructure:"redis" json:"redis"`
 	*KafkaConfig `mapstructure:"kafka" json:"kafka"`
@@ -55,7 +55,7 @@ type RedisConfig struct {
 
 // EtcdConfig etcd配置
 type EtcdConfig struct {
-	Addr []string `mapstructure:"address"`
+	Addr string `mapstructure:"address" json:"address"`
 }
 
 // KafkaConfig kafka配置

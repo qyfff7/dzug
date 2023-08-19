@@ -21,9 +21,9 @@ var (
 
 // InitDiscovery 初始化一个服务发现程序
 func InitDiscovery() {
-	endpoints := conf.Config.EtcdConfig.Addr              // etcd地址
-	SerDiscovery = serviceDiscovery{EtcdAddrs: endpoints} // 放入etcd地址
-	err := SerDiscovery.newServiceDiscovery()             // 实例化
+	endpoints := conf.Config.EtcdConfig.Addr                        // etcd地址
+	SerDiscovery = serviceDiscovery{EtcdAddrs: []string{endpoints}} // 放入etcd地址
+	err := SerDiscovery.newServiceDiscovery()                       // 实例化
 	if err != nil {
 		zap.L().Fatal("启动服务发现失败: " + err.Error())
 		return

@@ -2,12 +2,10 @@ package etcd
 
 import (
 	"context"
-	"dzug/conf/tailfile"
 	"dzug/models"
 	"encoding/json"
 	"fmt"
 	"go.etcd.io/etcd/client/v3"
-	"go.uber.org/zap"
 	"time"
 )
 
@@ -94,6 +92,7 @@ func GetLogConf(key string) (logconflist []*models.LogConfig, err error) {
 	return
 }
 
+/*
 // WatchConf 监控etcd中日志收集项配置变化的函数
 func WatchConf(key string) {
 	for {
@@ -122,3 +121,4 @@ func WatchConf(key string) {
 		}
 	}
 }
+*/

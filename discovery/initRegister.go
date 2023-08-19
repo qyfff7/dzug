@@ -12,7 +12,7 @@ import (
 func InitRegister(key, value string) (*ServiceRegister, *grpc.Server) {
 	endpoints := conf.Config.EtcdConfig.Addr
 	sRegister := &ServiceRegister{
-		EtcdAddrs: endpoints,
+		EtcdAddrs: []string{endpoints},
 		Lease:     5,
 		Key:       key,
 		Value:     value,

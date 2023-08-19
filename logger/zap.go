@@ -2,6 +2,7 @@ package logger
 
 import (
 	"dzug/models"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -16,8 +17,10 @@ import (
 )
 
 // Init 初始化Logger
-func Init(logconf *models.LogConfig) (err error) {
-
+func Init(log *models.LogConfig) (err error) {
+	//fmt.Println("在 zap 的init")
+	logconf := new(models.LogConfig)
+	logconf = log
 	writeSyncer := getLogWriter(logconf.Path, logconf.MaxSize, logconf.MaxBackups, logconf.MaxAge)
 	encoder := getEncoder()
 	l := new(zapcore.Level)
@@ -25,9 +28,10 @@ func Init(logconf *models.LogConfig) (err error) {
 	if err != nil {
 		return
 	}
-
+	//fmt.Println("在 zap 的init 中")
 	var core zapcore.Core
-	if logconf.Mode == "develop" {
+	fmt.Println(logconf.Mode)
+	if fmt.Sprintf("%s", logconf.Mode) == "develop" {
 		//开发模式，日志输出到终端
 		consoleEnbcoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
 		core = zapcore.NewTee(
@@ -43,6 +47,8 @@ func Init(logconf *models.LogConfig) (err error) {
 
 	lg := zap.New(core, zap.AddCaller())
 	zap.ReplaceGlobals(lg) // 替换zap包中全局的logger实例，后续在其他包中只需使用zap.L()调用即可
+
+	//fmt.Println("zhixingdap  zap   的最后了")
 	return
 }
 
