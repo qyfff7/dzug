@@ -17,6 +17,7 @@ type ProjectConfig struct {
 	*Service     `mapstructure:"service" json:"service"`
 	*Ratelimit   `mapstructure:"ratelimit" json:"ratelimit"`
 	*EtcdConfig  `mapstructure:"etcdconfig" json:"etcd"`
+	*ESConf      `json:"esconfig"`
 }
 
 // LogConfig 日志文件的配置
@@ -79,10 +80,16 @@ type Service struct {
 	VideoServiceName    string `mapstructure:"video_service_name" json:"video_service_name"`
 	VideoServiceUrl     string `mapstructure:"video_service_url" json:"video_service_url"`
 	FavoriteServiceName string `mapstructure:"favorite_service_name" json:"favorite_service_name"`
-	FavoriteServiceUrl  string `mapstructure:"favorite_service_url" json:"favorite_service_url"`
+	FavoriteServiceUrl  string `json:"favorite_service_url"`
 }
 
 type Ratelimit struct {
 	Rate int64 `mapstructure:"rate" json:"rate"`
 	Cap  int64 `mapstructure:"cap" json:"cap"`
+}
+type ESConf struct {
+	Address string `json:"address"`
+	Index   string `json:"index"`
+	MaxSize int    `json:"max_chan_size"`
+	GoNum   int    `json:"goroutine_num"`
 }

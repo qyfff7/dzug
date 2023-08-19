@@ -33,7 +33,6 @@ func Init() (err error) {
 		fmt.Println("init basic config failed, err:" + err.Error())
 		return err
 	}
-	fmt.Println("viper 完成  ！！！")
 
 	//1. 初始化etcd连接
 	err = etcd.Init(BasicConf.EtcdAddr)
@@ -49,8 +48,7 @@ func Init() (err error) {
 		fmt.Printf("get conf from etcd failed, err:%s", err)
 		return
 	}
-	fmt.Printf("%s", Config)
-	fmt.Println("从etcd中获取所有配置完成")
+
 	//初始化日志
 	if err = logger.Init(Config.LogConfig); err != nil {
 		fmt.Printf("log file initialization error,%#v", err)
@@ -59,7 +57,7 @@ func Init() (err error) {
 	defer zap.L().Sync() //把缓冲区的日志，追加到文件中
 	zap.L().Info("服务启动，开始记录日志")
 
-	//3. 初始化连接kafka(做好准备工作)     (初始化kafka,初始化msg chan，起后台gorountine 去往kafka发msg)
+	//3. 初始化连接kafka生产者(做好准备工作)     (初始化kafka,初始化msg chan，起后台gorountine 去往kafka发msg)
 	err = kafka.Init([]string{Config.KafkaConfig.Addr}, Config.KafkaConfig.ChanSize)
 	if err != nil {
 		zap.L().Error("init kafka failed, err:%v", zap.Error(err))
@@ -67,33 +65,20 @@ func Init() (err error) {
 	}
 	zap.L().Info("init kafka success!")
 
-	// 4.派一个小弟去监控etcd中 日志配置的变化
-	//go etcd.WatchConf(Config.LogConfig)
-
 	// 5. 根据配置中的日志路径初始化tail   （根据配置文件中指定的路径创建了一个对应的tailObj）
 	err = tailfile.Init(Config.LogConfig.Path)
 	if err != nil {
 		zap.L().Error("init tailfile failed, err:%v", zap.Error(err))
-		//fmt.Printf("init tailfile failed, err:%v", zap.Error(err))
 		return
 	}
 	zap.L().Info("init tailfile success!")
-	zap.L().Info("配置初始化完成。。。")
-	//fmt.Printf("init tailfile success!")
-	//6 3. 把日志通过sarama发往kafka   (从tailObj中一行一行的读日志包装成kafka msg  丢到MsgChan 中)
-	//err = confrun(Config.LogConfig.Topic)
-	//if err != nil {
-	//	zap.L().Error("run failed ,err : ", zap.Error(err))
-	//	return
-	//}
 	return nil
 }
 
 func Collectlog() (err error) {
-
 	err = confrun(Config.LogConfig.Topic)
 	if err != nil {
-		zap.L().Error("run failed ,err : ", zap.Error(err))
+		zap.L().Error("将日志数据发送到kafka出错 : ", zap.Error(err))
 		return
 	}
 	return
@@ -107,7 +92,6 @@ func confrun(topic string) (err error) {
 	//-->  在kafka初始化的时候，就创建一个goroutine，来从channel中读取信息， 真正发送到kafka中
 	for {
 		// 循环读数据
-
 		line, ok := <-tailfile.TailObj.Lines // chan tail.Line
 		if !ok {
 			zap.L().Warn("tail file close reopen, filename: " + fmt.Sprintf("%s", tailfile.TailObj.Filename))

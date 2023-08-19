@@ -48,7 +48,7 @@ func GetProjectConf(key string) (config *models.ProjectConfig, err error) {
 
 	ret := resp.Kvs[0] //取一个
 	// ret.Value // json格式字符串
-	fmt.Printf("%s", ret.Value)
+	//fmt.Printf("%s", ret.Value)
 
 	//将从etcd中去取出来的值ret.Value利用Unmarshal方法反序列化出来，存放在collectEntryList上
 	err = json.Unmarshal(ret.Value, &configlist)
@@ -61,7 +61,7 @@ func GetProjectConf(key string) (config *models.ProjectConfig, err error) {
 	return
 }
 
-// GetProjectConf 拉取日志收集配置项的函数
+// GetLogConf 拉取日志收集配置项的函数
 func GetLogConf(key string) (logconflist []*models.LogConfig, err error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
@@ -79,8 +79,8 @@ func GetLogConf(key string) (logconflist []*models.LogConfig, err error) {
 	}
 
 	ret := resp.Kvs[0] //取一个
-	// ret.Value // json格式字符串
-	fmt.Printf("%s", ret.Value)
+	//// ret.Value // json格式字符串
+	//fmt.Printf("%s", ret.Value)
 
 	//将从etcd中去取出来的值ret.Value利用Unmarshal方法反序列化出来，存放在collectEntryList上
 	err = json.Unmarshal(ret.Value, &logconflist)
@@ -91,34 +91,3 @@ func GetLogConf(key string) (logconflist []*models.LogConfig, err error) {
 	}
 	return
 }
-
-/*
-// WatchConf 监控etcd中日志收集项配置变化的函数
-func WatchConf(key string) {
-	for {
-		watchCh := client.Watch(context.Background(), key)
-		for wresp := range watchCh {
-			zap.L().Info("get new conf from etcd!")
-			for _, evt := range wresp.Events {
-				fmt.Printf("type:%s key:%s value:%s\n", evt.Type, evt.Kv.Key, evt.Kv.Value)
-				var newConf []models.LogConfig
-
-				if evt.Type == clientv3.EventTypeDelete {
-					// 如果是 删除事件
-					zap.L().Warn("FBI warning:etcd delete the key!!!")
-					tailfile.SendNewConf(newConf) // 没有任何接收就是阻塞的
-					continue
-				}
-
-				err := json.Unmarshal(evt.Kv.Value, &newConf)
-				if err != nil {
-					zap.L().Error("json unmarshal new conf failed, err:", zap.Error(err))
-					continue
-				}
-				// 告诉tailfile这个模块应该启用新的配置了!
-				tailfile.SendNewConf(newConf) // 没有人接收就是阻塞的
-			}
-		}
-	}
-}
-*/

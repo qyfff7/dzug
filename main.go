@@ -1,11 +1,14 @@
 package main
 
 import (
+	favorservice "dzug/app/favorite/cmd"
 	client "dzug/app/gateway/cmd"
 	"dzug/app/redis"
 	userservice "dzug/app/user/cmd"
 	"dzug/app/user/pkg/snowflake"
+	videoservice "dzug/app/video/cmd"
 	"dzug/conf"
+	transfer "dzug/conf/log_transfer"
 	"dzug/repo"
 	"fmt"
 	"go.uber.org/zap"
@@ -19,15 +22,15 @@ func main() {
 		fmt.Printf("Config file initialization error,%#v", err)
 		return
 	}
+	//2.初始化kafka消费者和ES
+	go transfer.Init()
 
 	//3. 初始化mysql数据库
 	if err := repo.Init(); err != nil {
-		fmt.Printf("mysql  init error,%#v", err)
-		//zap.L().Error("初始化mysql数据库失败！！！")
+		//fmt.Printf("mysql  init error,%#v", err)
+		zap.L().Error("初始化mysql数据库失败！！！")
 		return
 	}
-
-	//defer repo.Close()
 
 	//4.初始化redis连接
 	if err := redis.Init(); err != nil {
@@ -54,8 +57,9 @@ func main() {
 	time.Sleep(time.Second)
 	go userservice.Start()
 	time.Sleep(time.Second)
-	//go videoservice.Start()
-	//go favorservice.Start()
+	go videoservice.Start()
+	time.Sleep(time.Second)
+	go favorservice.Start()
 	client.Start()
 
 }
