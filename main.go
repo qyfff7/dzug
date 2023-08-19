@@ -1,19 +1,21 @@
 package main
 
 import (
+	commentservice "dzug/app/comment/cmd"
 	favorservice "dzug/app/favorite/cmd"
-	"dzug/app/gateway/cmd"
+	client "dzug/app/gateway/cmd"
 	messageservice "dzug/app/message/cmd"
 	"dzug/app/redis"
-	"dzug/app/user/cmd"
+	userservice "dzug/app/user/cmd"
 	"dzug/app/user/pkg/snowflake"
-	"dzug/app/video/cmd"
+	videoservice "dzug/app/video/cmd"
 	"dzug/conf"
 	"dzug/logger"
 	"dzug/repo"
 	"fmt"
-	"go.uber.org/zap"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -60,5 +62,6 @@ func main() {
 	go videoservice.Start()
 	go favorservice.Start()
 	go messageservice.Start()
+	go commentservice.Start()
 	client.Start()
 }

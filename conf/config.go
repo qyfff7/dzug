@@ -2,9 +2,10 @@ package conf
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
-	"os"
 )
 
 // Config 全局变量，用来保存项目所有的配置信息
@@ -93,6 +94,8 @@ type Service struct {
 	FavoriteServiceUrl  string `mapstructure:"favorite_service_url"`
 	MessageServiceName  string `mapstructure:"message_service_name"`
 	MessageServiceUrl   string `mapstructure:"message_service_url"`
+	CommentServiceUrl   string `mapstructure:"comment_service_url"`
+	CommentServiceName  string `mapstructure:"comment_service_name"`
 }
 
 // Init 从配置文件中获取项目所有的配置信息

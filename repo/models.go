@@ -10,11 +10,15 @@ import (
 // Comment 评论表
 type Comment struct {
 	gorm.Model
+	ID          uint   `gorm:"primarykey"`
 	CommentUuid int64  `gorm:"column:comment_uuid;type:bigint(20) unsigned;default:0;comment:评论uuid;NOT NULL;unique" json:"comment_uuid"`
 	UserId      int64  `gorm:"column:user_id;type:bigint(20) unsigned;default:0;comment:评论作者id;NOT NULL" json:"user_id"`
 	VideoId     int64  `gorm:"column:video_id;type:bigint(20) unsigned;default:0;comment:评论视频id;NOT NULL" json:"video_id"`
 	Contents    string `gorm:"column:contents;type:varchar(255);comment:评论内容;NOT NULL" json:"contents"`
 	CreateTime  int64  `gorm:"column:create_time;type:bigint(20) unsigned;default:0;comment:自设创建时间(unix);NOT NULL" json:"create_time"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   gorm.DeletedAt `gorm:"uniqueIndex:f"`
 }
 
 func (m *Comment) TableName() string {

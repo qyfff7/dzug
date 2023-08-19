@@ -3,7 +3,9 @@ package discovery
 import (
 	"dzug/conf"
 	"dzug/protos/favorite"
+	"dzug/protos/comment"
 	"dzug/protos/message"
+	"dzug/protos/relation"
 	"dzug/protos/user"
 	"dzug/protos/video"
 	"errors"
@@ -18,6 +20,8 @@ var (
 	VideoClient    video.VideoServiceClient
 	MessageClient  message.DouyinMessageServiceClient
 	FavoriteClient favorite.DouyinFavoriteActionServiceClient
+	RelationClient relation.DouyinRelationActionServiceClient
+	CommentClient  comment.DouyinCommentServiceClient
 )
 
 // InitDiscovery 初始化一个服务发现程序
@@ -47,6 +51,10 @@ func LoadClient(serviceName string, client any) error {
 		*c = video.NewVideoServiceClient(conn)
 	case *favorite.DouyinFavoriteActionServiceClient:
 		*c = favorite.NewDouyinFavoriteActionServiceClient(conn)
+	case *relation.DouyinRelationActionServiceClient:
+		*c = relation.NewDouyinRelationActionServiceClient(conn)
+	case *comment.DouyinCommentServiceClient:
+		*c = comment.NewDouyinCommentServiceClient(conn)
 	case *message.DouyinMessageServiceClient:
 		*c = message.NewDouyinMessageServiceClient(conn)
 	default:
