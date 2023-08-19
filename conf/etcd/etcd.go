@@ -2,8 +2,8 @@ package etcd
 
 import (
 	"context"
-	"dzug/conf"
-	"dzug/logger/logagent/tailfile"
+	"dzug/conf/tailfile"
+	"dzug/models"
 	"encoding/json"
 	"fmt"
 	"go.etcd.io/etcd/client/v3"
@@ -30,9 +30,10 @@ func Init(address []string) (err error) {
 	return
 }
 
-// GetConf 拉取日志收集配置项的函数
-func GetConf(key string) (config *conf.ProjectConfig, err error) {
-	var configList []*conf.ProjectConfig
+// GetProjectConf 拉取日志收集配置项的函数
+func GetProjectConf(key string) (config *models.ProjectConfig, err error) {
+	var configlist []*models.ProjectConfig
+
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
 	resp, err := client.Get(ctx, key)
@@ -46,21 +47,49 @@ func GetConf(key string) (config *conf.ProjectConfig, err error) {
 		fmt.Printf("get len:0 conf from etcd by key:%s", key)
 		return
 	}
+
 	ret := resp.Kvs[0] //取一个
 	// ret.Value // json格式字符串
-	fmt.Println(ret.Value)
+	fmt.Printf("%s", ret.Value)
+
 	//将从etcd中去取出来的值ret.Value利用Unmarshal方法反序列化出来，存放在collectEntryList上
-	err = json.Unmarshal(ret.Value, &configList)
+	err = json.Unmarshal(ret.Value, &configlist)
 	if err != nil {
 		//zap.L().Error("json unmarshal failed, err:", zap.Error(err))
 		fmt.Printf("json unmarshal failed, err:%v", err)
 		return nil, err
 	}
-	for _, c := range configList {
-		if c.Name == "Douyin" {
-			config = c
-			return
-		}
+	config = configlist[0]
+	return
+}
+
+// GetProjectConf 拉取日志收集配置项的函数
+func GetLogConf(key string) (logconflist []*models.LogConfig, err error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
+	defer cancel()
+	resp, err := client.Get(ctx, key)
+	if err != nil {
+		//zap.L().Error("get conf from etcd by key:" + fmt.Sprintf("%s", key) + " failed ,err:%v" + fmt.Sprintf("%s", err))
+		fmt.Printf("get conf from etcd by key:%s ,err:%v", key, err)
+		return
+	}
+	if len(resp.Kvs) == 0 {
+		//zap.L().Warn("get len:0 conf from etcd by key:%s" + fmt.Sprintf("%s", key))
+		fmt.Printf("get len:0 conf from etcd by key:%s", key)
+		return
+	}
+
+	ret := resp.Kvs[0] //取一个
+	// ret.Value // json格式字符串
+	fmt.Printf("%s", ret.Value)
+
+	//将从etcd中去取出来的值ret.Value利用Unmarshal方法反序列化出来，存放在collectEntryList上
+	err = json.Unmarshal(ret.Value, &logconflist)
+	if err != nil {
+		//zap.L().Error("json unmarshal failed, err:", zap.Error(err))
+		fmt.Printf("json unmarshal failed, err:%v", err)
+		return nil, err
 	}
 	return
 }
@@ -73,7 +102,7 @@ func WatchConf(key string) {
 			zap.L().Info("get new conf from etcd!")
 			for _, evt := range wresp.Events {
 				fmt.Printf("type:%s key:%s value:%s\n", evt.Type, evt.Kv.Key, evt.Kv.Value)
-				var newConf []conf.CollectEntry
+				var newConf []models.LogConfig
 
 				if evt.Type == clientv3.EventTypeDelete {
 					// 如果是 删除事件

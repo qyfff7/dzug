@@ -1,19 +1,27 @@
 package main
 
-import "dzug/logger/logagent"
+import (
+	client "dzug/app/gateway/cmd"
+	"dzug/app/redis"
+	userservice "dzug/app/user/cmd"
+	"dzug/app/user/pkg/snowflake"
+	"dzug/conf"
+	"dzug/repo"
+	"fmt"
+	"time"
+)
 
-/*func main() {
+func main() {
 
 	//1. 初始化配置文件
-	if err := conf.Init(); err != nil {
+	if err := conf.Init([]string{"127.0.0.1:2379"}, "douyin"); err != nil {
 		fmt.Printf("Config file initialization error,%#v", err)
 		return
 	}
-	//2. 开启配置中心
-	go logagent.Start()
 
 	//2. 初始化日志
-	//if err := logger.Init(); err != nil {
+	//servicename := "project"
+	//if err := logger.Init(conf.LogConfList, servicename); err != nil {
 	//	fmt.Printf("log file initialization error,%#v", err)
 	//	return
 	//}
@@ -23,7 +31,7 @@ import "dzug/logger/logagent"
 	//3. 初始化mysql数据库
 	if err := repo.Init(); err != nil {
 		fmt.Printf("mysql  init error,%#v", err)
-		zap.L().Error("初始化mysql数据库失败！！！")
+		//zap.L().Error("初始化mysql数据库失败！！！")
 		return
 	}
 
@@ -39,20 +47,15 @@ import "dzug/logger/logagent"
 
 	//5. snowflake初始化
 	if err := snowflake.Init(conf.Config.StartTime, conf.Config.MachineID); err != nil {
-		zap.L().Error("snowflake initialization error", zap.Error(err))
+		//zap.L().Error("snowflake initialization error", zap.Error(err))
 		return
 	}
 	//6.启动服务（后续可将所有的服务单独写到一个文件）
 
 	go userservice.Start()
 	time.Sleep(time.Second)
-	go videoservice.Start()
+	//go videoservice.Start()
 	//go favorservice.Start()
 	client.Start()
 
-}
-*/
-
-func main() {
-	logagent.Start()
 }

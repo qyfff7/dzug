@@ -2,7 +2,7 @@ package tailfile
 
 import (
 	"context"
-	"dzug/logger/logagent/kafka"
+	"dzug/conf/kafka"
 	"fmt"
 	"github.com/IBM/sarama"
 	"github.com/hpcloud/tail"

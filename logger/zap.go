@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"dzug/conf"
+	"dzug/models"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -16,25 +16,18 @@ import (
 )
 
 // Init 初始化Logger
-func Init(filepath string, level string, maxsize, maxbackups, maxage int) (err error) {
-	var writeSyncer zapcore.WriteSyncer
-	var encoder zapcore.Encoder
+func Init(logconf *models.LogConfig) (err error) {
 
-	//对于每一个配置项，新建一个日志对象，这样在项目中实现分开收集各自的日志
-	//for _, logconf := range allConf {
-	writeSyncer = getLogWriter(filepath, maxsize, maxbackups, maxage)
-	encoder = getEncoder()
-	//fmt.Sprintf("%s",logconf.Topic)
-
+	writeSyncer := getLogWriter(logconf.Path, logconf.MaxSize, logconf.MaxBackups, logconf.MaxAge)
+	encoder := getEncoder()
 	l := new(zapcore.Level)
-	err = l.UnmarshalText([]byte(level))
+	err = l.UnmarshalText([]byte(logconf.Level))
 	if err != nil {
 		return
 	}
-	//}
 
 	var core zapcore.Core
-	if conf.Config.Mode == "develop" {
+	if logconf.Mode == "develop" {
 		//开发模式，日志输出到终端
 		consoleEnbcoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
 		core = zapcore.NewTee(
