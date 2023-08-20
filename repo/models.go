@@ -9,7 +9,6 @@ import (
 
 // Comment 评论表
 type Comment struct {
-	gorm.Model
 	ID          uint   `gorm:"primarykey"`
 	CommentUuid int64  `gorm:"column:comment_uuid;type:bigint(20) unsigned;default:0;comment:评论uuid;NOT NULL;unique" json:"comment_uuid"`
 	UserId      int64  `gorm:"column:user_id;type:bigint(20) unsigned;default:0;comment:评论作者id;NOT NULL" json:"user_id"`
@@ -57,11 +56,11 @@ func (m *Message) TableName() string {
 }
 
 type Relation struct {
-	ID        uint  `gorm:"primarykey"`
-	UserId    int64 `gorm:"column:user_id;type:bigint(20) unsigned;default:0;comment:用户id;NOT NULL;uniqueIndex:r" json:"user_id"`
-	ToUserId  int64 `gorm:"column:to_user_id;type:bigint(20) unsigned;default:0;comment:关注目标的用户id;NOT NULL;uniqueIndex:r" json:"to_user_id"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        uint           `gorm:"primarykey"`
+	UserId    int64          `gorm:"foreignKey:UserId;references:UserId;comment:用户的UserId;type:bigint(20) unsigned;default:0;NOT NULL;uniqueIndex:r" json:"user_id"`
+	ToUserId  int64          `gorm:"foreignKey:ToUserId;references:UserId;comment:关注目标用户的UserId;type:bigint(20) unsigned;default:0;NOT NULL;uniqueIndex:r" json:"to_user_id"`
+	CreatedAt time.Time      `gorm:"null" json:"created_at"`
+	UpdatedAt time.Time      `gorm:"null" json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"uniqueIndex:r"`
 }
 

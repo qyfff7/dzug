@@ -2,13 +2,14 @@ package discovery
 
 import (
 	"dzug/conf"
-	"dzug/protos/favorite"
 	"dzug/protos/comment"
+	"dzug/protos/favorite"
 	"dzug/protos/message"
 	"dzug/protos/relation"
 	"dzug/protos/user"
 	"dzug/protos/video"
 	"errors"
+
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

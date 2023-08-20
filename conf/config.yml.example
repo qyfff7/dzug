@@ -49,8 +49,12 @@ service:
   video_service_url: 127.0.0.1:9002
   favorite_service_name: "favorite"
   favorite_service_url: 127.0.0.1:9003
+  relation_service_name: "relation"
+  relation_service_url: 127.0.0.1:9004
+  comment_service_name: "comment"
+  comment_service_url: 127.0.0.1:9005
   message_service_name: "message"
-  message_service_url: "127.0.0.1:9006"
+  message_service_url: 127.0.0.1:9006
 
 video:
   feedcount: 30
