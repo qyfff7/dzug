@@ -6,6 +6,7 @@ import (
 	client "dzug/app/gateway/cmd"
 	messageservice "dzug/app/message/cmd"
 	"dzug/app/redis"
+	relationservice "dzug/app/relation/cmd"
 	userservice "dzug/app/user/cmd"
 	"dzug/app/user/pkg/snowflake"
 	videoservice "dzug/app/video/cmd"
@@ -63,5 +64,6 @@ func main() {
 	go favorservice.Start()
 	go messageservice.Start()
 	go commentservice.Start()
+	go relationservice.Start()
 	client.Start()
 }

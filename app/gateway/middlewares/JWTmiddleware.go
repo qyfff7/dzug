@@ -4,9 +4,10 @@ import (
 	"dzug/app/redis"
 	"dzug/app/user/pkg/jwt"
 	"dzug/models"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"strconv"
 )
 
 // JWTAuthMiddleware 基于JWT的认证中间件
@@ -22,6 +23,7 @@ func JWTAuthMiddleware() func(ctx *gin.Context) {
 		}
 
 		oldtoken, err := redis.Rdb.HGet(ctx, redis.GetRedisKey(redis.KeyUserInfo, strconv.Itoa(int(mc.UserID))), "token").Result()
+
 		if err != nil {
 			zap.L().Error("获取redis中的用户 token 出错", zap.Error(err))
 			models.ResponseError(ctx, models.CodeServerBusy)
