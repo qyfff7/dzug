@@ -17,13 +17,7 @@ import (
 
 // Config 全局变量，用来保存项目所有的配置信息
 var Config = new(models.ProjectConfig)
-
-type BasicConfig struct {
-	Name     string   `mapstructure:"project_name"`
-	EtcdAddr []string `mapstructure:"etcd_address"`
-}
-
-var BasicConf = new(BasicConfig)
+var BasicConf = new(models.BasicConfig)
 
 // Init 项目配置初始化
 func Init() (err error) {
@@ -33,9 +27,8 @@ func Init() (err error) {
 		fmt.Println("init basic config failed, err:" + err.Error())
 		return err
 	}
-
 	//1. 初始化etcd连接
-	err = etcd.Init(BasicConf.EtcdAddr)
+	err = etcd.Init(BasicConf.EtcdAddr, BasicConf.Name)
 	if err != nil {
 		//zap.L().Error("init etcd failed, err:", zap.Error(err))
 		fmt.Println("init etcd failed, err:" + err.Error())
