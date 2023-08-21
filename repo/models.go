@@ -100,8 +100,8 @@ type Video struct {
 	gorm.Model
 	UserId        int64  `gorm:"column:user_id;type:bigint(20) unsigned;default:0;comment:user表主键;NOT NULL;" json:"user_id"`
 	Title         string `gorm:"column:title;type:varchar(128);comment:视频标题;NOT NULL" json:"title"`
-	PlayUrl       string `gorm:"column:play_url;type:varchar(128);comment:视频地址;NOT NULL" json:"play_url"`
-	CoverUrl      string `gorm:"column:cover_url;type:varchar(128);comment:封面地址;NOT NULL" json:"cover_url"`
+	PlayUrl       string `gorm:"column:play_url;type:varchar(225);comment:视频地址;NOT NULL" json:"play_url"`
+	CoverUrl      string `gorm:"column:cover_url;type:varchar(225);comment:封面地址;NOT NULL" json:"cover_url"`
 	FavoriteCount uint   `gorm:"column:favorite_count;type:int(15) unsigned;default:0;comment:获赞数量;NOT NULL" json:"favorite_count"`
 	CommentCount  uint   `gorm:"column:comment_count;type:int(15) unsigned;default:0;comment:评论数量;NOT NULL" json:"comment_count"`
 	Comment       []Comment

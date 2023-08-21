@@ -98,6 +98,8 @@ type Service struct {
 	CommentServiceName  string `mapstructure:"comment_service_name"`
 	RelationServiceName string `mapstructure:"relation_service_name"`
 	RelationServiceUrl  string `mapstructure:"relation_service_url"`
+	PublishServiceName  string `mapstructure:"publish_service_name"`
+	PublishServiceUrl   string `mapstructure:"publish_service_url"`
 }
 
 // Init 从配置文件中获取项目所有的配置信息

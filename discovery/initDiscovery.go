@@ -5,6 +5,7 @@ import (
 	"dzug/protos/comment"
 	"dzug/protos/favorite"
 	"dzug/protos/message"
+	"dzug/protos/publish"
 	"dzug/protos/relation"
 	"dzug/protos/user"
 	"dzug/protos/video"
@@ -23,6 +24,7 @@ var (
 	FavoriteClient favorite.DouyinFavoriteActionServiceClient
 	RelationClient relation.DouyinRelationActionServiceClient
 	CommentClient  comment.DouyinCommentServiceClient
+	PublishClient  publish.PublishServiceClient
 )
 
 // InitDiscovery 初始化一个服务发现程序
@@ -58,6 +60,8 @@ func LoadClient(serviceName string, client any) error {
 		*c = comment.NewDouyinCommentServiceClient(conn)
 	case *message.DouyinMessageServiceClient:
 		*c = message.NewDouyinMessageServiceClient(conn)
+	case *publish.PublishServiceClient:
+		*c = publish.NewPublishServiceClient(conn)
 	default:
 		err = errors.New("没有该类型的服务")
 		zap.L().Error(err.Error())

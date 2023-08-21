@@ -67,6 +67,14 @@ func NewRouter(mode string) *gin.Engine {
 		relation.GET("/follower/list/", handlers.RelationFanList)
 		relation.GET("/friend/list/", handlers.RelationFriendList)
 	}
+
+	publish := ginRouter.Group("/douyin/publish")
+	//publish.Use(middlewares.JWTAuthMiddleware())
+	{
+		publish.POST("/action", handlers.UploadHandler)
+		publish.GET("/list", handlers.GetVideoListByUser)
+	}
+
 	message := ginRouter.Group("/douyin/message")
 	message.Use(middlewares.JWTAuthMiddleware())
 	{
