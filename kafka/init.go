@@ -14,7 +14,7 @@ var (
 func InitKafka() error {
 	var err error
 	// 成功交付的消息将在success channel返回
-	KafkaConsumer, err = sarama.NewConsumer(conf.Config.KafkaConfig.Addr, nil) // 启动消费者，此时消费者开始消费
+	KafkaConsumer, err = sarama.NewConsumer([]string{conf.Config.KafkaConfig.Addr}, nil) // 启动消费者，此时消费者开始消费
 	//KafkaConsumer, err = sarama.NewConsumer(conf.Config.KafkaConfig.Addr, nil) // 启动消费者，此时消费者开始消费
 	if err != nil {
 		panic("kafka错误：" + err.Error())

@@ -8,15 +8,13 @@ import (
 	"dzug/conf"
 	"dzug/discovery"
 	"dzug/kafka"
-	"dzug/logger"
 	pb "dzug/protos/message"
 	"dzug/repo"
-	"fmt"
 	"go.uber.org/zap"
 )
 
 func Start() {
-	//1. 初始化配置文件
+	/*//1. 初始化配置文件
 	if err := conf.Init(); err != nil {
 		fmt.Printf("Config file initialization error,%#v", err)
 		return
@@ -28,7 +26,7 @@ func Start() {
 		return
 	}
 	defer zap.L().Sync() //把缓冲区的日志，追加到文件中
-	zap.L().Info("服务启动，开始记录日志")
+	zap.L().Info("服务启动，开始记录日志")*/
 
 	//3. 初始化数据库
 	repo.Init()

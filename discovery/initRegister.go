@@ -10,7 +10,7 @@ import (
 
 // InitRegister 放入服务名称和服务的链接，返回etcdServiceRegister和grpc服务器
 func InitRegister(key, value string) (*ServiceRegister, *grpc.Server) {
-	endpoints := conf.Config.EtcdConfig.Addr
+	endpoints := conf.BasicConf.EtcdAddr
 	sRegister := &ServiceRegister{
 		EtcdAddrs: endpoints,
 		Lease:     5,

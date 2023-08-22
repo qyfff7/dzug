@@ -29,7 +29,7 @@ var (
 
 // InitDiscovery 初始化一个服务发现程序
 func InitDiscovery() {
-	endpoints := conf.Config.EtcdConfig.Addr              // etcd地址
+	endpoints := conf.BasicConf.EtcdAddr                  // etcd地址
 	SerDiscovery = serviceDiscovery{EtcdAddrs: endpoints} // 放入etcd地址
 	err := SerDiscovery.newServiceDiscovery()             // 实例化
 	if err != nil {
