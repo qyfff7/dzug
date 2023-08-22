@@ -18,11 +18,11 @@ log:
   level: "debug"   #日志级别
 
 mysql:
-  host: 你的mysql host   #主机名
+  host: 127.0.0.1   #主机名
   port: 3306   #端口
   user: "root"   #用户名
-  password: "password"  #密码
-  database: "byte_dance"   #数据库名
+  password: "mysql"  #密码
+  database: "douyin"   #数据库名
   charset: "utf8mb4"
   parsetime: true
   loc: "Local"
@@ -54,7 +54,9 @@ service:
   comment_service_name: "comment"
   comment_service_url: 127.0.0.1:9005
   message_service_name: "message"
-  message_service_url: 127.0.0.1:9006
+  message_service_url: 127.0.0.1:9007
+  publish_service_name: "publish"
+  publish_service_url: 127.0.0.1:9008
 
 video:
   feedcount: 30
