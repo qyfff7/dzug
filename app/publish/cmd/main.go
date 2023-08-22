@@ -19,7 +19,7 @@ func main() {
 		return
 	}
 
-	if err := logger.Init(conf.Config.LogConfig, conf.Config.Mode); err != nil {
+	if err := logger.Init(conf.Config.LogConfig); err != nil {
 		fmt.Printf("log file initialization error,%#v", err)
 		return
 	}
