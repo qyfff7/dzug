@@ -37,8 +37,8 @@ func CommentAction(ctx *gin.Context) {
 	ac, _ := strconv.Atoi(CReq.ActionType)
 	actionType := int32(ac)
 	commentText := ctx.Query("comment_text")
-	commentId := snowflake.GenID()
-
+	commentId := snowflake.GenID()                                 //新建评论时生成ID
+	commid, _ := strconv.ParseInt(ctx.Query("comment_id"), 10, 64) //删除评论时使用的ID
 	ctx.JSON(http.StatusOK, pb.DouyinCommentActionResponse{
 		StatusCode: 200,
 		StatusMsg:  "操作成功",
@@ -67,7 +67,7 @@ func CommentAction(ctx *gin.Context) {
 			Token:      token,
 			ActionType: int32(actionType),
 			VideoId:    int64(videoid),
-			CommentId:  int64(commentId),
+			CommentId:  int64(commid),
 		}
 		CResp, err := rpc.CommentAction(ctx, &CAction)
 		if err != nil {
