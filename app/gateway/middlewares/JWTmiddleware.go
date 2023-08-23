@@ -1,8 +1,8 @@
 package middlewares
 
 import (
-	"dzug/app/user/pkg/jwt"
-	"dzug/app/user/redis"
+	"dzug/app/services/user/dal/redis"
+	"dzug/app/services/user/pkg/jwt"
 	"dzug/models"
 	"strconv"
 

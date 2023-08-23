@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"dzug/app/gateway/rpc"
-	"dzug/app/user/pkg/jwt"
+	"dzug/app/services/user/pkg/jwt"
 	pb "dzug/protos/favorite"
 	"fmt"
 	"github.com/gin-gonic/gin"

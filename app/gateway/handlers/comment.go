@@ -2,8 +2,7 @@ package handlers
 
 import (
 	"dzug/app/gateway/rpc"
-	"dzug/app/user/pkg/snowflake"
-
+	"dzug/app/services/user/pkg/snowflake"
 	pb "dzug/protos/comment"
 	"fmt"
 	"net/http"

@@ -1,15 +1,15 @@
 package main
 
 import (
-	commentservice "dzug/app/comment/cmd"
-	favorservice "dzug/app/favorite/cmd"
 	client "dzug/app/gateway/cmd"
-	messageservice "dzug/app/message/cmd"
-	relationservice "dzug/app/relation/cmd"
-	userservice "dzug/app/user/cmd"
-	"dzug/app/user/pkg/snowflake"
-	"dzug/app/user/redis"
-	videoservice "dzug/app/video/cmd"
+	"dzug/app/services/comment/cmd"
+	"dzug/app/services/favorite/cmd"
+	"dzug/app/services/message/cmd"
+	"dzug/app/services/relation/cmd"
+	"dzug/app/services/user/cmd"
+	"dzug/app/services/user/dal/redis"
+	"dzug/app/services/user/pkg/snowflake"
+	"dzug/app/services/video/cmd"
 	"dzug/conf"
 	transfer "dzug/conf/confagent/log_transfer"
 	"dzug/repo"

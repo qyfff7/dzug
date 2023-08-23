@@ -8,7 +8,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `message`;
 CREATE TABLE `message` (
                            `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '消息id',
-                           `thread_id` varchar(255) NOT NULL COMMENT '对话id',
+                           `thread_id` bigint unsigned NOT NULL COMMENT '对话id',
                            `message_uuid` bigint unsigned NOT NULL DEFAULT '0' COMMENT '消息uuid',
                            `to_user_id` bigint NOT NULL DEFAULT '0' COMMENT '该消息接收者的id',
                            `from_user_id` bigint NOT NULL DEFAULT '0' COMMENT '该消息发送者的id',
