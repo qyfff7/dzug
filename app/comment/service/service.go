@@ -63,7 +63,7 @@ func (c *CommentSrv) Action(ctx context.Context, in *comment.DouyinCommentAction
 			}, errors.New("redis数据库错误")
 		}
 		ans = 0
-		ans = dao.Incomm(commentid)
+		ans = dao.Incomm(ctx, videoId, commentid)
 		if ans == 0 {
 			return &comment.DouyinCommentActionResponse{
 				StatusCode: 500,

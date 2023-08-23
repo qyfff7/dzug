@@ -38,7 +38,8 @@ func CommentAction(ctx *gin.Context) {
 	actionType := int32(ac)
 	commentText := ctx.Query("comment_text")
 	commId := snowflake.GenID()
-	commentId, _ := strconv.ParseInt(commId, 10, 64)
+	comid := ctx.Query("comment_id")
+	commentId, _ := strconv.ParseInt(comid, 10, 64)
 	ctx.JSON(http.StatusOK, pb.DouyinCommentActionResponse{
 		StatusCode: 200,
 		StatusMsg:  "操作成功",
@@ -50,7 +51,7 @@ func CommentAction(ctx *gin.Context) {
 			VideoId:     int64(videoid),
 			ActionType:  int32(actionType),
 			CommentText: string(commentText),
-			CommentId:   int64(commentId),
+			CommentId:   int64(commId),
 		}
 
 		CResp, err := rpc.CommentAction(ctx, &CAction)
