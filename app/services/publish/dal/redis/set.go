@@ -2,7 +2,7 @@ package redis
 
 import (
 	"context"
-	redisModel "dzug/app/publish/infra/redis/model"
+	redisModel "dzug/app/services/publish/dal/redis/model"
 	"dzug/repo"
 	"encoding/json"
 	"math/rand"

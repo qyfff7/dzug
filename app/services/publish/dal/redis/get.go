@@ -2,7 +2,7 @@ package redis
 
 import (
 	"context"
-	redisVideoModle "dzug/app/publish/infra/redis/model"
+	redisVideoModle "dzug/app/services/publish/dal/redis/model"
 	"dzug/repo"
 	"encoding/json"
 	"go.uber.org/zap"

@@ -5,6 +5,7 @@ import (
 	"dzug/app/services/comment/cmd"
 	"dzug/app/services/favorite/cmd"
 	"dzug/app/services/message/cmd"
+	publishservice "dzug/app/services/publish/cmd"
 	"dzug/app/services/relation/cmd"
 	"dzug/app/services/user/cmd"
 	"dzug/app/services/user/dal/redis"
@@ -67,5 +68,6 @@ func main() {
 	go messageservice.Start()
 	go commentservice.Start()
 	go relationservice.Start()
+	go publishservice.Start()
 	client.Start()
 }
