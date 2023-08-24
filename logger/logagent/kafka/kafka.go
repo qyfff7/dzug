@@ -1,7 +1,7 @@
 package kafka
 
 import (
-	"dzug/conf/confagent/es"
+	"dzug/logger/logagent/es"
 	"encoding/json"
 	"fmt"
 	"github.com/IBM/sarama"

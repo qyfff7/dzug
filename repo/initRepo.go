@@ -1,7 +1,7 @@
 package repo
 
 import (
-	"dzug/conf"
+	"dzug/models"
 	"fmt"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
@@ -13,9 +13,9 @@ import (
 // DB 提供给对外操作数据库
 var DB *gorm.DB
 
-func Init() (err error) {
+func Init(mysqlConfig *models.MySQLConfig) (err error) {
 
-	mysqlConfig := conf.Config.MySQLConfig
+	//mysqlConfig := userservice.UserConf.MySQLConfig
 	link := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=%t&loc=%s",
 		mysqlConfig.User, mysqlConfig.Password, mysqlConfig.Host, mysqlConfig.Port, mysqlConfig.DB, mysqlConfig.Charset, mysqlConfig.ParseTime, mysqlConfig.Loc)
 	DB, err = gorm.Open(mysql.Open(link), &gorm.Config{

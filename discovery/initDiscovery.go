@@ -1,7 +1,7 @@
 package discovery
 
 import (
-	"dzug/conf"
+	"dzug/app/services/config_center"
 	"dzug/protos/comment"
 	"dzug/protos/favorite"
 	"dzug/protos/message"
@@ -29,7 +29,7 @@ var (
 
 // InitDiscovery 初始化一个服务发现程序
 func InitDiscovery() {
-	endpoints := conf.BasicConf.EtcdAddr                  // etcd地址
+	endpoints := config_center.ProjBaseConf.EtcdAddr      // etcd地址
 	SerDiscovery = serviceDiscovery{EtcdAddrs: endpoints} // 放入etcd地址
 	err := SerDiscovery.newServiceDiscovery()             // 实例化
 	if err != nil {

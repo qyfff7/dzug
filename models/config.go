@@ -2,33 +2,33 @@ package models
 
 // ProjectConfig 项目所有的配置
 type ProjectConfig struct {
-	Name           string `json:"name"`
-	Port           int    `json:"port"`
-	Version        string `json:"version"`
-	StartTime      string `json:"start_time"`
-	MachineID      int64  `json:"machine_id"`
-	*LogConfig     `json:"logconfig"`
-	*MySQLConfig   `json:"mysql"`
-	*RedisConfig   `json:"redis"`
-	*KafkaConfig   `json:"kafka"`
-	*JwtConfig     `json:"jwt"`
-	*VideoConfig   `json:"video"`
-	*Service       `json:"service"`
-	*Ratelimit     `json:"ratelimit"`
-	*EtcdConfig    `json:"etcd"`
-	*ESConf        `json:"esconfig"`
-	*MongoDbConfig `json:"mongodb"`
+	Name      string `mapstructure:"name" json:"name"`
+	Port      int    `mapstructure:"port" json:"port"`
+	Version   string `mapstructure:"version" json:"version"`
+	StartTime string `mapstructure:"start_time" json:"start_time"`
+	MachineID int64  `mapstructure:"machine_id" json:"machine_id"`
 }
 
 // LogConfig 日志文件的配置
 type LogConfig struct {
-	Path       string `json:"path"`
-	MaxSize    int    `json:"max_size"`
-	MaxAge     int    `json:"max_age"`
-	MaxBackups int    `json:"max_backups"`
-	Topic      string `json:"topic"`
-	Level      string `json:"level"`
-	Mode       string `json:"mode"`
+	Path         string `mapstructure:"path" json:"path"`
+	MaxSize      int    `mapstructure:"max_size" json:"max_size"`
+	MaxAge       int    `mapstructure:"max_age" json:"max_age"`
+	MaxBackups   int    `mapstructure:"max_backups" json:"max_backups"`
+	Topic        string `mapstructure:"topic" json:"topic"`
+	Level        string `mapstructure:"level" json:"level"`
+	Mode         string `mapstructure:"mode" json:"mode"`
+	*ESConfig    `mapstructure:"es" json:"es"`
+	*KafkaConfig `mapstructure:"kafka" json:"kafka"`
+}
+
+// ProjectConfig 项目所有的配置
+type UserConfig struct {
+	Url          string `mapstructure:"url" json:"url"`
+	Name         string `mapstructure:"service_name" json:"service_name"`
+	*JwtConfig   `mapstructure:"jwt" json:"jwt"`
+	*MySQLConfig `mapstructure:"mysql" json:"mysql"`
+	*RedisConfig `mapstructure:"redis" json:"redis"`
 }
 
 // MySQLConfig 数据库配置
@@ -98,13 +98,14 @@ type Ratelimit struct {
 	Rate int64 `json:"rate"`
 	Cap  int64 `json:"cap"`
 }
-type ESConf struct {
+
+type BasicConfig struct {
+	Name     string   `mapstructure:"name"`
+	EtcdAddr []string `mapstructure:"etcd_address"`
+}
+type ESConfig struct {
 	Address string `json:"address"`
 	Index   string `json:"index"`
 	MaxSize int    `json:"max_chan_size"`
 	GoNum   int    `json:"goroutine_num"`
-}
-type BasicConfig struct {
-	Name     string   `mapstructure:"project_name"`
-	EtcdAddr []string `mapstructure:"etcd_address"`
 }

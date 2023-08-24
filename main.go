@@ -2,27 +2,32 @@ package main
 
 import (
 	client "dzug/app/gateway/cmd"
-	"dzug/app/services/comment/cmd"
-	"dzug/app/services/favorite/cmd"
-	"dzug/app/services/message/cmd"
-	publishservice "dzug/app/services/publish/cmd"
-	"dzug/app/services/relation/cmd"
-	"dzug/app/services/user/cmd"
-	"dzug/app/services/user/dal/redis"
-	"dzug/app/services/user/pkg/snowflake"
-	"dzug/app/services/video/cmd"
-	"dzug/conf"
-	transfer "dzug/conf/confagent/log_transfer"
-	"dzug/repo"
+	"dzug/app/services/config_center"
+	userservice "dzug/app/services/user/cmd"
+	"dzug/logger"
 	"fmt"
-	"time"
-
 	"go.uber.org/zap"
 )
 
 func main() {
 
-	//1. 初始化配置文件
+	//1.启动配置中心（将项目初始配置都存到etcd中，启动监控）
+	config_center.Init()
+
+	//2.初始化日志（获取etcd中日志的配置，进行初始化，包括kafka,es的初始化）这也是一个服务
+	if err := logger.Init(); err != nil {
+		fmt.Printf("log file initialization error,%#v", err)
+		return
+	}
+	defer zap.L().Sync() //把缓冲区的日志，追加到文件中
+	zap.L().Info("服务启动，开始记录日志")
+
+	//3.各个服务启动（①获取各自的配置，进行相应的初始化，②进行业务代码操作）
+
+	go userservice.Start()
+	client.Start()
+
+	/*//1. 初始化配置中心
 	if err := conf.Init(); err != nil {
 		fmt.Printf("Config file initialization error,%#v", err)
 		return
@@ -69,5 +74,23 @@ func main() {
 	go commentservice.Start()
 	go relationservice.Start()
 	go publishservice.Start()
-	client.Start()
+	client.Start()*/
+
+	//1.初始化配置中心（将项目初始配置都存到etcd中，启动监控）
+	//2.初始化日志（获取etcd中日志的配置，进行初始化，包括kafka,es的初始化）这也是一个服务
+	//3.各个服务启动（①获取各自的配置，进行相应的初始化，②进行业务代码操作）
+
+	/*time.Sleep(time.Second)
+	fmt.Println(config_center.ProjConf.Name)
+	fmt.Println("2222" + config_center.ProjConf.Name)
+	time.Sleep(time.Second * 2)
+	go func() {
+		for {
+			fmt.Println("2222" + config_center.ProjConf.Name + "hahah")
+			fmt.Println("2222" + config_center.ProjConf.Name)
+		}
+
+	}()
+
+	select {}*/
 }
