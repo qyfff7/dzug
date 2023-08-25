@@ -30,13 +30,13 @@ var (
 )
 
 // Init 初始化连接
-func Init() (err error) {
+func Init(host, pw string, db, port, pool_size, min_idle_conns int) (err error) {
 	Rdb = redis.NewClient(&redis.Options{
-		Addr:         fmt.Sprintf("%s:%d", conf.Config.RedisConfig.Host, conf.Config.RedisConfig.Port),
-		Password:     conf.Config.RedisConfig.Password, // no password set
-		DB:           conf.Config.RedisConfig.DB,       // use default DB
-		PoolSize:     conf.Config.RedisConfig.PoolSize,
-		MinIdleConns: conf.Config.RedisConfig.MinIdleConns,
+		Addr:         fmt.Sprintf("%s:%d", host, port),
+		Password:     pw, // no password set
+		DB:           db, // use default DB
+		PoolSize:     pool_size,
+		MinIdleConns: min_idle_conns,
 	})
 	ctx := context.Background()
 	_, err = Rdb.Ping(ctx).Result()
@@ -51,7 +51,7 @@ func Close() {
 }
 
 func AddUser(ctx context.Context, newuser *repo.User, newtoken string) error {
-	//以userid为key,用户的其他所有信息为value,存到redis中
+	//以userid为key,用户的其他所有信息为valuint到redis中
 	userinfo := make(map[string]interface{})
 	userinfo["user_id"] = newuser.UserId
 	userinfo["name"] = newuser.Name
@@ -82,7 +82,7 @@ func AddUser(ctx context.Context, newuser *repo.User, newtoken string) error {
 			zap.L().Error("用户信息存到redis出错", zap.Error(err))
 			return err
 		}
-		Rdb.Expire(ctx, GetRedisKey(KeyUserId, ""), time.Duration(conf.Config.RedisConfig.RedisExpire)*time.Hour)
+		Rdb.Expire(ctx, GetRedisKey(KeyUserId, ""), time.Duration(conf.UserConf.RedisExpire)*time.Hour)
 		//Rdb.Expire(ctx, GetRedisKey(KeyUserInfo, strconv.Itoa(int(newuser.UserId))), time.Duration(conf.Config.RedisConfig.RedisExpire)*time.Second)
 	}
 

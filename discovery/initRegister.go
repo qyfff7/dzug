@@ -1,7 +1,7 @@
 package discovery
 
 import (
-	"dzug/app/services/config_center"
+	"dzug/conf"
 	"fmt"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -10,7 +10,7 @@ import (
 
 // InitRegister 放入服务名称和服务的链接，返回etcdServiceRegister和grpc服务器
 func InitRegister(key, value string) (*ServiceRegister, *grpc.Server) {
-	endpoints := config_center.ProjBaseConf.EtcdAddr
+	endpoints := conf.ProjBaseConf.EtcdAddr
 	sRegister := &ServiceRegister{
 		EtcdAddrs: endpoints,
 		Lease:     5,

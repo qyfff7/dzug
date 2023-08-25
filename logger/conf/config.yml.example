@@ -1,0 +1,22 @@
+#项目相关配置信息
+name: "logconfig"   #项目名称
+etcd_address: "127.0.0.1:2379"   #etcd地址
+#日志相关配置信息
+
+path: "./logger/douyin.log"  #日志文件的名称
+max_size: 200    #单个日志文件的大小
+max_backups: 7  #日志备份数量
+max_age: 30   #日志备份天数
+level: "debug"   #日志级别
+topic: "douyin"
+mode: "develop"
+
+kafka:
+  address: "127.0.0.1:9092"
+  chansize: 10000
+
+es:
+  address: "127.0.0.1:9200"
+  indes: "douyin"
+  max_chan_size: 100000
+  goroutine_num: 100

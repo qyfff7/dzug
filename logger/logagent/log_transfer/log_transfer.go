@@ -1,7 +1,7 @@
 package log_transfer
 
 import (
-	"dzug/logger"
+	"dzug/conf"
 	"dzug/logger/logagent/es"
 	"dzug/logger/logagent/kafka"
 	"go.uber.org/zap"
@@ -9,14 +9,14 @@ import (
 
 func Init() {
 	//  连接ES
-	err := es.Init(logger.LogConf.Address, logger.LogConf.Topic, logger.LogConf.GoNum, logger.LogConf.MaxSize)
+	err := es.Init(conf.LogConf.Address, conf.LogConf.Topic, conf.LogConf.GoNum, conf.LogConf.MaxSize)
 	if err != nil {
 		zap.L().Error("Init es failed,err: ", zap.Error(err))
 		panic(err)
 	}
 	zap.L().Info("Init ES success")
 	// 初始化kafka 消费者
-	err = kafka.ConsumerInit([]string{logger.LogConf.Addr}, logger.LogConf.Topic)
+	err = kafka.ConsumerInit([]string{conf.LogConf.Addr}, conf.LogConf.Topic)
 	if err != nil {
 		zap.L().Error("connect to kafka consumer failed,err: ", zap.Error(err))
 		panic(err)

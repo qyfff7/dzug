@@ -2,7 +2,7 @@ package models
 
 // ProjectConfig 项目所有的配置
 type ProjectConfig struct {
-	Name      string `mapstructure:"name" json:"name"`
+	Name      string `mapstructure:"proj_name" json:"proj_name"`
 	Port      int    `mapstructure:"port" json:"port"`
 	Version   string `mapstructure:"version" json:"version"`
 	StartTime string `mapstructure:"start_time" json:"start_time"`
@@ -33,25 +33,25 @@ type UserConfig struct {
 
 // MySQLConfig 数据库配置
 type MySQLConfig struct {
-	Host      string `json:"host"`
-	Port      int    `json:"port"`
-	User      string `json:"user"`
-	Password  string `json:"password"`
-	DB        string `json:"database"`
-	Charset   string `json:"charset"`
-	ParseTime bool   `json:"parsetime"`
-	Loc       string `json:"loc"`
+	Host      string `mapstructure:"host" json:"host"`
+	Port      int    `mapstructure:"port" json:"port"`
+	User      string `mapstructure:"user" json:"user"`
+	Password  string `mapstructure:"password" json:"password"`
+	DB        string `mapstructure:"database" json:"database"`
+	Charset   string `mapstructure:"charset" json:"charset"`
+	ParseTime bool   `mapstructure:"parsetime" json:"parsetime"`
+	Loc       string `mapstructure:"loc" json:"loc"`
 }
 
 // RedisConfig Redis配置
 type RedisConfig struct {
-	Host         string `json:"host"`
-	Port         int    `json:"port"`
-	Password     string `json:"password"`
-	DB           int    `json:"db"`
-	PoolSize     int    `json:"pool_size"`
-	MinIdleConns int    `json:"min_idle_conns"`
-	RedisExpire  int    `json:"redis_expire"`
+	Host         string `mapstructure:"host" json:"host"`
+	Port         int    `mapstructure:"port" json:"port"`
+	Password     string `mapstructure:"password" json:"password"`
+	DB           int    `mapstructure:"db" json:"db"`
+	PoolSize     int    `mapstructure:"pool_size" json:"pool_size"`
+	MinIdleConns int    `mapstructure:"min_idle_conns" json:"min_idle_conns"`
+	RedisExpire  int    `mapstructure:"redis_expire" json:"redis_expire"`
 }
 
 // EtcdConfig etcd配置
@@ -61,13 +61,13 @@ type EtcdConfig struct {
 
 // KafkaConfig kafka配置
 type KafkaConfig struct {
-	Addr     string `json:"address"`
-	ChanSize int64  `json:"chansize"`
+	Addr     string `mapstructure:"address" json:"address"`
+	ChanSize int64  `mapstructure:"chansize" json:"chansize"`
 }
 
 // jwt 配置
 type JwtConfig struct {
-	JwtExpire int64 `json:"jwt_expire"`
+	JwtExpire int64 `mapstructure:"jwt_expire" json:"jwt_expire"`
 }
 type VideoConfig struct {
 	FeedCount int64 `json:"feedcount"`
@@ -104,8 +104,8 @@ type BasicConfig struct {
 	EtcdAddr []string `mapstructure:"etcd_address"`
 }
 type ESConfig struct {
-	Address string `json:"address"`
-	Index   string `json:"index"`
-	MaxSize int    `json:"max_chan_size"`
-	GoNum   int    `json:"goroutine_num"`
+	Address string `mapstructure:"address" json:"address"`
+	Index   string `mapstructure:"index" json:"index"`
+	MaxSize int    `mapstructure:"max_chan_size" json:"max_chan_size"`
+	GoNum   int    `mapstructure:"goroutine_num" json:"goroutine_num"`
 }

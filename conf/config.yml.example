@@ -1,3 +1,9 @@
 #项目相关配置信息
-project_name: "douyin"   #项目名称
+name: "douyin"   #项目名称
 etcd_address: "127.0.0.1:2379"   #etcd地址
+
+service_name: "douyin"   #项目名称
+port: 8001    #启动的端口
+version: "v0.0.1"   #项目版本
+start_time: "2023-07-30"  #项目开始时间
+machine_id: 1

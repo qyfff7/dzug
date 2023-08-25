@@ -2,8 +2,8 @@ package logger
 
 import (
 	"context"
-	"dzug/app/services/config_center"
 	"dzug/conf"
+	"dzug/logger/logagent"
 	"dzug/logger/logagent/kafka"
 	"dzug/logger/logagent/tailfile"
 	"dzug/models"
@@ -26,15 +26,16 @@ import (
 
 var LogClient *clientv3.Client
 var LogBaseConf = new(models.BasicConfig)
-var LogConf = new(models.LogConfig)
+
+//var LogConf = new(models.LogConfig)
 
 // Init 初始化Logger
 func Init() (err error) {
 
 	//1.初始化viper
-	ymlPath := "/app/services/config_center/conf"
-	if err := conf.ViperInit(LogBaseConf, ymlPath); err != nil {
-		fmt.Printf("viper 初始化失败...,baseconf   err:%v\n", err)
+	ymlPath := "/logger/conf/config.yml"
+	if err = conf.ViperInit(LogBaseConf, ymlPath); err != nil {
+		fmt.Printf("viper 初始化失败..., err:%v\n", err)
 	}
 	//2.连接etcd
 	LogClient, err = clientv3.New(clientv3.Config{
@@ -56,34 +57,32 @@ func Init() (err error) {
 	//如果配置没有存到etcd
 	if len(resp.Kvs) == 0 {
 		//从yml文件中读取配置，存到etcd中
-		if err := conf.ViperInit(LogConf, ymlPath); err != nil {
-			fmt.Printf("viper 初始化失败..., projconf   err:%v\n", err)
+		if err = conf.ViperInit(conf.LogConf, ymlPath); err != nil {
+			fmt.Printf("viper 失败..., err:%v\n", err)
 		}
-		err = config_center.PutConfigToEtcd(LogBaseConf.Name, LogConf)
+		err = conf.PutConfigToEtcd(LogBaseConf.Name, conf.LogConf)
 		if err != nil {
 			fmt.Println("项目配置存到etcd过程中出错：" + err.Error())
 			return err
 		}
 	} else {
-		var confs []*models.LogConfig
-		ret := resp.Kvs[0]
-		err = json.Unmarshal(ret.Value, &confs)
-		LogConf = confs[0]
+		err = json.Unmarshal(resp.Kvs[0].Value, &conf.LogConf)
 	}
 	//4.启动配置监控
-	config_center.WatchProjConf(LogBaseConf.Name)
+	go WatchLogConf(LogBaseConf.Name)
 
 	//5.初始化日志
-	if err := zapInit(); err != nil {
+	if err = zapInit(); err != nil {
 		fmt.Println("zap init failed ... ")
 		return
 	}
 	//6.初始化kafka和es，用于日志收集
-	if err = LogAgentInit(); err != nil {
+	if err = logagent.LogAgentInit(); err != nil {
 		zap.L().Error("初始化kafka和es 失败,err:", zap.Error(err))
 		return
 	}
-	//7.启动日志收集
+
+	//time.Sleep(time.Second * 3)
 	go CollectLog()
 
 	return
@@ -91,7 +90,7 @@ func Init() (err error) {
 }
 
 func zapInit() (err error) {
-	logconf := LogConf
+	logconf := conf.LogConf
 	writeSyncer := getLogWriter(logconf.Path, logconf.MaxSize, logconf.MaxBackups, logconf.MaxAge)
 	encoder := getEncoder()
 	l := new(zapcore.Level)
@@ -101,7 +100,7 @@ func zapInit() (err error) {
 	}
 	//fmt.Println("在 zap 的init 中")
 	var core zapcore.Core
-	fmt.Println(logconf.Mode)
+	//fmt.Println(logconf.Mode)
 	if fmt.Sprintf("%s", logconf.Mode) == "develop" {
 		//开发模式，日志输出到终端
 		consoleEnbcoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
@@ -212,7 +211,7 @@ func GinRecovery(stack bool) gin.HandlerFunc {
 
 // CollectLog  收集日志
 func CollectLog() (err error) {
-	err = collectrun(LogConf.Topic)
+	err = collectrun(conf.LogConf.Topic)
 	if err != nil {
 		zap.L().Error("Error sending log data to kafka : ", zap.Error(err))
 		return
@@ -253,4 +252,34 @@ func collectrun(topic string) (err error) {
 		// 丢到通道中
 		kafka.ToMsgChan(msg)
 	}
+}
+
+// WatchLogConf 监控etcd中log服务配置变化
+func WatchLogConf(key string) {
+	for {
+		watchCh := LogClient.Watch(context.Background(), key)
+		for wresp := range watchCh {
+			fmt.Println("get new conf from etcd!!!")
+			for _, evt := range wresp.Events {
+				fmt.Printf("type:%s key:%s value:%s\n", evt.Type, evt.Kv.Key, evt.Kv.Value)
+				err := json.Unmarshal(evt.Kv.Value, &conf.LogConf)
+				if err != nil {
+					fmt.Println("json unmarshal new conf failed, err: ", err)
+					continue
+				}
+				if err = zapInit(); err != nil {
+					fmt.Println("zap init failed ... ")
+					return
+				}
+
+				if err = logagent.LogAgentInit(); err != nil {
+					zap.L().Error("初始化kafka和es 失败,err:", zap.Error(err))
+					return
+				}
+
+			}
+
+		}
+	}
+
 }
