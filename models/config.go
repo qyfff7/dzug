@@ -2,7 +2,7 @@ package models
 
 // ProjectConfig 项目所有的配置
 type ProjectConfig struct {
-	Name      string `mapstructure:"proj_name" json:"proj_name"`
+	Name      string `mapstructure:"service_name" json:"service_name"`
 	Port      int    `mapstructure:"port" json:"port"`
 	Version   string `mapstructure:"version" json:"version"`
 	StartTime string `mapstructure:"start_time" json:"start_time"`
@@ -22,7 +22,6 @@ type LogConfig struct {
 	*KafkaConfig `mapstructure:"kafka" json:"kafka"`
 }
 
-// ProjectConfig 项目所有的配置
 type UserConfig struct {
 	Url          string `mapstructure:"url" json:"url"`
 	Name         string `mapstructure:"service_name" json:"service_name"`

@@ -37,7 +37,7 @@ func Start() (err error) {
 		return
 	}
 	//3. 判断user配置是否已经存到etcd
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 	resp, err := UserClient.Get(ctx, UserBaseConf.Name)
 	if err != nil {
@@ -52,7 +52,7 @@ func Start() (err error) {
 		}
 		err = conf.PutConfigToEtcd(UserBaseConf.Name, conf.UserConf)
 		if err != nil {
-			fmt.Println("项目配置存到etcd过程中出错：" + err.Error())
+			fmt.Println("user配置存到etcd过程中出错：" + err.Error())
 			return
 		}
 	} else { //如果已经存到etcd上
@@ -106,6 +106,26 @@ func WatchUserConf(key string) {
 				if err != nil {
 					fmt.Println("json unmarshal new conf failed, err: ", err)
 					continue
+				}
+				if err = repo.Init(conf.UserConf.MySQLConfig.User,
+					conf.UserConf.MySQLConfig.Password,
+					conf.UserConf.MySQLConfig.Host,
+					conf.UserConf.MySQLConfig.DB,
+					conf.UserConf.MySQLConfig.Charset,
+					conf.UserConf.MySQLConfig.Loc,
+					conf.UserConf.MySQLConfig.Port,
+					conf.UserConf.MySQLConfig.ParseTime); err != nil {
+					return
+				}
+				//6.初始化user 的 redis
+				if err = redis.Init(conf.UserConf.RedisConfig.Host,
+					conf.UserConf.RedisConfig.Password,
+					conf.UserConf.RedisConfig.DB,
+					conf.UserConf.RedisConfig.Port,
+					conf.UserConf.RedisConfig.PoolSize,
+					conf.UserConf.RedisConfig.MinIdleConns); err != nil {
+					fmt.Printf("init redis failed, err:%v\n", err)
+					return
 				}
 
 			}

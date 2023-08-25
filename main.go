@@ -7,6 +7,7 @@ import (
 	"dzug/logger"
 	"fmt"
 	"go.uber.org/zap"
+	"time"
 )
 
 func main() {
@@ -27,6 +28,15 @@ func main() {
 
 	//3.各个服务启动（①获取各自的配置，进行相应的初始化，②进行业务代码操作）
 	go userservice.Start()
+
+	//仅用于演示
+	go func() {
+		for {
+			time.Sleep(time.Second * 2)
+			fmt.Println("log config ", conf.LogConf.Path)
+		}
+
+	}()
 	client.Start()
 
 }

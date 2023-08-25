@@ -62,7 +62,7 @@ func Init() (err error) {
 		}
 		err = conf.PutConfigToEtcd(LogBaseConf.Name, conf.LogConf)
 		if err != nil {
-			fmt.Println("项目配置存到etcd过程中出错：" + err.Error())
+			fmt.Println("log配置存到etcd过程中出错：" + err.Error())
 			return err
 		}
 	} else {

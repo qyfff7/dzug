@@ -40,7 +40,7 @@ func Init() (err error) {
 		return
 	}
 	//3. 判断项目配置是否已经存到etcd
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 	resp, err := ProiClient.Get(ctx, ProjBaseConf.Name)
 	if err != nil {
@@ -75,10 +75,10 @@ func Init() (err error) {
 }
 func PutConfigToEtcd(key string, projconf interface{}) (err error) {
 	// put     在etcd里面设置key - value
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 	//项目的所有配置的json格式的数据
-	str, err := json.Marshal(projconf)
+	str, _ := json.Marshal(projconf)
 	_, err = ProiClient.Put(ctx, key, string(str))
 	if err != nil {
 		fmt.Printf("put config to etcd failed, err:%v", err)
