@@ -210,8 +210,8 @@ func GinRecovery(stack bool) gin.HandlerFunc {
 }
 
 // CollectLog  收集日志
-func CollectLog() (err error) {
-	err = collectrun(conf.LogConf.Topic)
+func CollectLog() {
+	err := collectrun(conf.LogConf.Topic)
 	if err != nil {
 		zap.L().Error("Error sending log data to kafka : ", zap.Error(err))
 		return
@@ -222,8 +222,7 @@ func CollectLog() (err error) {
 // collectrun 真正的业务逻辑
 func collectrun(topic string) (err error) {
 	// logfile --> TailObj --> log --> Client --> kafka
-	//利用ini文件，创建kafka配置项，日志文件配置项  --> 读取出ini文件里面的信息，用来初始化 kafka 和  tail
-	//--> tail得到日志文件的地址  --> TailObj对象读取出一行 log  --> 包装成一个发送到kafka所需要的 msg 对象,发送到一个channel 中
+	//tail得到日志文件的地址  --> TailObj对象读取出一行 log  --> 包装成一个发送到kafka所需要的 msg 对象,发送到一个channel 中
 	//-->  在kafka初始化的时候，就创建一个goroutine，来从channel中读取信息， 真正发送到kafka中
 	for {
 		// 循环读数据
@@ -234,7 +233,6 @@ func collectrun(topic string) (err error) {
 			continue
 		}
 		// 如果是空行就略过
-		//fmt.Printf("%#v\n", line.Text)
 		if len(strings.Trim(line.Text, "\r")) == 0 { //strings.Trim  用来去除  "\r"
 			zap.L().Info("出现空行拉,直接跳过...")
 			continue
