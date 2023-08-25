@@ -91,7 +91,7 @@ func Start() (err error) {
 	defer grpcServer.Stop()
 	pb.RegisterServiceServer(grpcServer, &service.Userservice{}) // 绑定grpc
 	discovery.GrpcListen(grpcServer, conf.UserConf.Url)          // 开启监听
-	return err
+	return
 }
 
 // WatchUserConf 监控etcd中user服务配置变化

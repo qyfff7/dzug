@@ -20,6 +20,7 @@ var (
 	ProjConf     = new(models.ProjectConfig)
 	LogConf      = new(models.LogConfig)
 	ProjBaseConf = new(models.BasicConfig)
+	VideoConf    = new(models.VideoConfig)
 )
 
 // Init 初始化  etcd

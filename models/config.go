@@ -69,7 +69,9 @@ type JwtConfig struct {
 	JwtExpire int64 `mapstructure:"jwt_expire" json:"jwt_expire"`
 }
 type VideoConfig struct {
-	FeedCount int64 `json:"feedcount"`
+	Url         string `mapstructure:"url" json:"url"`
+	ServiceName string `mapstructure:"service_name" json:"service_name"`
+	FeedCount   int64  `mapstructure:"feedcount" json:"feedcount"`
 }
 type MongoDbConfig struct {
 	Addr string `json:"address"`

@@ -3,6 +3,7 @@ package main
 import (
 	client "dzug/app/gateway/cmd"
 	userservice "dzug/app/services/user/cmd"
+	videoservice "dzug/app/services/video/cmd"
 	"dzug/conf"
 	"dzug/logger"
 	"fmt"
@@ -27,6 +28,8 @@ func main() {
 
 	//3.各个服务启动（①获取各自的配置，进行相应的初始化，②进行业务代码操作）
 	go userservice.Start()
+
+	go videoservice.Start()
 
 	client.Start()
 
