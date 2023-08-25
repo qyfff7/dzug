@@ -2,27 +2,45 @@ package handlers
 
 import (
 	"dzug/app/gateway/rpc"
+	"dzug/app/services/user/pkg/jwt"
+	model "dzug/models"
 	pb "dzug/protos/publish"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 )
 
+type ActionResp struct {
+	status_code int
+	status_msg  string
+}
+
+type ListResponse struct {
+	status_code int
+	status_msg  string
+	video_list  []model.Video
+}
+
 // UploadHandler 视频投稿
 func UploadHandler(ctx *gin.Context) {
-	user_id_ := ctx.PostForm("user_id")
-	title := ctx.PostForm("title")
-	file, err := ctx.FormFile("file")
-	fileName := file.Filename
+	const MaxFileSize = 30 * 1024 * 1024 // 30MB
 
-	user_id, _ := strconv.ParseInt(user_id_, 10, 64)
-
+	file, err := ctx.FormFile("data")
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Failed to read file"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get file"})
 		return
 	}
+
+	title := ctx.PostForm("title")
+	token := ctx.PostForm("token")
+	userIdBefore, err := jwt.ParseToken(token)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse token"})
+		return
+	}
+	userId := userIdBefore.UserID
 
 	fileReader, err := file.Open()
 	if err != nil {
@@ -31,42 +49,43 @@ func UploadHandler(ctx *gin.Context) {
 	}
 	defer fileReader.Close()
 
+	// 限制文件大小
+	if file.Size > MaxFileSize {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "File size exceeds the limit"})
+		return
+	}
+
 	// 将视频数据读取到字节切片中
-	var videoData []byte
-	buf := make([]byte, 1024)
-	for {
-		n, err := fileReader.Read(buf)
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read file"})
-			return
-		}
-		videoData = append(videoData, buf[:n]...)
+	videoData, err := ioutil.ReadAll(fileReader)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read file"})
+		return
 	}
 
 	publishReq := &pb.PublishVideoReq{
-		UserId:   user_id,
+		UserId:   userId,
 		Data:     videoData,
 		Title:    title,
-		FileName: fileName,
+		FileName: file.Filename,
 	}
 
-	publishVideoResp, err := rpc.PublishVideo(ctx, publishReq)
+	_, err = rpc.PublishVideo(ctx, publishReq)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, pb.PublishVideoResp{
-			StatusCode: 500,
-			StatusMsg:  "远程RPC调用异常",
+		ctx.JSON(http.StatusInternalServerError, ActionResp{
+			status_code: http.StatusOK,
+			status_msg:  "Wrong Request",
 		})
-		return
 	}
-	ctx.JSON(http.StatusOK, publishVideoResp)
+	rtnResp := ActionResp{
+		status_code: http.StatusOK,
+		status_msg:  "Success",
+	}
+	ctx.JSON(http.StatusOK, rtnResp)
 }
 
 // GetVideoListByUser 获取用户投稿信息
 func GetVideoListByUser(ctx *gin.Context) {
-	user_id := ctx.PostForm("user_id")
+	user_id := ctx.Query("user_id")
 	parsedUserId, err := strconv.ParseInt(user_id, 10, 64)
 	if err != nil {
 		zap.L().Error(err.Error())
@@ -75,11 +94,17 @@ func GetVideoListByUser(ctx *gin.Context) {
 		UserId: parsedUserId,
 	}
 	getVideoListResp, err := rpc.GetPublishListByUser(ctx, getVideoListReq)
+
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, pb.PublishVideoResp{
 			StatusCode: 500,
 			StatusMsg:  "远程RPC调用异常",
 		})
 	}
+	//rtn := ListResponse{
+	//	status_code: http.StatusOK,
+	//	status_msg: "调用成功",
+	//	video_list: getVideoListResp.VideoList
+	//}
 	ctx.JSON(http.StatusOK, getVideoListResp)
 }

@@ -29,8 +29,8 @@ func GenToken(userID int64) (aToken string, err error) {
 	claims := CustomClaims{
 		userID, // 自定义字段
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Duration(conf.UserConf.JwtExpire) * time.Hour).Unix(), //过期时间
-			Issuer:    "douyin",                                                                  // 签发人
+			ExpiresAt: time.Now().Add(time.Duration(conf.Config.JwtExpire) * time.Hour).Unix(), //过期时间
+			Issuer:    "douyin",                                                                // 签发人
 		},
 	}
 	//Access Token 使用指定的签名方法创建签名对象

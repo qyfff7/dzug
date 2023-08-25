@@ -1,4 +1,4 @@
-package publishservice
+package publish
 
 import (
 	"dzug/app/services/publish/dal/redis"

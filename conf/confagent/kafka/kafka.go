@@ -1,7 +1,7 @@
 package kafka
 
 import (
-	"dzug/logger/logagent/es"
+	"dzug/conf/confagent/es"
 	"encoding/json"
 	"fmt"
 	"github.com/IBM/sarama"
@@ -61,6 +61,7 @@ func ConsumerInit(addr []string, topic string) (err error) {
 	// 创建新的消费者
 	consumer, err := sarama.NewConsumer(addr, nil)
 	if err != nil {
+		//fmt.Printf("fail to start consumer, err:%v\n", err)
 		zap.L().Error("fail to start consumer, err: ", zap.Error(err))
 		return
 	}

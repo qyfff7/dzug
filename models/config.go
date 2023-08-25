@@ -2,55 +2,56 @@ package models
 
 // ProjectConfig 项目所有的配置
 type ProjectConfig struct {
-	Name      string `mapstructure:"service_name" json:"service_name"`
-	Port      int    `mapstructure:"port" json:"port"`
-	Version   string `mapstructure:"version" json:"version"`
-	StartTime string `mapstructure:"start_time" json:"start_time"`
-	MachineID int64  `mapstructure:"machine_id" json:"machine_id"`
+	Name           string `json:"name"`
+	Port           int    `json:"port"`
+	Version        string `json:"version"`
+	StartTime      string `json:"start_time"`
+	MachineID      int64  `json:"machine_id"`
+	*LogConfig     `json:"logconfig"`
+	*MySQLConfig   `json:"mysql"`
+	*RedisConfig   `json:"redis"`
+	*KafkaConfig   `json:"kafka"`
+	*JwtConfig     `json:"jwt"`
+	*VideoConfig   `json:"video"`
+	*Service       `json:"service"`
+	*Ratelimit     `json:"ratelimit"`
+	*EtcdConfig    `json:"etcd"`
+	*ESConf        `json:"esconfig"`
+	*MongoDbConfig `json:"mongodb"`
 }
 
 // LogConfig 日志文件的配置
 type LogConfig struct {
-	Path         string `mapstructure:"path" json:"path"`
-	MaxSize      int    `mapstructure:"max_size" json:"max_size"`
-	MaxAge       int    `mapstructure:"max_age" json:"max_age"`
-	MaxBackups   int    `mapstructure:"max_backups" json:"max_backups"`
-	Topic        string `mapstructure:"topic" json:"topic"`
-	Level        string `mapstructure:"level" json:"level"`
-	Mode         string `mapstructure:"mode" json:"mode"`
-	*ESConfig    `mapstructure:"es" json:"es"`
-	*KafkaConfig `mapstructure:"kafka" json:"kafka"`
-}
-
-type UserConfig struct {
-	Url          string `mapstructure:"url" json:"url"`
-	Name         string `mapstructure:"service_name" json:"service_name"`
-	*JwtConfig   `mapstructure:"jwt" json:"jwt"`
-	*MySQLConfig `mapstructure:"mysql" json:"mysql"`
-	*RedisConfig `mapstructure:"redis" json:"redis"`
+	Path       string `json:"path"`
+	MaxSize    int    `json:"max_size"`
+	MaxAge     int    `json:"max_age"`
+	MaxBackups int    `json:"max_backups"`
+	Topic      string `json:"topic"`
+	Level      string `json:"level"`
+	Mode       string `json:"mode"`
 }
 
 // MySQLConfig 数据库配置
 type MySQLConfig struct {
-	Host      string `mapstructure:"host" json:"host"`
-	Port      int    `mapstructure:"port" json:"port"`
-	User      string `mapstructure:"user" json:"user"`
-	Password  string `mapstructure:"password" json:"password"`
-	DB        string `mapstructure:"database" json:"database"`
-	Charset   string `mapstructure:"charset" json:"charset"`
-	ParseTime bool   `mapstructure:"parsetime" json:"parsetime"`
-	Loc       string `mapstructure:"loc" json:"loc"`
+	Host      string `json:"host"`
+	Port      int    `json:"port"`
+	User      string `json:"user"`
+	Password  string `json:"password"`
+	DB        string `json:"database"`
+	Charset   string `json:"charset"`
+	ParseTime bool   `json:"parsetime"`
+	Loc       string `json:"loc"`
 }
 
 // RedisConfig Redis配置
 type RedisConfig struct {
-	Host         string `mapstructure:"host" json:"host"`
-	Port         int    `mapstructure:"port" json:"port"`
-	Password     string `mapstructure:"password" json:"password"`
-	DB           int    `mapstructure:"db" json:"db"`
-	PoolSize     int    `mapstructure:"pool_size" json:"pool_size"`
-	MinIdleConns int    `mapstructure:"min_idle_conns" json:"min_idle_conns"`
-	RedisExpire  int    `mapstructure:"redis_expire" json:"redis_expire"`
+	Host         string `json:"host"`
+	Port         int    `json:"port"`
+	Password     string `json:"password"`
+	DB           int    `json:"db"`
+	PoolSize     int    `json:"pool_size"`
+	MinIdleConns int    `json:"min_idle_conns"`
+	RedisExpire  int    `json:"redis_expire"`
 }
 
 // EtcdConfig etcd配置
@@ -60,18 +61,16 @@ type EtcdConfig struct {
 
 // KafkaConfig kafka配置
 type KafkaConfig struct {
-	Addr     string `mapstructure:"address" json:"address"`
-	ChanSize int64  `mapstructure:"chansize" json:"chansize"`
+	Addr     string `json:"address"`
+	ChanSize int64  `json:"chansize"`
 }
 
 // jwt 配置
 type JwtConfig struct {
-	JwtExpire int64 `mapstructure:"jwt_expire" json:"jwt_expire"`
+	JwtExpire int64 `json:"jwt_expire"`
 }
 type VideoConfig struct {
-	Url         string `mapstructure:"url" json:"url"`
-	ServiceName string `mapstructure:"service_name" json:"service_name"`
-	FeedCount   int64  `mapstructure:"feedcount" json:"feedcount"`
+	FeedCount int64 `json:"feedcount"`
 }
 type MongoDbConfig struct {
 	Addr string `json:"address"`
@@ -99,14 +98,13 @@ type Ratelimit struct {
 	Rate int64 `json:"rate"`
 	Cap  int64 `json:"cap"`
 }
-
-type BasicConfig struct {
-	Name     string   `mapstructure:"name"`
-	EtcdAddr []string `mapstructure:"etcd_address"`
+type ESConf struct {
+	Address string `json:"address"`
+	Index   string `json:"index"`
+	MaxSize int    `json:"max_chan_size"`
+	GoNum   int    `json:"goroutine_num"`
 }
-type ESConfig struct {
-	Address string `mapstructure:"address" json:"address"`
-	Index   string `mapstructure:"index" json:"index"`
-	MaxSize int    `mapstructure:"max_chan_size" json:"max_chan_size"`
-	GoNum   int    `mapstructure:"goroutine_num" json:"goroutine_num"`
+type BasicConfig struct {
+	Name     string   `mapstructure:"project_name"`
+	EtcdAddr []string `mapstructure:"etcd_address"`
 }

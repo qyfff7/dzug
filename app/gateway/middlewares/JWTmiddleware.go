@@ -14,7 +14,11 @@ import (
 func JWTAuthMiddleware() func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
 		//token 是存放在url请求参数中的，因此从url中获取token
-		token := ctx.Query("token")
+		var token string
+		token = ctx.Query("token")
+		if token == "" {
+			token = ctx.PostForm("token")
+		}
 		mc, err := jwt.ParseToken(token)
 		if err != nil {
 			models.ResponseError(ctx, models.CodeInvalidToken)

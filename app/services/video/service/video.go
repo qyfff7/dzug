@@ -19,7 +19,7 @@ type VideoService struct {
 func (v VideoService) GetVideoListByTime(ctx context.Context, req *video.GetVideoListByTimeReq) (*video.GetVideoListByTimeResp, error) {
 
 	//1.从数据库中获取视频封面地址、播放地址、标题、userID等信息，返回的是一个视频信息数组
-	videos, nextTime, err := dao.GetVideoInfoByTime(ctx, req, conf.VideoConf.FeedCount)
+	videos, nextTime, err := dao.GetVideoInfoByTime(ctx, req, conf.Config.FeedCount)
 	if err != nil {
 		zap.L().Error("获取视频信息失败", zap.Error(err))
 		return nil, err

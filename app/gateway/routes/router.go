@@ -69,10 +69,10 @@ func NewRouter(mode string) *gin.Engine {
 	}
 
 	publish := ginRouter.Group("/douyin/publish")
-	//publish.Use(middlewares.JWTAuthMiddleware())
+	publish.Use(middlewares.JWTAuthMiddleware())
 	{
-		publish.POST("/action", handlers.UploadHandler)
-		publish.GET("/list", handlers.GetVideoListByUser)
+		publish.POST("/action/", handlers.UploadHandler)
+		publish.GET("/list/", handlers.GetVideoListByUser)
 	}
 
 	message := ginRouter.Group("/douyin/message")
