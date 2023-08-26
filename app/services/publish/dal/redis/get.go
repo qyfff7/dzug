@@ -2,8 +2,7 @@ package redis
 
 import (
 	"context"
-	redisVideoModle "dzug/app/services/publish/dal/redis/model"
-	"dzug/repo"
+	"dzug/models"
 	"encoding/json"
 	"go.uber.org/zap"
 	"math/rand"
@@ -11,7 +10,7 @@ import (
 	"time"
 )
 
-func GetPublishList(userId int64) ([]*repo.Video, error) {
+func GetPublishList(userId int64) ([]*models.Video, error) {
 	ctx := context.Background()
 	// 根据user_id去redis中拿缓存
 	key := "publish" + ":" + strconv.FormatInt(userId, 10)
@@ -22,8 +21,8 @@ func GetPublishList(userId int64) ([]*repo.Video, error) {
 	}
 
 	// 解析redis值对象
-	videoRedisListp := new([]redisVideoModle.VideoCache)
-	err = json.Unmarshal(res, videoRedisListp)
+	var videoList []*models.Video
+	err = json.Unmarshal(res, &videoList)
 	if err != nil {
 		return nil, err
 	}
@@ -34,18 +33,6 @@ func GetPublishList(userId int64) ([]*repo.Video, error) {
 		return nil, err
 	}
 
-	videoRedisList := *videoRedisListp
-	videoList := make([]*repo.Video, len(videoRedisList))
-
-	for it := range videoRedisList {
-		videoList[it] = &repo.Video{
-			UserId:   videoRedisList[it].UserId,
-			Title:    videoRedisList[it].Title,
-			PlayUrl:  videoRedisList[it].PlayUrl,
-			CoverUrl: videoRedisList[it].CoverUrl,
-		}
-		videoList[it].ID = videoRedisList[it].VideoId
-	}
 	return videoList, nil
 
 }

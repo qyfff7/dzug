@@ -32,7 +32,7 @@ message UserInfo {
   optional int64 favorite_count = 11; //点赞数量
 }
 
-message PublishVideoReq {
+message PublishVideoReq { 
   int64 user_id = 1;
   bytes data = 2;
   string title = 3;

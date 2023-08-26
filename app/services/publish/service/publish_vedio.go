@@ -5,6 +5,7 @@ import (
 	"dzug/app/services/publish/dal/dao"
 	"dzug/app/services/publish/dal/redis"
 	"dzug/app/services/publish/pkg/oss"
+	"dzug/models"
 	pb "dzug/protos/publish"
 	r "github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
@@ -45,59 +46,83 @@ func (p *VideoServer) PublishVideo(ctx context.Context, req *pb.PublishVideoReq)
 }
 
 func (p *VideoServer) GetVideoListByUserId(ctx context.Context, req *pb.GetVideoListByUserIdReq) (*pb.GetVideoListByUserIdResp, error) {
-	resp := pb.GetVideoListByUserIdResp{}
 	user_id := req.UserId
-
-	videoModels, err := redis.GetPublishList(user_id)
+	videoList, err := redis.GetPublishList(user_id)
 
 	if err != nil {
 		// 缓存未命中
 		if err == r.Nil {
 			// 去数据库查询
-			videoModels, err = dao.GetVideoListByUserId(ctx, user_id)
+			daoVideoModel, err := dao.GetVideoListByUserId(ctx, user_id)
 			if err != nil {
 				return nil, err
 			}
 
+			daoUserModel, err := dao.GetUserInfoByUserId(ctx, user_id)
+			if err != nil {
+				return nil, err
+			}
+			for _, v := range daoVideoModel {
+				videoListTmp := &models.Video{
+					Id: int64(v.ID),
+					Author: models.User{
+						ID:              daoUserModel.UserId,
+						Name:            daoUserModel.Name,
+						FollowCount:     daoUserModel.FollowCount,
+						FollowerCount:   daoUserModel.FollowerCount,
+						Avatar:          daoUserModel.Avatar,
+						BackgroundImage: daoUserModel.BackgroundImages,
+						TotalFavorited:  daoUserModel.TotalFavorited,
+						WorkCount:       daoUserModel.WorkCount,
+						FavoriteCount:   daoUserModel.FavoriteCount,
+					},
+					PlayUrl:       v.PlayUrl,
+					CoverUrl:      v.CoverUrl,
+					FavoriteCount: int64(v.FavoriteCount),
+					CommentCount:  int64(v.CommentCount),
+					Title:         v.Title,
+				}
+				videoList = append(videoList, videoListTmp)
+			}
+
 			// 查询结果写入 redis
-			if err := redis.PutPublishList(ctx, videoModels, user_id); err != nil {
+			if err := redis.PutPublishList(ctx, videoList, user_id); err != nil {
 				zap.L().Error(err.Error())
 			}
 		}
 	}
 
-	// 获取userInfo
-	userInfo, err := dao.GetUserInfoByUserId(ctx, user_id)
-	rspUserInfo := &pb.UserInfo{
-		Id:              userInfo.UserId,
-		Name:            userInfo.Name,
-		FollowCount:     &userInfo.FollowCount,
-		FollowerCount:   &userInfo.FollowerCount,
-		Avatar:          &userInfo.Avatar,
-		BackgroundImage: &userInfo.BackgroundImages,
-		Signature:       &userInfo.Signature,
-		TotalFavorited:  &userInfo.TotalFavorited,
-		WorkCount:       &userInfo.WorkCount,
-		FavoriteCount:   &userInfo.FavoriteCount,
-	}
-
-	var videoInfoList []*pb.VideoInfo
-	for i := 0; i < len(videoModels); i++ {
-		tmp := &pb.VideoInfo{
-			PlayUrl:       videoModels[i].PlayUrl,
-			CoverUrl:      videoModels[i].CoverUrl,
-			FavoriteCount: int64(videoModels[i].FavoriteCount),
-			CommentCount:  int64(videoModels[i].CommentCount),
-			Id:            int64(videoModels[i].ID),
-			Title:         videoModels[i].Title,
-			Author:        rspUserInfo,
+	var rtnVidelList []*pb.VideoInfo
+	for _, v := range videoList {
+		uInfo := pb.UserInfo{
+			Id:              v.Author.ID,
+			Name:            v.Author.Name,
+			FollowCount:     &v.Author.FollowCount,
+			FollowerCount:   &v.Author.FollowerCount,
+			Avatar:          &v.Author.Avatar,
+			BackgroundImage: &v.Author.BackgroundImage,
+			Signature:       &v.Author.Signature,
+			TotalFavorited:  &v.Author.TotalFavorited,
+			WorkCount:       &v.Author.WorkCount,
+			FavoriteCount:   &v.Author.FavoriteCount,
 		}
-		videoInfoList = append(videoInfoList, tmp)
+		vInfo := &pb.VideoInfo{
+			Author:        &uInfo,
+			Id:            v.Id,
+			PlayUrl:       v.PlayUrl,
+			CoverUrl:      v.CoverUrl,
+			FavoriteCount: v.FavoriteCount,
+			CommentCount:  v.CommentCount,
+			Title:         v.Title,
+		}
+		rtnVidelList = append(rtnVidelList, vInfo)
 	}
 
-	resp.StatusCode = 200
-	resp.StatusMsg = "success"
-	resp.VideoList = videoInfoList
+	rtn := pb.GetVideoListByUserIdResp{
+		StatusCode: 200,
+		StatusMsg:  "Success",
+		VideoList:  rtnVidelList,
+	}
 
-	return &resp, nil
+	return &rtn, nil
 }

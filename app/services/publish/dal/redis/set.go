@@ -2,8 +2,7 @@ package redis
 
 import (
 	"context"
-	redisModel "dzug/app/services/publish/dal/redis/model"
-	"dzug/repo"
+	"dzug/models"
 	"encoding/json"
 	"math/rand"
 	"strconv"
@@ -19,22 +18,10 @@ func DelPublishList(ctx context.Context, user_id int64) error {
 	return nil
 }
 
-func PutPublishList(ctx context.Context, videoListp []*repo.Video, userId int64) error {
+func PutPublishList(ctx context.Context, videoList []*models.Video, userId int64) error {
 
-	if videoListp == nil || len(videoListp) == 0 {
+	if videoList == nil || len(videoList) == 0 {
 		return nil
-	}
-
-	var videoList []redisModel.VideoCache
-
-	for i := range videoListp {
-		videoList = append(videoList, redisModel.VideoCache{
-			VideoId:  videoListp[i].ID,
-			UserId:   videoListp[i].UserId,
-			Title:    videoListp[i].Title,
-			PlayUrl:  videoListp[i].PlayUrl,
-			CoverUrl: videoListp[i].CoverUrl,
-		})
 	}
 	ub, err := json.Marshal(videoList)
 	if err != nil {

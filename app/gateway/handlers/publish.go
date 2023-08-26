@@ -3,7 +3,6 @@ package handlers
 import (
 	"dzug/app/gateway/rpc"
 	"dzug/app/services/user/pkg/jwt"
-	model "dzug/models"
 	pb "dzug/protos/publish"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -15,12 +14,6 @@ import (
 type ActionResp struct {
 	status_code int
 	status_msg  string
-}
-
-type ListResponse struct {
-	status_code int
-	status_msg  string
-	video_list  []model.Video
 }
 
 // UploadHandler 视频投稿
@@ -101,10 +94,5 @@ func GetVideoListByUser(ctx *gin.Context) {
 			StatusMsg:  "远程RPC调用异常",
 		})
 	}
-	//rtn := ListResponse{
-	//	status_code: http.StatusOK,
-	//	status_msg: "调用成功",
-	//	video_list: getVideoListResp.VideoList
-	//}
 	ctx.JSON(http.StatusOK, getVideoListResp)
 }
