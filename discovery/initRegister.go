@@ -23,7 +23,7 @@ func InitRegister(key, value string) (*ServiceRegister, *grpc.Server) {
 	}
 
 	server := grpc.NewServer(
-		grpc.MaxRecvMsgSize(10 * 1024 * 1024),
+		grpc.MaxRecvMsgSize(500 * 1024 * 1024),
 	)
 	return sRegister, server
 }

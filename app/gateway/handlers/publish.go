@@ -18,7 +18,7 @@ type ActionResp struct {
 
 // UploadHandler 视频投稿
 func UploadHandler(ctx *gin.Context) {
-	const MaxFileSize = 30 * 1024 * 1024 // 30MB
+	const MaxFileSize = 300 * 1024 * 1024 // 30MB
 
 	file, err := ctx.FormFile("data")
 	if err != nil {

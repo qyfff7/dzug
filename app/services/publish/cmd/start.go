@@ -2,7 +2,7 @@ package publish
 
 import (
 	"dzug/app/services/publish/dal/redis"
-	"dzug/app/services/publish/pkg/oss"
+	"dzug/app/services/publish/pkg/cos"
 	"dzug/app/services/publish/service"
 	"dzug/conf"
 	"dzug/discovery"
@@ -29,7 +29,8 @@ func Start() {
 	if err != nil {
 		return
 	}
-	oss.Init()
+	cos.Init()
+	//oss.Init()
 	_ = repo.Init()
 	serviceRegister, grpcServer := discovery.InitRegister(conf.Config.PublishServiceName, conf.Config.PublishServiceUrl)
 	defer serviceRegister.Close()

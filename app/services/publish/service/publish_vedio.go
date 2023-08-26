@@ -4,7 +4,7 @@ import (
 	"context"
 	"dzug/app/services/publish/dal/dao"
 	"dzug/app/services/publish/dal/redis"
-	"dzug/app/services/publish/pkg/oss"
+	"dzug/app/services/publish/pkg/cos"
 	"dzug/models"
 	pb "dzug/protos/publish"
 	r "github.com/redis/go-redis/v9"
@@ -24,16 +24,16 @@ func (p *VideoServer) PublishVideo(ctx context.Context, req *pb.PublishVideoReq)
 	}
 
 	// 对象存储操作
-	video := oss.Video{
+	video := cos.Video{
 		Title:    req.Title,
 		FileName: req.FileName,
 		File:     req.Data,
 		UserID:   req.UserId,
 	}
-	ossUrl, _ := oss.UploadVideoToOss(ctx, &video)
+	cosUrl, _ := cos.UploadVideo(ctx, &video)
 
 	// 数据库操作
-	err := dao.PublishVideo(ctx, req.UserId, req.Title, ossUrl.PlayUrl, ossUrl.CoverUrl)
+	err := dao.PublishVideo(ctx, req.UserId, req.Title, cosUrl.PlayUrl, cosUrl.CoverUrl)
 	if err != nil {
 		resp.StatusCode = 400
 		resp.StatusMsg = "发布失败"

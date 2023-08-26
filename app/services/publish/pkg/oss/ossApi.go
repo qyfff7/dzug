@@ -34,6 +34,7 @@ func UploadVideoToOss(ctx context.Context, v *Video) (*VideoUrl, error) {
 	bucket, err := client.Bucket(tmp.Bucket)
 	if err != nil {
 		zap.L().Error(err.Error())
+		return nil, err
 	}
 
 	videoFileName := strconv.FormatInt(v.UserID, 10) + "/" + v.FileName
@@ -47,7 +48,7 @@ func UploadVideoToOss(ctx context.Context, v *Video) (*VideoUrl, error) {
 		zap.L().Error(err.Error())
 		return nil, err
 	}
-	dataUrl := ossVideo.Bucket + "." + ossVideo.EndPoint + "/" + videoObjectKey
+	dataUrl := ossVideo.Bucket + "." + ossVideo.EndPoint + "/" + videoObjectKey + "?x-oss-process=video/snapshot,t_0,f_jpg|video/s/mp4"
 	coverUrl := dataUrl + "?x-oss-process=video/snapshot,t_0,f_jpg"
 
 	return &VideoUrl{
