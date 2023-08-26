@@ -83,13 +83,19 @@ func (c *CommentSrv) Action(ctx context.Context, in *comment.DouyinCommentAction
 
 func (c *CommentSrv) List(ctx context.Context, in *comment.DouyinCommentListRequest) (*comment.DouyinCommentListResponse, error) {
 	videoId := in.VideoId
+	if videoId == 0 {
+		return &comment.DouyinCommentListResponse{
+			StatusCode: 500,
+			StatusMsg:  "VedioId获取失败",
+		}, nil
+	}
 	commentIds, err := redis.GetComm(ctx, videoId)
 	if err != nil {
 		zap.L().Error("redis获取视频评论列表失败")
 		return nil, err
 	}
-	comments, err := dao.GetcommByCommentIDs(commentIds)
-	if err != nil {
+	comments, err2 := dao.GetcommByCommentIDs(commentIds)
+	if err2 != nil {
 		zap.L().Error("获取评论列表失败")
 		return &comment.DouyinCommentListResponse{
 			StatusCode: 500,
