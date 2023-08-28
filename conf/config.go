@@ -12,12 +12,12 @@ var Config = new(ProjectConfig)
 
 // ProjectConfig 项目所有的配置
 type ProjectConfig struct {
-	Name      string `mapstructure:"name"`
-	Port      int    `mapstructure:"port"`
-	Version   string `mapstructure:"version"`
-	StartTime string `mapstructure:"start_time"`
-	Mode      string `mapstructure:"mode"`
-
+	Name         string `mapstructure:"name"`
+	Port         int    `mapstructure:"port"`
+	Version      string `mapstructure:"version"`
+	StartTime    string `mapstructure:"start_time"`
+	Mode         string `mapstructure:"mode"`
+	MachineID    int64  `mapstructure: "machine_id"`
 	*LogConfig   `mapstructure:"log"`
 	*MySQLConfig `mapstructure:"mysql"`
 	*RedisConfig `mapstructure:"redis"`

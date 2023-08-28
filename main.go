@@ -4,6 +4,7 @@ import (
 	commentservice "dzug/app/comment/cmd"
 	client "dzug/app/gateway/cmd"
 	"dzug/app/redis"
+	"dzug/app/user/pkg/snowflake"
 	"dzug/conf"
 	"dzug/logger"
 	"dzug/repo"
@@ -37,12 +38,13 @@ func main() {
 	}
 
 	//defer repo.Close()
-
+	snowflake.Init(conf.Config.StartTime, conf.Config.MachineID)
 	//4.初始化redis连接
 	if err := redis.Init(conf.Config.RedisConfig); err != nil {
 		fmt.Printf("init redis failed, err:%v\n", err)
 		return
 	}
+
 	// 程序退出关闭数据库连接
 	defer redis.Close()
 	//defer repo.Close()

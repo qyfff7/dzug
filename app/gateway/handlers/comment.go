@@ -5,12 +5,10 @@ import (
 	"dzug/app/user/pkg/snowflake"
 
 	pb "dzug/protos/comment"
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
 
 type CommentReq struct {
@@ -25,15 +23,16 @@ func CommentAction(ctx *gin.Context) {
 	//userId, _ := jwt.GetUserID(ctx)
 
 	token := ctx.Query("token")
+	//测试用代码
+	/*
+		userid := ctx.Query("user_id")
+		Userid, _ := strconv.ParseInt(userid, 10, 64)
+		token, _ := jwt.GenToken(Userid)
+	*/
 
-	err := ctx.ShouldBind(&CReq)
-	if err != nil {
-		zap.L().Fatal("绑定参数出错" + err.Error())
-	}
-	zap.L().Info(fmt.Sprintf("token:", token, " VideoId:", CReq.VideoId, " ActionType:", CReq.ActionType))
+	CReq.VideoId = ctx.Query("video_id")
+	CReq.ActionType = ctx.Query("action_type")
 	videoid, _ := strconv.Atoi(CReq.VideoId)
-	//videoId := ctx.Query("video_id")
-
 	ac, _ := strconv.Atoi(CReq.ActionType)
 	actionType := int32(ac)
 	commentText := ctx.Query("comment_text")
@@ -51,7 +50,7 @@ func CommentAction(ctx *gin.Context) {
 			VideoId:     int64(videoid),
 			ActionType:  int32(actionType),
 			CommentText: string(commentText),
-			CommentId:   int64(commId),
+			CommentId:   commId,
 		}
 
 		CResp, err := rpc.CommentAction(ctx, &CAction)
@@ -90,7 +89,7 @@ func CommentAction(ctx *gin.Context) {
 // 读取评论列表
 func CommentList(ctx *gin.Context) {
 	var CReq CommentReq
-	CReq.VideoId = ctx.Query("VideoId")
+	CReq.VideoId = ctx.Query("video_id")
 	videoID, _ := strconv.ParseInt(CReq.VideoId, 10, 64)
 	var commentList pb.DouyinCommentListRequest
 	commentList.VideoId = videoID
