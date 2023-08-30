@@ -34,20 +34,21 @@ func (c *CommentSrv) Action(ctx context.Context, in *comment.DouyinCommentAction
 	actiontype := in.ActionType
 	context := in.CommentText
 	if actiontype == 1 { //新增评论
-		ans := redis.AddComm(ctx, videoId, commentid)
-		if ans == 0 {
-			return &comment.DouyinCommentActionResponse{
-				StatusCode: 500,
-				StatusMsg:  "服务器错误",
-			}, errors.New("redis数据库错误")
-		}
-		ans = 0
-		ans = dao.Comm(ctx, commentid, userId, videoId, context)
+		ans, id := dao.Comm(ctx, commentid, userId, videoId, context)
 		if ans == 0 {
 			return &comment.DouyinCommentActionResponse{
 				StatusCode: 500,
 				StatusMsg:  "服务器错误",
 			}, errors.New("mysql数据库错误")
+		}
+		ans = 0
+		id64 := int64(id)
+		ans = redis.AddComm(ctx, videoId, id64)
+		if ans == 0 {
+			return &comment.DouyinCommentActionResponse{
+				StatusCode: 500,
+				StatusMsg:  "服务器错误",
+			}, errors.New("redis数据库错误")
 		}
 		return &comment.DouyinCommentActionResponse{
 			StatusCode: 200,
@@ -83,13 +84,19 @@ func (c *CommentSrv) Action(ctx context.Context, in *comment.DouyinCommentAction
 
 func (c *CommentSrv) List(ctx context.Context, in *comment.DouyinCommentListRequest) (*comment.DouyinCommentListResponse, error) {
 	videoId := in.VideoId
+	if videoId == 0 {
+		return &comment.DouyinCommentListResponse{
+			StatusCode: 500,
+			StatusMsg:  "VedioId获取失败",
+		}, nil
+	}
 	commentIds, err := redis.GetComm(ctx, videoId)
 	if err != nil {
 		zap.L().Error("redis获取视频评论列表失败")
 		return nil, err
 	}
-	comments, err := dao.GetcommByCommentIDs(commentIds)
-	if err != nil {
+	comments, err2 := dao.GetcommByCommentIDs(commentIds)
+	if err2 != nil {
 		zap.L().Error("获取评论列表失败")
 		return &comment.DouyinCommentListResponse{
 			StatusCode: 500,

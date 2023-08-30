@@ -5,10 +5,11 @@ import (
 	"dzug/app/services/user/pkg/jwt"
 	pb "dzug/protos/favorite"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type favoriteReq struct {
@@ -80,7 +81,7 @@ func FavoriteList(ctx *gin.Context) {
 	}
 	resp := convert(fResp)
 	ctx.JSON(0, resp)
-	//ctx.JSON(http.StatusOK, fResp)
+
 }
 
 func convert(fResp *pb.FavoriteListResponse) *response {

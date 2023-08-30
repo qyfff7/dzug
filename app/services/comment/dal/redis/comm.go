@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"dzug/app/services/comment/dal/dao"
+
 	"strconv"
 	"time"
 
@@ -10,7 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var coPrefix = "comm:" // redis中favor前缀
+var coPrefix = "comm:" // redis中comm前缀
 var key string         // redis的key
 func AddComm(ctx context.Context, videoId int64, comment_uuid int64) int {
 	InitRedis()

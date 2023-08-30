@@ -3,13 +3,12 @@ package handlers
 import (
 	"dzug/app/gateway/rpc"
 	"dzug/app/services/user/pkg/snowflake"
+
 	pb "dzug/protos/comment"
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
 
 type CommentReq struct {
@@ -24,20 +23,22 @@ func CommentAction(ctx *gin.Context) {
 	//userId, _ := jwt.GetUserID(ctx)
 
 	token := ctx.Query("token")
+	//测试用代码
+	/*
+		userid := ctx.Query("user_id")
+		Userid, _ := strconv.ParseInt(userid, 10, 64)
+		token, _ := jwt.GenToken(Userid)
+	*/
 
-	err := ctx.ShouldBind(&CReq)
-	if err != nil {
-		zap.L().Fatal("绑定参数出错" + err.Error())
-	}
-	zap.L().Info(fmt.Sprintf("token:", token, " VideoId:", CReq.VideoId, " ActionType:", CReq.ActionType))
+	CReq.VideoId = ctx.Query("video_id")
+	CReq.ActionType = ctx.Query("action_type")
 	videoid, _ := strconv.Atoi(CReq.VideoId)
-	//videoId := ctx.Query("video_id")
-
 	ac, _ := strconv.Atoi(CReq.ActionType)
 	actionType := int32(ac)
 	commentText := ctx.Query("comment_text")
-	commentId := snowflake.GenID()                                 //新建评论时生成ID
-	commid, _ := strconv.ParseInt(ctx.Query("comment_id"), 10, 64) //删除评论时使用的ID
+	commId := snowflake.GenID()
+	comid := ctx.Query("comment_id")
+	commentId, _ := strconv.ParseInt(comid, 10, 64)
 	ctx.JSON(http.StatusOK, pb.DouyinCommentActionResponse{
 		StatusCode: 200,
 		StatusMsg:  "操作成功",
@@ -49,7 +50,7 @@ func CommentAction(ctx *gin.Context) {
 			VideoId:     int64(videoid),
 			ActionType:  int32(actionType),
 			CommentText: string(commentText),
-			CommentId:   int64(commentId),
+			CommentId:   commId,
 		}
 
 		CResp, err := rpc.CommentAction(ctx, &CAction)
@@ -66,7 +67,7 @@ func CommentAction(ctx *gin.Context) {
 			Token:      token,
 			ActionType: int32(actionType),
 			VideoId:    int64(videoid),
-			CommentId:  int64(commid),
+			CommentId:  int64(commentId),
 		}
 		CResp, err := rpc.CommentAction(ctx, &CAction)
 		if err != nil {
@@ -88,7 +89,7 @@ func CommentAction(ctx *gin.Context) {
 // 读取评论列表
 func CommentList(ctx *gin.Context) {
 	var CReq CommentReq
-	CReq.VideoId = ctx.Query("VideoId")
+	CReq.VideoId = ctx.Query("video_id")
 	videoID, _ := strconv.ParseInt(CReq.VideoId, 10, 64)
 	var commentList pb.DouyinCommentListRequest
 	commentList.VideoId = videoID
@@ -100,6 +101,49 @@ func CommentList(ctx *gin.Context) {
 		})
 		return
 	}
-	ctx.JSON(http.StatusOK, CResp)
+	resp := converT(CResp)
+	ctx.JSON(0, resp)
 
+}
+
+func converT(CResp *pb.DouyinCommentListResponse) *Response {
+	var resp Response
+	// 将CRsp转换为resp
+	resp.StatusCode = 0
+	resp.StatusMsg = CResp.StatusMsg
+	resp.CommentList = make([]*Comment, len(CResp.CommentList))
+	for k, v := range CResp.CommentList {
+		var comment Comment
+		comment.Id = v.Id
+		comment.User = &User{
+			Id:              v.User.Id,
+			Name:            v.User.Name,
+			FollowCount:     v.User.FollowCount,                           // 关注总数
+			FollowerCount:   v.User.FollowerCount,                         // 粉丝总数
+			IsFollow:        v.User.IsFollow,                              // true-已关注，false-未关注
+			Avatar:          v.User.Avatar,                                //用户头像
+			BackgroundImage: v.User.BackgroundImage,                       //用户个人页顶部大图
+			Signature:       v.User.Signature,                             //个人简介
+			TotalFavorited:  strconv.FormatInt(v.User.TotalFavorited, 10), //获赞数量
+			WorkCount:       v.User.WorkCount,                             //作品数量
+			FavoriteCount:   v.User.FavoriteCount,                         //点赞数量
+		}
+		comment.ConTent = v.Content
+		comment.CreateDate = v.CreateDate
+		resp.CommentList[k] = &comment
+	}
+	return &resp
+}
+
+type Comment struct {
+	Id         int64  `json:"id"`          // 视频评论id
+	User       *User  `json:"user"`        // 评论用户信息
+	ConTent    string `json:"content"`     // 评论内容
+	CreateDate string `json:"create_date"` // 评论发布日期，格式 mm-dd
+}
+
+type Response struct {
+	StatusCode  int32      `json:"status_code"`
+	StatusMsg   string     `json:"status_msg"`
+	CommentList []*Comment `json:"comment_list"`
 }

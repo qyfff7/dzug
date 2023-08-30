@@ -34,9 +34,10 @@ func NewRouter(mode string) *gin.Engine {
 		})
 	})
 	comment := ginRouter.Group("/douyin/comment")
+	comment.Use(middlewares.JWTAuthMiddleware())
 	{
 		comment.GET("/list/", handlers.CommentList)
-		comment.POST("/action/", middlewares.JWTAuthMiddleware(), handlers.CommentAction)
+		comment.POST("/action/", handlers.CommentAction)
 	}
 
 	tourist := ginRouter.Group("/douyin")
