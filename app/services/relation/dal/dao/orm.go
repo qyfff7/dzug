@@ -187,8 +187,8 @@ func GetFriendList(ctx context.Context, userID int64) ([]int64, error) {
 		return nil, err
 	}
 	userIDS := make([]int64, len(friendList))
-	for i, fan := range friendList {
-		userIDS[i] = int64(fan.UserId)
+	for i, friend := range friendList {
+		userIDS[i] = int64(friend.ToUserId)
 	}
 
 	zap.L().Info("MySQL数据库成功获取好友列表")
@@ -224,39 +224,4 @@ func IsFollowByID(ctx context.Context, userID, autherID int64) (bool, error) {
 		return true, nil
 	}
 	return false, nil //未关注
-}
-
-func GetFriendsByIDList(ctx context.Context, UserID int64, friendIDs []int64) ([]*models.FriendUser, error) {
-	var friendInfoList []*models.FriendUser
-	for _, friendID := range friendIDs {
-		// 查询当前用户发送的最新消息
-		var sentMessage repo.Message
-		err := repo.DB.Order("create_time desc").Where("from_user_id = ? AND to_user_id = ?", UserID, friendID).First(&sentMessage).Error
-		if err != nil {
-			zap.L().Error("查不到用户发送的最新消息:", zap.Error(err))
-		}
-		// 查询当前用户接收的最新消息
-		var receivedMessage repo.Message
-		err = repo.DB.Order("create_time desc").Where("from_user_id = ? AND to_user_id = ?", friendID, UserID).First(&receivedMessage).Error
-		if err != nil {
-			zap.L().Error("查不到用户接收的最新消息:", zap.Error(err))
-		}
-
-		// 获取每个(userId, friendId) 的最新消息 和 消息类型，判断哪个消息更新
-		var latestMessage repo.Message
-		var isSender int64
-		if sentMessage.CreateTime > receivedMessage.CreateTime {
-			latestMessage = sentMessage
-			isSender = 1
-		} else {
-			latestMessage = receivedMessage
-			isSender = 0
-		}
-		msgInfo := &models.FriendUser{
-			Msg:     latestMessage.Contents, // 最新聊天消息
-			MsgType: isSender,               // 消息类型
-		}
-		friendInfoList = append(friendInfoList, msgInfo)
-	}
-	return friendInfoList, nil
 }

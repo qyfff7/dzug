@@ -55,7 +55,7 @@ message douyin_relation_friend_list_request {
 message douyin_relation_friend_list_response {
   int32 status_code = 1; // 状态码，0-成功，其他值-失败
   string status_msg = 2; // 返回状态描述
-  repeated FriendUser user_list = 3; // 用户列表
+  repeated User user_list = 3; // 用户列表
 }
 
 message User {
@@ -70,9 +70,4 @@ message User {
   int64 total_favorited = 9; //获赞数量
   int64 work_count = 10; //作品数量
   int64 favorite_count = 11; //点赞数量
-}
-
-message FriendUser{
-    string message = 1; // 和该好友的最新聊天消息
-    int64 msgType = 2; // message消息的类型，0 => 当前请求用户接收的消息， 1 => 当前请求用户发送的消息
 }
