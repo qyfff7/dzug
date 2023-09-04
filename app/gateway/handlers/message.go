@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
 	"strconv"
 )
@@ -18,11 +17,17 @@ func MessageChatList(ctx *gin.Context) {
 
 	zap.L().Info("Getting Message List!")
 
-	if err := ctx.Bind(&msgListReq); err != nil {
-		zap.L().Error("Get Message List with invalid param", zap.Error(err))
-		models.ResponseError(ctx, models.CodeInvalidParam)
-		return
-	}
+	//if err := ctx.Bind(&msgListReq); err != nil {
+	//	zap.L().Error("Get Message List with invalid param", zap.Error(err))
+	//	models.ResponseError(ctx, models.CodeInvalidParam)
+	//	return
+	//}
+	msgListReq.Token = ctx.Query("token")
+	toUserId, _ := strconv.ParseInt(ctx.Query("to_user_id"), 10, 64)
+	msgListReq.ToUserId = toUserId
+	preMsgTime, _ := strconv.ParseInt(ctx.Query("pre_msg_time"), 10, 64)
+	msgListReq.PreMsgTime = preMsgTime
+	//fmt.Printf("Got message list request: %++v \n", msgListReq)
 
 	u, err := jwt.ParseToken(msgListReq.Token)
 	if err != nil {
@@ -56,21 +61,15 @@ func MessagePostAction(ctx *gin.Context) {
 
 	zap.L().Info("Posting a Message!")
 
-	if err := ctx.ShouldBind(msgPostReq); err != nil {
-		zap.L().Error("Post message with invalid param", zap.Error(err))
-		// 判断err是不是validator.ValidationErrors 类型
-		errs, ok := err.(validator.ValidationErrors)
-		if !ok {
-			// 非validator.ValidationErrors类型错误直接返回
-			models.ResponseError(ctx, models.CodeInvalidParam)
-			return
-		}
-		err, _ := json.Marshal(removeTopStruct(errs.Translate(trans)))
-		models.ResponseErrorWithMsg(ctx, models.CodeInvalidParam, string(err))
-		return
-	}
+	msgPostReq.Token = ctx.Query("token")
+	toUserId, _ := strconv.ParseInt(ctx.Query("to_user_id"), 10, 64)
+	msgPostReq.ToUserId = toUserId
+	n, _ := strconv.Atoi(ctx.Query("action_type"))
+	msgPostReq.ActionType = int32(n)
+	msgPostReq.Content = ctx.Query("content")
 
-	fmt.Println(msgPostReq.Token)
+	fmt.Printf("Got Chat request: %++v\n", msgPostReq)
+
 	u, err := jwt.ParseToken(msgPostReq.Token)
 	if err != nil {
 		zap.L().Error("解析Token出错", zap.Error(err))

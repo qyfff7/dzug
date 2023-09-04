@@ -147,7 +147,6 @@ func GetuserInfoByID(ctx context.Context, uid int64) (*models.User, error) {
 		return nil, err
 	}
 	return userInfo, nil
-
 }
 
 // IsFollowByID 判断是否关注了该用户

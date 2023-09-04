@@ -34,7 +34,7 @@ func GetMessages(ctx context.Context, threadId string, preMsgTime int64) ([]*MgM
 	cond := bson.M{
 		"thread_id": threadId,
 		"create_time": bson.M{
-			"$gte": preMsgTime,
+			"$gt": preMsgTime,
 		},
 	}
 	var cursor *mongo.Cursor

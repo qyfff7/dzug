@@ -12,6 +12,16 @@ type Message struct {
 	CreateTime  int64  `gorm:"column:create_time;not null;"`
 }
 
+type Thread struct {
+	gorm.Model
+	ThreadId     string `gorm:"column:thread_id;type:varchar(255);not null"`
+	LastPullTime int64  `gorm:"column:last_pull_time;not null;"`
+}
+
 func (Message) TableName() string {
 	return "message"
+}
+
+func (Thread) TableName() string {
+	return "thread"
 }

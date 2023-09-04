@@ -150,4 +150,18 @@ CREATE TABLE `video` (
 
 SET FOREIGN_KEY_CHECKS = 1;
 
+-- ----------------------------
+-- Table structure for thread
+-- ----------------------------
+
+DROP TABLE IF EXISTS `thread`;
+
+CREATE TABLE `thread`  (
+                           `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '消息id',
+                           `thread_id` varchar(255) NOT NULL COMMENT '对话id',
+                           `last_pull_time` timestamp NULL DEFAULT NULL COMMENT '最后一次拉取时间',
+                           PRIMARY KEY (`id`) USING BTREE,
+                           UNIQUE INDEX `thread_id`(`thread_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 30 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
 

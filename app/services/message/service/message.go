@@ -70,6 +70,14 @@ func (MsgSvr) GetMessageList(ctx context.Context, request *pb.GetMessageListReq)
 
 	threadId := getThreadId(request.ToUserId, userId)
 
+	//thread, err := dao2.GetThreadInfo(ctx, threadId)
+	//if err != nil {
+	//	fmt.Printf("Get threads from db fail: " + err.Error())
+	//	return nil, err
+	//}
+	//request.PreMsgTime = thread.LastPullTime
+	//fmt.Printf("+++++++++++++++ Got thread info from DB: %++v \n", thread)
+
 	oldestCache, err := mongodb2.GetOldestMessage(ctx, threadId)
 	if err != nil {
 		zap.L().Error("获取缓存记录失败", zap.Error(err))
@@ -83,6 +91,7 @@ func (MsgSvr) GetMessageList(ctx context.Context, request *pb.GetMessageListReq)
 
 	var infos []*pb.MessageInfo
 	if request.PreMsgTime < oldestCache.CreateTime {
+		//fmt.Printf("Pull messages from db ")
 		msgs, err := dao2.GetMessageList(ctx, userId, request.ToUserId, request.PreMsgTime)
 		if err != nil {
 			fmt.Printf("Get messages from db fail: " + err.Error())
@@ -90,6 +99,7 @@ func (MsgSvr) GetMessageList(ctx context.Context, request *pb.GetMessageListReq)
 		}
 		infos = messagesToInfo(msgs)
 	} else {
+		//fmt.Printf("Pull messages from mongodb ")
 		mgMessages, err := mongodb2.GetMessages(ctx, threadId, request.PreMsgTime)
 		if err != nil {
 			fmt.Printf("Get messages from cache fail: " + err.Error())
@@ -97,6 +107,14 @@ func (MsgSvr) GetMessageList(ctx context.Context, request *pb.GetMessageListReq)
 		}
 		infos = mgMessagesToInfo(mgMessages)
 	}
+	//for _, info := range infos {
+	//	fmt.Printf("Got msg from DB: %++v \n", info)
+	//}
+
+	//err = dao2.UpdateThreadPullInfo(ctx, threadId)
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	return &pb.GetMessageListResp{
 		BaseResp: &pb.BaseResp{

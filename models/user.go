@@ -8,6 +8,7 @@ import (
 
 type User struct {
 	ID            int64  `json:"id"`
+	UserId        int64  `json:"user_id"`
 	Name          string `json:"name"`
 	FollowCount   int64  `json:"follow_count"`   // 关注总数
 	FollowerCount int64  `json:"follower_count"` // 粉丝总数

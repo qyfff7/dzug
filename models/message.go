@@ -11,14 +11,19 @@ import (
 type Message struct {
 	FromUserId  int64  `json:"from_user_id"`
 	ToUserId    int64  `json:"to_user_id"`
-	Contents    string `json:"contents"`
+	Contents    string `json:"content"`
 	CreateTime  int64  `json:"create_time"`
 	MessageUUID int64  `json:"id"`
 }
 
+type Thread struct {
+	ThreadId     string `json:"thread_id"`
+	LastPullTime int64  `json:"last_pull_time"`
+}
+
 type GetMessageListResp struct {
 	Response
-	Msg []*Message `json:"messages"`
+	Msg []*Message `json:"message_list"`
 }
 
 type PostMessageResp struct {

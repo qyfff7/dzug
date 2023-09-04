@@ -3,6 +3,7 @@ package dao
 import (
 	"context"
 	"dzug/repo"
+	"time"
 )
 
 func CreateMessage(ctx context.Context, message *Message) error {
@@ -21,4 +22,19 @@ func GetMessageList(ctx context.Context, userId int64, toUserId int64, latestTim
 		return nil, err
 	}
 	return messages, nil
+}
+
+func GetThreadInfo(ctx context.Context, threadId string) (*Thread, error) {
+	var thread Thread
+	err := repo.DB.WithContext(ctx).Table("thread").Where("thread_id = ?", threadId).Find(&thread).Error
+	if err != nil {
+		return nil, err
+	}
+	return &thread, nil
+}
+
+func UpdateThreadPullInfo(ctx context.Context, threadId string) error {
+	ts := time.Now().Unix()
+	err := repo.DB.WithContext(ctx).Table("thread").Where("thread_id = ?", threadId).Update("last_pull_time", ts).Error
+	return err
 }

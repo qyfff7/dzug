@@ -79,8 +79,8 @@ func NewRouter(mode string) *gin.Engine {
 	message := ginRouter.Group("/douyin/message")
 	message.Use(middlewares.JWTAuthMiddleware())
 	{
-		message.GET("/chat", handlers.MessageChatList)
-		message.POST("/action", handlers.MessagePostAction)
+		message.GET("/chat/", handlers.MessageChatList)
+		message.POST("/action/", handlers.MessagePostAction)
 
 		ginRouter.NoRoute(func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{

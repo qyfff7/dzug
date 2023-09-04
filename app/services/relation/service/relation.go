@@ -144,7 +144,7 @@ func GetUserInfoList(ctx context.Context, UserID int64, followIdList []int64) ([
 	var userProtos []*relation.User
 	for _, user := range users {
 		userProto := &relation.User{
-			Id:              user.ID,
+			Id:              user.UserId,
 			Name:            user.Name,
 			FollowCount:     user.FollowCount,
 			FollowerCount:   user.FollowerCount,
