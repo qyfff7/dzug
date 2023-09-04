@@ -117,7 +117,7 @@ func (r *RelationSrv) DouyinRelationFriendList(ctx context.Context, req *relatio
 	fmt.Printf("userID: %v\n", userID)
 	friendIdList, err := dao.GetFriendList(ctx, userID)
 
-	friendInfoList, err := GetFriendInfoList(ctx, userID, friendIdList)
+	friendInfoList, err := GetUserInfoList(ctx, userID, friendIdList)
 
 	if err != nil {
 		return &relation.DouyinRelationFriendListResponse{
@@ -130,24 +130,6 @@ func (r *RelationSrv) DouyinRelationFriendList(ctx context.Context, req *relatio
 		StatusMsg:  "获取好友列表成功",
 		UserList:   friendInfoList,
 	}, nil
-}
-
-func GetFriendInfoList(ctx context.Context, userId int64, friendIDs []int64) ([]*relation.FriendUser, error) {
-
-	var friendProtos []*relation.FriendUser
-	friends, err := dao.GetFriendsByIDList(ctx, userId, friendIDs)
-	if err != nil {
-		return nil, err
-	}
-	for _, friend := range friends {
-		friendProto := &relation.FriendUser{
-			Message: friend.Msg,
-			MsgType: friend.MsgType,
-		}
-		friendProtos = append(friendProtos, friendProto)
-	}
-
-	return friendProtos, nil
 }
 
 func GetUserInfoList(ctx context.Context, UserID int64, followIdList []int64) ([]*relation.User, error) {
