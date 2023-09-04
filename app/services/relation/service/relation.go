@@ -119,7 +119,9 @@ func (r *RelationSrv) DouyinRelationFriendList(ctx context.Context, req *relatio
 	friendIdList, err := dao.GetFriendList(ctx, userID)
 
 	friendInfoList, err := GetFriendInfoList(ctx, userID, friendIdList)
-
+	for _, v := range friendInfoList {
+		fmt.Printf("Returned User friend info: %++v", v)
+	}
 	if err != nil {
 		return &relation.DouyinRelationFriendListResponse{
 			StatusCode: 500,
@@ -181,7 +183,7 @@ func GetFriendInfoList(ctx context.Context, UserID int64, friendIdList []int64) 
 	var userProtos []*relation.UserFriend
 	for _, user := range users {
 		userProto := &relation.UserFriend{
-			Id:              user.UserId,
+			Id:              user.ID,
 			Name:            user.Name,
 			FollowCount:     user.FollowCount,
 			FollowerCount:   user.FollowerCount,

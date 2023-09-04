@@ -69,14 +69,7 @@ func (MsgSvr) GetMessageList(ctx context.Context, request *pb.GetMessageListReq)
 	userId, _ := strconv.ParseInt(request.Token, 10, 64)
 
 	threadId := getThreadId(request.ToUserId, userId)
-
-	//thread, err := dao2.GetThreadInfo(ctx, threadId)
-	//if err != nil {
-	//	fmt.Printf("Get threads from db fail: " + err.Error())
-	//	return nil, err
-	//}
-	//request.PreMsgTime = thread.LastPullTime
-	//fmt.Printf("+++++++++++++++ Got thread info from DB: %++v \n", thread)
+	fmt.Printf("Message between: %d, %d. Thread: %s", request.ToUserId, userId, threadId)
 
 	oldestCache, err := mongodb2.GetOldestMessage(ctx, threadId)
 	if err != nil {
