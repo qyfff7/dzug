@@ -7,6 +7,7 @@ import (
 	"dzug/repo"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -224,4 +225,67 @@ func IsFollowByID(ctx context.Context, userID, autherID int64) (bool, error) {
 		return true, nil
 	}
 	return false, nil //未关注
+}
+
+// 拼接message表中的threadid
+func getThreadId(fromUserId int64, toUserId int64) string {
+	if fromUserId < toUserId {
+		return strconv.FormatInt(fromUserId, 10) + "_" + strconv.FormatInt(toUserId, 10)
+	} else {
+		return strconv.FormatInt(toUserId, 10) + "_" + strconv.FormatInt(fromUserId, 10)
+	}
+}
+
+func GetUserFriendsByIDList(ctx context.Context, UserID int64, userIDs []int64) ([]*models.UserFriend, error) {
+	var users []*models.UserFriend
+	for _, toUserID := range userIDs {
+		var user *models.UserFriend
+		// 查找好友的所有个人信息
+		userInfo, err := dao.GetuserInfoByID(ctx, toUserID)
+		userInfo.IsFollow, _ = dao.IsFollowByID(ctx, UserID, toUserID)
+		// 查找userid 和 touserid 组成的threadid的最新Message
+		threadId := getThreadId(UserID, userInfo.UserId)
+		var Msg repo.Message
+		var msgtype int64
+		var msgcontent string
+		err = repo.DB.Order("create_time desc").Table("message").Where("thread_id = ?", threadId).First(&Msg).Error
+		if err != nil {
+			return nil, err
+		}
+
+		if Msg.FromUserId == UserID {
+			msgtype = 1
+		} else {
+			msgtype = 0
+		}
+		msgcontent = Msg.Contents
+
+		// 填充用户信息
+		user = &models.UserFriend{
+			ID:              userInfo.UserId,
+			Name:            userInfo.Name,
+			FollowCount:     userInfo.FollowCount,
+			FollowerCount:   userInfo.FollowerCount,
+			IsFollow:        userInfo.IsFollow,
+			Avatar:          userInfo.Avatar,
+			BackgroundImage: userInfo.BackgroundImage,
+			Signature:       userInfo.Signature,
+			TotalFavorited:  userInfo.TotalFavorited,
+			WorkCount:       userInfo.WorkCount,
+			FavoriteCount:   userInfo.FavoriteCount,
+			MsgType:         int64(msgtype),
+			Message:         msgcontent,
+		}
+
+		users = append(users, user)
+
+		if err != nil {
+			return nil, err
+		}
+
+		fmt.Printf("user_id: %v\n", UserID)
+		fmt.Printf("to_user_id: %v\n", toUserID)
+		fmt.Printf("isfollow: %v\n", userInfo.IsFollow)
+	}
+	return users, nil
 }

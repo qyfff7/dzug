@@ -7,6 +7,7 @@ import (
 	"dzug/protos/relation"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -117,7 +118,7 @@ func (r *RelationSrv) DouyinRelationFriendList(ctx context.Context, req *relatio
 	fmt.Printf("userID: %v\n", userID)
 	friendIdList, err := dao.GetFriendList(ctx, userID)
 
-	friendInfoList, err := GetUserInfoList(ctx, userID, friendIdList)
+	friendInfoList, err := GetFriendInfoList(ctx, userID, friendIdList)
 
 	if err != nil {
 		return &relation.DouyinRelationFriendListResponse{
@@ -155,6 +156,44 @@ func GetUserInfoList(ctx context.Context, UserID int64, followIdList []int64) ([
 			TotalFavorited:  user.TotalFavorited,
 			WorkCount:       user.WorkCount,
 			FavoriteCount:   user.FavoriteCount,
+		}
+		userProtos = append(userProtos, userProto)
+	}
+	return userProtos, nil
+}
+
+func getThreadId(fromUserId int64, toUserId int64) string {
+	if fromUserId < toUserId {
+		return strconv.FormatInt(fromUserId, 10) + "_" + strconv.FormatInt(toUserId, 10)
+	} else {
+		return strconv.FormatInt(toUserId, 10) + "_" + strconv.FormatInt(fromUserId, 10)
+	}
+}
+
+func GetFriendInfoList(ctx context.Context, UserID int64, friendIdList []int64) ([]*relation.UserFriend, error) {
+	zap.L().Info("已经获取好友的id列表，开始获取好友的具体信息")
+
+	// 根据idList获取所有的信息list
+	users, err := dao.GetUserFriendsByIDList(ctx, UserID, friendIdList)
+	if err != nil {
+		return nil, err
+	}
+	var userProtos []*relation.UserFriend
+	for _, user := range users {
+		userProto := &relation.UserFriend{
+			Id:              user.UserId,
+			Name:            user.Name,
+			FollowCount:     user.FollowCount,
+			FollowerCount:   user.FollowerCount,
+			IsFollow:        user.IsFollow,
+			Avatar:          user.Avatar,
+			BackgroundImage: user.BackgroundImage,
+			Signature:       user.Signature,
+			TotalFavorited:  user.TotalFavorited,
+			WorkCount:       user.WorkCount,
+			FavoriteCount:   user.FavoriteCount,
+			Message:         user.Message,
+			MsgType:         user.MsgType,
 		}
 		userProtos = append(userProtos, userProto)
 	}

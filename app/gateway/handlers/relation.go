@@ -154,23 +154,24 @@ func RelationFriendList(ctx *gin.Context) {
 		return
 	}
 
-	userInfoList := make([]*models.User, 0)
+	userInfoList := make([]*models.UserFriend, 0)
 	for _, m := range relationResp.UserList {
-		userInfoList = append(userInfoList, &models.User{
-			ID:            m.Id,
-			Name:          m.Name,
-			FollowCount:   m.FollowCount,
-			FollowerCount: m.FollowerCount,
-			WorkCount:     m.WorkCount,
-			FavoriteCount: m.WorkCount,
-			IsFollow:      m.IsFollow,
-
+		userInfoList = append(userInfoList, &models.UserFriend{
+			ID:              m.Id,
+			Name:            m.Name,
+			FollowCount:     m.FollowCount,
+			FollowerCount:   m.FollowerCount,
+			WorkCount:       m.WorkCount,
+			FavoriteCount:   m.WorkCount,
+			IsFollow:        m.IsFollow,
 			Avatar:          m.Avatar,
 			BackgroundImage: m.BackgroundImage,
 			Signature:       m.Signature,
 			TotalFavorited:  m.TotalFavorited,
+			Message:         m.Message,
+			MsgType:         m.MsgType,
 		})
 	}
 
-	models.UserInfoListRespSuccess(ctx, userInfoList)
+	models.UserFriendInfoListRespSuccess(ctx, userInfoList)
 }

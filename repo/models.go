@@ -1,8 +1,9 @@
 package repo
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 // 数据库模型
@@ -40,15 +41,13 @@ func (m *Favorite) TableName() string {
 
 // Message 消息表
 type Message struct {
-	ID          uint `gorm:"primarykey"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time      `gorm:"uniqueIndex:m"`
-	DeletedAt   gorm.DeletedAt `gorm:"index"`
-	MessageUuid int64          `gorm:"column:message_uuid;type:bigint(20) unsigned;default:0;comment:消息uuid;NOT NULL;" json:"message_uuid"`
-	ToUserId    int64          `gorm:"column:to_user_id;type:bigint(20) unsigned;default:0;comment:该消息接收者的id;NOT NULL;uniqueIndex:m" json:"to_user_id"`
-	FromUserId  int64          `gorm:"column:from_user_id;type:bigint(20) unsigned;default:0;comment:该消息发送者的id;NOT NULL;uniqueIndex:m" json:"from_user_id"`
-	Contents    string         `gorm:"column:contents;type:varchar(255);comment:消息内容;NOT NULL" json:"contents"`
-	CreateTime  int64          `gorm:"column:create_time;type:bigint(20) unsigned;default:0;comment:自设创建时间(unix);NOT NULL" json:"create_time"`
+	gorm.Model
+	ThreadId    string `gorm:"column:thread_id;type:varchar(255);not null"`
+	FromUserId  int64  `gorm:"column:from_user_id;not null;index:fk_user_message_from"`
+	ToUserId    int64  `gorm:"column:to_user_id;not null;index:fk_user_message_to"`
+	Contents    string `gorm:"column:contents;type:varchar(255);not null"`
+	MessageUUID int64  `gorm:"column:message_uuid;not null;index:fk_uuid_message"`
+	CreateTime  int64  `gorm:"column:create_time;not null;"`
 }
 
 func (m *Message) TableName() string {
