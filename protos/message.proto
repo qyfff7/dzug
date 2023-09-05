@@ -1,0 +1,43 @@
+syntax = "proto3";
+package message;
+option go_package = "./message";
+
+service DouyinMessageService {
+  rpc CreateMessage(CreateMessageReq) returns(CreateMessageResp);                 // 发消息
+  rpc GetMessageList(GetMessageListReq) returns(GetMessageListResp);                 // 查询消息列表
+}
+
+message BaseResp {
+  int64 status_code = 1;
+  string status_msg = 2;
+}
+
+message MessageInfo {
+  int64 message_id = 1;
+  int64 from_user_id = 2;
+  int64 to_user_id = 3;
+  string content = 4;
+  int64 create_time = 5;     // yyyy-MM-dd HH:MM:ss
+}
+
+message CreateMessageReq {
+  string token = 1;
+  int64 to_user_id = 2;
+  int32  action_type = 3;
+  string content = 4;
+}
+
+message CreateMessageResp {
+  BaseResp base_resp = 1;
+}
+
+message GetMessageListReq {
+  string token = 1;
+  int64 to_user_id = 2;
+  int64 pre_msg_time = 3;
+}
+
+message GetMessageListResp {
+  BaseResp base_resp = 1;
+  repeated MessageInfo message_infos = 2;
+}

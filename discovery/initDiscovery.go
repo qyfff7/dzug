@@ -2,26 +2,34 @@ package discovery
 
 import (
 	"dzug/conf"
+	"dzug/protos/comment"
 	"dzug/protos/favorite"
+	"dzug/protos/message"
+	"dzug/protos/publish"
+	"dzug/protos/relation"
 	"dzug/protos/user"
 	"dzug/protos/video"
 	"errors"
+
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 var (
-	SerDiscovery serviceDiscovery
-
+	SerDiscovery   serviceDiscovery
 	UserClient     user.ServiceClient
-	FavoriteClient favorite.DouyinFavoriteActionServiceClient
 	VideoClient    video.VideoServiceClient
+	MessageClient  message.DouyinMessageServiceClient
+	FavoriteClient favorite.DouyinFavoriteActionServiceClient
+	RelationClient relation.DouyinRelationActionServiceClient
+	CommentClient  comment.DouyinCommentServiceClient
+	PublishClient  publish.PublishServiceClient
 )
 
 // InitDiscovery 初始化一个服务发现程序
 func InitDiscovery() {
-	endpoints := conf.Config.EtcdConfig.Addr              // etcd地址
+	endpoints := conf.BasicConf.EtcdAddr                  // etcd地址
 	SerDiscovery = serviceDiscovery{EtcdAddrs: endpoints} // 放入etcd地址
 	err := SerDiscovery.newServiceDiscovery()             // 实例化
 	if err != nil {
@@ -46,6 +54,14 @@ func LoadClient(serviceName string, client any) error {
 		*c = video.NewVideoServiceClient(conn)
 	case *favorite.DouyinFavoriteActionServiceClient:
 		*c = favorite.NewDouyinFavoriteActionServiceClient(conn)
+	case *relation.DouyinRelationActionServiceClient:
+		*c = relation.NewDouyinRelationActionServiceClient(conn)
+	case *comment.DouyinCommentServiceClient:
+		*c = comment.NewDouyinCommentServiceClient(conn)
+	case *message.DouyinMessageServiceClient:
+		*c = message.NewDouyinMessageServiceClient(conn)
+	case *publish.PublishServiceClient:
+		*c = publish.NewPublishServiceClient(conn)
 	default:
 		err = errors.New("没有该类型的服务")
 		zap.L().Error(err.Error())

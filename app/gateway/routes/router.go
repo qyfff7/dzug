@@ -5,8 +5,9 @@ import (
 	"dzug/app/gateway/middlewares"
 	"dzug/logger"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func NewRouter(mode string) *gin.Engine {
@@ -23,6 +24,7 @@ func NewRouter(mode string) *gin.Engine {
 
 	ginRouter := gin.New()
 	ginRouter.Use(logger.GinLogger(), logger.GinRecovery(true)) // 使用自己的两个中间件
+
 	ginRouter.LoadHTMLFiles("./templates/index.html")
 	ginRouter.Static("/static", "./static")
 
@@ -31,6 +33,12 @@ func NewRouter(mode string) *gin.Engine {
 			"title": "Main website",
 		})
 	})
+	comment := ginRouter.Group("/douyin/comment")
+	comment.Use(middlewares.JWTAuthMiddleware())
+	{
+		comment.GET("/list/", handlers.CommentList)
+		comment.POST("/action/", handlers.CommentAction)
+	}
 
 	tourist := ginRouter.Group("/douyin")
 	{
@@ -52,10 +60,33 @@ func NewRouter(mode string) *gin.Engine {
 		favorite.GET("/list/", handlers.FavoriteList)
 	}
 
-	ginRouter.NoRoute(func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"msg": "404 not found",
+	relation := ginRouter.Group("/douyin/relation")
+	relation.Use(middlewares.JWTAuthMiddleware())
+	{
+		relation.POST("/action/", handlers.RelationAction)
+		relation.GET("/follow/list/", handlers.RelationFollowList)
+		relation.GET("/follower/list/", handlers.RelationFanList)
+		relation.GET("/friend/list/", handlers.RelationFriendList)
+	}
+
+	publish := ginRouter.Group("/douyin/publish")
+	publish.Use(middlewares.JWTAuthMiddleware())
+	{
+		publish.POST("/action/", handlers.UploadHandler)
+		publish.GET("/list/", handlers.GetVideoListByUser)
+	}
+
+	message := ginRouter.Group("/douyin/message")
+	message.Use(middlewares.JWTAuthMiddleware())
+	{
+		message.GET("/chat/", handlers.MessageChatList)
+		message.POST("/action/", handlers.MessagePostAction)
+
+		ginRouter.NoRoute(func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{
+				"msg": "404 not found",
+			})
 		})
-	})
-	return ginRouter
+		return ginRouter
+	}
 }

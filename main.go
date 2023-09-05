@@ -1,17 +1,23 @@
 package main
 
 import (
-	"dzug/app/gateway/cmd"
-	"dzug/app/redis"
-	"dzug/app/user/cmd"
-	"dzug/app/user/pkg/snowflake"
-	"dzug/app/video/cmd"
+	client "dzug/app/gateway/cmd"
+	commentservice "dzug/app/services/comment/cmd"
+	favorservice "dzug/app/services/favorite/cmd"
+	messageservice "dzug/app/services/message/cmd"
+	publishservice "dzug/app/services/publish/cmd"
+	relationservice "dzug/app/services/relation/cmd"
+	userservice "dzug/app/services/user/cmd"
+	"dzug/app/services/user/dal/redis"
+	"dzug/app/services/user/pkg/snowflake"
+	videoservice "dzug/app/services/video/cmd"
 	"dzug/conf"
-	"dzug/logger"
+	transfer "dzug/conf/confagent/log_transfer"
 	"dzug/repo"
 	"fmt"
-	"go.uber.org/zap"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -21,14 +27,8 @@ func main() {
 		fmt.Printf("Config file initialization error,%#v", err)
 		return
 	}
-
-	//2. 初始化日志
-	if err := logger.Init(conf.Config.LogConfig, conf.Config.Mode); err != nil {
-		fmt.Printf("log file initialization error,%#v", err)
-		return
-	}
-	defer zap.L().Sync() //把缓冲区的日志，追加到文件中
-	zap.L().Info("服务启动，开始记录日志")
+	//2.初始化kafka消费者和ES
+	go transfer.Init()
 
 	//3. 初始化mysql数据库
 	if err := repo.Init(); err != nil {
@@ -52,10 +52,22 @@ func main() {
 		zap.L().Error("snowflake initialization error", zap.Error(err))
 		return
 	}
+	//6.启动日志收集
+	go func() {
+		err := conf.Collectlog()
+		if err != nil {
+			zap.L().Error("log collect error ,", zap.Error(err))
+		}
+	}()
+
 	//6.启动服务（后续可将所有的服务单独写到一个文件）
 	go userservice.Start()
 	time.Sleep(time.Second)
 	go videoservice.Start()
 	go favorservice.Start()
+	go messageservice.Start()
+	go commentservice.Start()
+	go relationservice.Start()
+	go publishservice.Start()
 	client.Start()
 }

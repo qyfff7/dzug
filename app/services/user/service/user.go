@@ -2,9 +2,9 @@ package service
 
 import (
 	"context"
-	"dzug/app/redis"
-	"dzug/app/user/dao"
-	"dzug/app/user/pkg/jwt"
+	"dzug/app/services/user/dal/dao"
+	"dzug/app/services/user/dal/redis"
+	"dzug/app/services/user/pkg/jwt"
 	"dzug/models"
 	pb "dzug/protos/user"
 	"go.uber.org/zap"

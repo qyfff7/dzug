@@ -1,7 +1,8 @@
 package logger
 
 import (
-	"dzug/conf"
+	"dzug/models"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -12,27 +13,25 @@ import (
 	"os"
 	"runtime/debug"
 	"strings"
-
 	"time"
 )
 
 // Init 初始化Logger
-func Init(cfg *conf.LogConfig, mode string) (err error) {
-	writeSyncer := getLogWriter(
-		cfg.Filename,
-		cfg.MaxSize,
-		cfg.MaxBackups,
-		cfg.MaxAge,
-	)
+func Init(log *models.LogConfig) (err error) {
+	//fmt.Println("在 zap 的init")
+	logconf := new(models.LogConfig)
+	logconf = log
+	writeSyncer := getLogWriter(logconf.Path, logconf.MaxSize, logconf.MaxBackups, logconf.MaxAge)
 	encoder := getEncoder()
-	var l = new(zapcore.Level)
-	err = l.UnmarshalText([]byte(cfg.Level))
+	l := new(zapcore.Level)
+	err = l.UnmarshalText([]byte(logconf.Level))
 	if err != nil {
 		return
 	}
-
+	//fmt.Println("在 zap 的init 中")
 	var core zapcore.Core
-	if mode == "develop" {
+	fmt.Println(logconf.Mode)
+	if fmt.Sprintf("%s", logconf.Mode) == "develop" {
 		//开发模式，日志输出到终端
 		consoleEnbcoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
 		core = zapcore.NewTee(
@@ -48,6 +47,8 @@ func Init(cfg *conf.LogConfig, mode string) (err error) {
 
 	lg := zap.New(core, zap.AddCaller())
 	zap.ReplaceGlobals(lg) // 替换zap包中全局的logger实例，后续在其他包中只需使用zap.L()调用即可
+
+	//fmt.Println("zhixingdap  zap   的最后了")
 	return
 }
 

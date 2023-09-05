@@ -1,20 +1,24 @@
 package repo
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 // 数据库模型
 
 // Comment 评论表
 type Comment struct {
-	gorm.Model
+	ID          uint   `gorm:"primarykey"`
 	CommentUuid int64  `gorm:"column:comment_uuid;type:bigint(20) unsigned;default:0;comment:评论uuid;NOT NULL;unique" json:"comment_uuid"`
 	UserId      int64  `gorm:"column:user_id;type:bigint(20) unsigned;default:0;comment:评论作者id;NOT NULL" json:"user_id"`
 	VideoId     int64  `gorm:"column:video_id;type:bigint(20) unsigned;default:0;comment:评论视频id;NOT NULL" json:"video_id"`
 	Contents    string `gorm:"column:contents;type:varchar(255);comment:评论内容;NOT NULL" json:"contents"`
 	CreateTime  int64  `gorm:"column:create_time;type:bigint(20) unsigned;default:0;comment:自设创建时间(unix);NOT NULL" json:"create_time"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   gorm.DeletedAt `gorm:"uniqueIndex:f"`
 }
 
 func (m *Comment) TableName() string {
@@ -37,15 +41,13 @@ func (m *Favorite) TableName() string {
 
 // Message 消息表
 type Message struct {
-	ID          uint `gorm:"primarykey"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time      `gorm:"uniqueIndex:m"`
-	DeletedAt   gorm.DeletedAt `gorm:"index"`
-	MessageUuid int64          `gorm:"column:message_uuid;type:bigint(20) unsigned;default:0;comment:消息uuid;NOT NULL" json:"message_uuid"`
-	ToUserId    int64          `gorm:"column:to_user_id;type:bigint(20) unsigned;default:0;comment:该消息接收者的id;NOT NULL;uniqueIndex:m" json:"to_user_id"`
-	FromUserId  int64          `gorm:"column:from_user_id;type:bigint(20) unsigned;default:0;comment:该消息发送者的id;NOT NULL;uniqueIndex:m" json:"from_user_id"`
-	Contents    string         `gorm:"column:contents;type:varchar(255);comment:消息内容;NOT NULL" json:"contents"`
-	CreateTime  int64          `gorm:"column:create_time;type:bigint(20) unsigned;default:0;comment:自设创建时间(unix);NOT NULL" json:"create_time"`
+	gorm.Model
+	ThreadId    string `gorm:"column:thread_id;type:varchar(255);not null"`
+	FromUserId  int64  `gorm:"column:from_user_id;not null;index:fk_user_message_from"`
+	ToUserId    int64  `gorm:"column:to_user_id;not null;index:fk_user_message_to"`
+	Contents    string `gorm:"column:contents;type:varchar(255);not null"`
+	MessageUUID int64  `gorm:"column:message_uuid;not null;index:fk_uuid_message"`
+	CreateTime  int64  `gorm:"column:create_time;not null;"`
 }
 
 func (m *Message) TableName() string {
@@ -53,11 +55,11 @@ func (m *Message) TableName() string {
 }
 
 type Relation struct {
-	ID        uint  `gorm:"primarykey"`
-	UserId    int64 `gorm:"column:user_id;type:bigint(20) unsigned;default:0;comment:用户id;NOT NULL;uniqueIndex:r" json:"user_id"`
-	ToUserId  int64 `gorm:"column:to_user_id;type:bigint(20) unsigned;default:0;comment:关注目标的用户id;NOT NULL;uniqueIndex:r" json:"to_user_id"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        uint           `gorm:"primarykey"`
+	UserId    int64          `gorm:"foreignKey:UserId;references:UserId;comment:用户的UserId;type:bigint(20) unsigned;default:0;NOT NULL;uniqueIndex:r" json:"user_id"`
+	ToUserId  int64          `gorm:"foreignKey:ToUserId;references:UserId;comment:关注目标用户的UserId;type:bigint(20) unsigned;default:0;NOT NULL;uniqueIndex:r" json:"to_user_id"`
+	CreatedAt time.Time      `gorm:"null" json:"created_at"`
+	UpdatedAt time.Time      `gorm:"null" json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"uniqueIndex:r"`
 }
 
@@ -97,8 +99,8 @@ type Video struct {
 	gorm.Model
 	UserId        int64  `gorm:"column:user_id;type:bigint(20) unsigned;default:0;comment:user表主键;NOT NULL;" json:"user_id"`
 	Title         string `gorm:"column:title;type:varchar(128);comment:视频标题;NOT NULL" json:"title"`
-	PlayUrl       string `gorm:"column:play_url;type:varchar(128);comment:视频地址;NOT NULL" json:"play_url"`
-	CoverUrl      string `gorm:"column:cover_url;type:varchar(128);comment:封面地址;NOT NULL" json:"cover_url"`
+	PlayUrl       string `gorm:"column:play_url;type:varchar(225);comment:视频地址;NOT NULL" json:"play_url"`
+	CoverUrl      string `gorm:"column:cover_url;type:varchar(225);comment:封面地址;NOT NULL" json:"cover_url"`
 	FavoriteCount uint   `gorm:"column:favorite_count;type:int(15) unsigned;default:0;comment:获赞数量;NOT NULL" json:"favorite_count"`
 	CommentCount  uint   `gorm:"column:comment_count;type:int(15) unsigned;default:0;comment:评论数量;NOT NULL" json:"comment_count"`
 	Comment       []Comment

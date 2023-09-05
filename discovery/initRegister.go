@@ -10,7 +10,7 @@ import (
 
 // InitRegister 放入服务名称和服务的链接，返回etcdServiceRegister和grpc服务器
 func InitRegister(key, value string) (*ServiceRegister, *grpc.Server) {
-	endpoints := conf.Config.EtcdConfig.Addr
+	endpoints := conf.BasicConf.EtcdAddr
 	sRegister := &ServiceRegister{
 		EtcdAddrs: endpoints,
 		Lease:     5,
@@ -22,7 +22,9 @@ func InitRegister(key, value string) (*ServiceRegister, *grpc.Server) {
 		zap.L().Fatal("初始化服务注册失败" + err.Error())
 	}
 
-	server := grpc.NewServer()
+	server := grpc.NewServer(
+		grpc.MaxRecvMsgSize(500 * 1024 * 1024),
+	)
 	return sRegister, server
 }
 
