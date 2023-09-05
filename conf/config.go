@@ -79,10 +79,7 @@ func Collectlog() (err error) {
 
 // run 真正的业务逻辑
 func confrun(topic string) (err error) {
-	// logfile --> TailObj --> log --> Client --> kafka
-	//利用ini文件，创建kafka配置项，日志文件配置项  --> 读取出ini文件里面的信息，用来初始化 kafka 和  tail
-	//--> tail得到日志文件的地址  --> TailObj对象读取出一行 log  --> 包装成一个发送到kafka所需要的 msg 对象,发送到一个channel 中
-	//-->  在kafka初始化的时候，就创建一个goroutine，来从channel中读取信息， 真正发送到kafka中
+
 	for {
 		// 循环读数据
 		line, ok := <-tailfile.TailObj.Lines // chan tail.Line
@@ -92,18 +89,12 @@ func confrun(topic string) (err error) {
 			continue
 		}
 		// 如果是空行就略过
-		//fmt.Printf("%#v\n", line.Text)
+
 		if len(strings.Trim(line.Text, "\r")) == 0 { //strings.Trim  用来去除  "\r"
 			zap.L().Info("出现空行拉,直接跳过...")
 			continue
 		}
 
-		//如果不适用channel的话，就是同步的操作，也就是读取一行日志，发送一行，这样当日志比较多的时候，是比较耗时的；
-		//使用channel,可以改成异步的操作，也就是一个goroutine一直在从日志文件里面读取日志，然后发送到一个channel里面，
-		//另一个 goroutine一直从该 channel 里面取日志信息，并且发送到kafka中。
-
-		// 利用通道将同步的代码改为异步的
-		// 把读出来的一行日志包装成kafka里面的msg类型
 		msg := &sarama.ProducerMessage{}
 		msg.Topic = topic
 		msg.Value = sarama.StringEncoder(line.Text)

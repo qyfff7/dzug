@@ -39,7 +39,3 @@ func Start() {
 	}
 	zap.L().Info("Server exiting")
 }
-
-func main() {
-	Start()
-}

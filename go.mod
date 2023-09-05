@@ -12,6 +12,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.14.0
 	github.com/hpcloud/tail v1.0.0
+	github.com/juju/ratelimit v1.0.2
 	github.com/magiconair/properties v1.8.7
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/redis/go-redis/v9 v9.0.5
