@@ -43,7 +43,10 @@ func FavoriteAction(ctx *gin.Context) {
 			})
 			return
 		}
-		ctx.JSON(0, fResp)
+		ctx.JSON(0, struct {
+			StatusCode int32  `json:"status_code"`
+			StatusMsg  string `json:"status_msg"`
+		}{0, fResp.StatusMsg})
 	} else if fReq.ActionType == "2" { // 取消点赞操作
 		fAction := pb.InfavoriteRequest{
 			UserId:  userId,
@@ -57,7 +60,10 @@ func FavoriteAction(ctx *gin.Context) {
 			})
 			return
 		}
-		ctx.JSON(0, fResp)
+		ctx.JSON(0, struct {
+			StatusCode int32  `json:"status_code"`
+			StatusMsg  string `json:"status_msg"`
+		}{0, fResp.StatusMsg})
 	} else { // 非法操作
 		ctx.JSON(http.StatusBadRequest, pb.FavoriteResponse{
 			StatusCode: 400,
